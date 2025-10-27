@@ -40,7 +40,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => $request->password,
         ]);
-           $user->assignRole('doctor');
+           $user->assignRole('patient');
         event(new Registered($user));
 
         Auth::login($user);

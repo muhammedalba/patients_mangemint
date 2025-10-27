@@ -7,11 +7,20 @@ export type User = {
     phone?: string;
 };
 
+export type Tooth = {
+    id: number;
+    tooth_number: string;
+    status: string;
+    notes: string;
+};
+
 export type Patient = {
     id: number;
     name: string;
     email: string;
     phone?: string;
+    teeth: Tooth[];
+    procedures: Procedure[];
 };
 
 export type Procedure = {
@@ -77,4 +86,17 @@ export type PaginatedData<T> = {
 export type BreadcrumbItem = {
     title: string;
     href?: string;
+};
+
+export type MedicalRecord = {
+    id: number;
+    patient_id: number;
+    details: string;
+    date: string;
+    attachments?: string;
+    patient?: Patient;
+    procedure_id?: number;
+    procedure?: Procedure;
+    doctor_id?: number;
+    doctor?: User;
 };

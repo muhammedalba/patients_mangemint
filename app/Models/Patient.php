@@ -23,15 +23,25 @@ class Patient extends Model
         'two_factor_recovery_codes',
         'remember_token',
     ];
+
+    public function teeth() {
+        return $this->hasMany(Tooth::class);
+    }
+
     public function appointments() {
         return $this->hasMany(Appointment::class);
     }
 
-    public function invoices() {
-        return $this->hasMany(Invoice::class);
+    public function procedures()
+    {
+        return $this->hasManyThrough(Procedure::class, Tooth::class);
     }
 
-    public function medicalRecords() {
-        return $this->hasMany(MedicalRecord::class);
-    }
+    // public function invoices() {
+    //     return $this->hasMany(Invoice::class);
+    // }
+
+//     public function medicalRecords() {
+//         return $this->hasMany(MedicalRecord::class);
+//     }
 }

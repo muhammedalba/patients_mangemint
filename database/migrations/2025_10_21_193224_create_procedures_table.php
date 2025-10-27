@@ -13,6 +13,8 @@ return new class extends Migration {
             $table->decimal('cost', 10, 2)->default(0);
             $table->integer('duration_minutes')->nullable();
             $table->integer('follow_up_days')->nullable();
+            $table->foreignId('tooth_id')->constrained('teeth')->onDelete('cascade');
+
             $table->timestamps();
         });
     }

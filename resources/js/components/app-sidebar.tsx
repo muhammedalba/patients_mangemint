@@ -50,6 +50,16 @@ const mainNavItems: NavItem[] = [
         href: '/procedures',
         icon: ClipboardPenLine,
     },
+     {
+        title: 'medicalrecords',
+        href: '/medicalrecords',
+        icon: ClipboardPenLine,
+    },
+    {
+        title: 'teeth',
+        href: '/teeth',
+        icon: ClipboardPenLine,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

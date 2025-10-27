@@ -8,6 +8,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ToothController;
 
 use Inertia\Inertia;
 
@@ -74,9 +75,9 @@ Route::prefix('medicalrecords')->controller(MedicalRecordController::class)->gro
     Route::get('/', 'index')->name('medicalrecords.index');
     Route::get('create', 'create')->name('medicalrecords.create');
     Route::post('store', 'store')->name('medicalrecords.store');
-    Route::get('edit/{id}', 'edit')->name('medicalrecords.edit');
-    Route::post('update/{id}', 'update')->name('medicalrecords.update');
-    Route::delete('delete/{id}', 'destroy')->name('medicalrecords.destroy');
+    Route::get('edit/{medicalRecord}', 'edit')->name('medicalrecords.edit');
+    Route::post('update/{medicalRecord}', 'update')->name('medicalrecords.update');
+    Route::delete('delete/{medicalRecord}', 'destroy')->name('medicalrecords.destroy');
 });
 
 // Invoices
@@ -97,6 +98,16 @@ Route::prefix('payments')->controller(PaymentController::class)->group(function 
     Route::get('edit/{id}', 'edit')->name('payments.edit');
     Route::post('update/{id}', 'update')->name('payments.update');
     Route::delete('delete/{id}', 'destroy')->name('payments.destroy');
+});
+
+// Teeth
+Route::prefix('teeth')->controller(ToothController::class)->group(function () {
+    Route::get('/', 'index')->name('tooth.index');
+    Route::get('create', 'create')->name('tooth.create');
+    Route::post('store', 'store')->name('tooth.store');
+    Route::get('edit/{tooth}', 'edit')->name('tooth.edit');
+    Route::post('update/{tooth}', 'update')->name('tooth.update');
+    Route::delete('delete/{tooth}', 'destroy')->name('tooth.destroy');
 });
 
 

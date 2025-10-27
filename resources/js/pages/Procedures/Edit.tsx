@@ -10,9 +10,10 @@ interface Procedure {
     description: string;
     cost: number;
     duration_minutes: number;
+    tooth_id: number;
 }
 
-export default function EditProcedure({ procedure }: { procedure: Procedure }) {
+export default function EditProcedure({ procedure, teeth }: { procedure: Procedure, teeth: any[] }) {
     const { props } = usePage<{
         flash: { success?: string; error?: string };
     }>();
@@ -22,6 +23,7 @@ export default function EditProcedure({ procedure }: { procedure: Procedure }) {
         description: procedure.description || '',
         cost: procedure.cost || 0,
         duration_minutes: procedure.duration_minutes || 0,
+        tooth_id: procedure.tooth_id || '',
     });
 
     const [submitted, setSubmitted] = useState(false);
@@ -124,6 +126,30 @@ export default function EditProcedure({ procedure }: { procedure: Procedure }) {
                         {errors.duration_minutes && (
                             <p className="mt-1 text-sm text-red-500">
                                 {errors.duration_minutes}
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="mb-1 block text-gray-700">
+                            السن
+                        </label>
+                        <select
+                            name="tooth_id"
+                            value={data.tooth_id}
+                            onChange={(e) => setData('tooth_id', e.target.value)}
+                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                        >
+                            <option value="">اختر السن</option>
+                            {teeth.map((tooth) => (
+                                <option key={tooth.id} value={tooth.id}>
+                                    {tooth.tooth_number}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.tooth_id && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.tooth_id}
                             </p>
                         )}
                     </div>

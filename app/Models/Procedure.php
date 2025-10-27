@@ -15,8 +15,18 @@ class Procedure extends Model
         'cost',
         'duration_minutes',
         'follow_up_days',
+        'tooth_id',
     ];
 
+    public function tooth()
+{
+    return $this->belongsTo(Tooth::class, 'tooth_id');
+}
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
     // علاقة مع المواعيد
     public function appointments()
     {
@@ -24,14 +34,14 @@ class Procedure extends Model
     }
 
     // علاقة مع السجلات الطبية
-    public function medicalRecords()
-    {
-        return $this->hasMany(MedicalRecord::class);
-    }
+    // public function medicalRecords()
+    // {
+    //     return $this->hasMany(MedicalRecord::class);
+    // }
 
     // علاقة مع عناصر الفواتير
-    public function invoiceItems()
-    {
-        return $this->hasMany(InvoiceItem::class);
-    }
+    // public function invoiceItems()
+    // {
+    //     return $this->hasMany(InvoiceItem::class);
+    // }
 }

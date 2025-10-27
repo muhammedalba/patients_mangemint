@@ -60,6 +60,7 @@ class PatientController extends Controller
 // show patient details
     public function show(Patient $patient)
     {
+        $patient->load('teeth', 'procedures');
         return Inertia::render('Patients/Show', ['patient' => $patient]);
     }
     public function destroy(Patient $patient)

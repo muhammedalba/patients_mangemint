@@ -4,22 +4,24 @@ import { Head, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
-export default function CreateProcedure() {
+export default function CreateProcedure({ teeth, patient_id }: { teeth: any[], patient_id?: number }) {
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         description: string;
         cost: string;
         duration_minutes: string;
+        tooth_id: string;
     }>({
         name: '',
         description: '',
         cost: '',
         duration_minutes: '',
+        tooth_id: '',
     });
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('procedures.store'), {
+        post(route('procedures.store', { patient_id }), {
             onSuccess: () => reset(),
         });
     };
@@ -103,6 +105,27 @@ export default function CreateProcedure() {
                         {errors.duration_minutes && (
                             <p className="mt-1 text-sm text-red-500">
                                 {errors.duration_minutes}
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <select
+                            name="tooth_id"
+                            value={data.tooth_id}
+                            onChange={(e) => setData('tooth_id', e.target.value)}
+                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        >
+                            <option value="">اختر السن</option>
+                            {teeth.map((tooth) => (
+                                <option key={tooth.id} value={tooth.id}>
+                                    {tooth.tooth_number}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.tooth_id && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.tooth_id}
                             </p>
                         )}
                     </div>
