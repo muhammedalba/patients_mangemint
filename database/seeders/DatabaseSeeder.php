@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
         Role::firstOrCreate(['name' => 'patient']);
 
          $user = User::firstOrCreate(
-            ['email' => 'muhammedalbahle@gmail.com'],
+            ['email' => 'codeProps@gmail.com'],
             ['name' => 'Super Admin', 'password' => bcrypt('password')]
         );
         $user->assignRole('admin');
