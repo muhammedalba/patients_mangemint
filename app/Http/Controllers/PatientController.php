@@ -9,31 +9,31 @@ use App\Models\Patient;
 
 class PatientController extends Controller
 {
-   public function index()
-{
-    // جلب النص المكتوب في مربع البحث من الـ query string
-     $search = request()->query('search');
+    public function index()
+    {
+        // جلب النص المكتوب في مربع البحث من الـ query string
+        $search = request()->query('search');
 
-    // استعلام ديناميكي مع البحث والبجينيشن
-    $patients = Patient::query()
-// اختياري: حدد الأعمدة التي تحتاجها
- ->when($search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        })
-        ->orderBy('id', 'desc') // ترتيب تنازلي حسب آخر مريض مضاف
-        ->paginate(10) // 10 عناصر في كل صفحة
-        ->withQueryString(); // يحتفظ بكلمة البحث أثناء التنقل بين الصفحات
+        // استعلام ديناميكي مع البحث والبجينيشن
+        $patients = Patient::query()
+            // اختياري: حدد الأعمدة التي تحتاجها
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('id', 'desc') // ترتيب تنازلي حسب آخر مريض مضاف
+            ->paginate(10) // 10 عناصر في كل صفحة
+            ->withQueryString(); // يحتفظ بكلمة البحث أثناء التنقل بين الصفحات
 
-    return Inertia::render('Patients/Index', [
-        'patients' => $patients,
-        'filters' => request()->only(['search']),
-    ]);
-// $patients = Patient::all();
-// return Inertia::render('Patients/Index', ['patients' => $patients]);
-}
+        return Inertia::render('Patients/Index', [
+            'patients' => $patients,
+            'filters' => request()->only(['search']),
+        ]);
+        // $patients = Patient::all();
+        // return Inertia::render('Patients/Index', ['patients' => $patients]);
+    }
 
 
     public function create()
@@ -57,12 +57,31 @@ class PatientController extends Controller
         $patient->update($request->validated());
         return redirect()->route('patients.index');
     }
-// show patient details
-    public function show(Patient $patient)
+
+
+
+    // show patient details , 'procedures'
+    public function show(Patient $patient, $tooth = null)
     {
-        $patient->load('teeth', 'procedures');
-        return Inertia::render('Patients/Show', ['patient' => $patient]);
+        $patient->load('teeth');
+        $toothWithProcedures = null;
+        if ($tooth) {
+            $toothWithProcedures = $patient->teeth()->where('id', $tooth)->with('procedures')->first();
+        }
+
+        return Inertia::render('Patients/Show', [
+            'patient' => $patient,
+            'tooth' => $toothWithProcedures,
+        ]);
     }
+
+
+
+
+
+
+
+
     public function destroy(Patient $patient)
     {
         $patient->delete();

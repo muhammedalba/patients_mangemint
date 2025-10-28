@@ -6,37 +6,38 @@ use App\Models\Tooth;
 use App\Models\Patient;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ToothController extends Controller
 {
 
-public function index(Request $request)
-{
-    $search = $request->query('search');
+    public function index(Request $request)
+    {
+        $search = $request->query('search');
 
-    $teeth = Tooth::with(['patient', 'procedures'])
-        ->when($search, function ($query, $search) {
-            $query->where('tooth_number', 'like', "%{$search}%")
-                ->orWhereHas('patient', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%");
-                })
-                ->orWhereHas('procedures', function ($q) use ($search) {
-                    $q->where('type', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
-                });
-        })
-        ->orderBy('id', 'desc')
-        ->paginate(10)
-        ->withQueryString();
+        $teeth = Tooth::with(['patient', 'procedures'])
+            ->when($search, function ($query, $search) {
+                $query->where('tooth_number', 'like', "%{$search}%")
+                    ->orWhereHas('patient', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('procedures', function ($q) use ($search) {
+                        $q->where('type', 'like', "%{$search}%")
+                            ->orWhere('description', 'like', "%{$search}%");
+                    });
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
-    return Inertia::render('Teeth/Index', [
-        'teeth' => $teeth,
-        'filters' => [
-            'search' => $search,
-        ],
-    ]);
-}
+        return Inertia::render('Teeth/Index', [
+            'teeth' => $teeth,
+            'filters' => [
+                'search' => $search,
+            ],
+        ]);
+    }
 
     public function create(Request $request)
     {
@@ -48,23 +49,28 @@ public function index(Request $request)
         ]);
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'tooth_number' => 'required|string|max:255',
-            'status' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-        ]);
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'patient_id' => 'required|exists:patients,id',
+        'tooth_number' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('teeth')->where(function ($query) use ($request) {
+                return $query->where('patient_id', $request->patient_id);
+            }),
+        ],
+        'status' => 'nullable|string|max:255',
+        'notes' => 'nullable|string',
+    ]);
 
-        Tooth::create($validated);
+    Tooth::create($validated);
 
-        if ($request->has('patient_id')) {
-            return redirect()->route('patients.show', $request->patient_id)->with('success', 'Teeth created successfully.');
-        }
-
-        return redirect()->route('tooth.index')->with('success', 'Teeth created successfully.');
-    }
+    return redirect()
+        ->route('patients.show', $request->patient_id)
+        ->with('success', 'Tooth created successfully.');
+}
 
     public function edit(Tooth $tooth)
     {
@@ -72,23 +78,30 @@ public function index(Request $request)
         return Inertia::render('Teeth/Edit', ['tooth' => $tooth]);
     }
 
-    public function update(Request $request, Tooth $tooth)
-    {
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'tooth_number' => 'required|string|max:255',
-            'status' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-        ]);
+   public function update(Request $request, Tooth $tooth)
+{
+    $validated = $request->validate([
+        'patient_id' => 'required|exists:patients,id',
+        'tooth_number' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('teeth')
+                ->where(function ($query) use ($request) {
+                    return $query->where('patient_id', $request->patient_id);
+                })
+                ->ignore($tooth->id), // ← تجاهل السجل الحالي أثناء التحقق من التفرد
+        ],
+        'status' => 'nullable|string|max:255',
+        'notes' => 'nullable|string',
+    ]);
 
-        $tooth->update($validated);
+    $tooth->update($validated);
 
-        if ($request->has('patient_id')) {
-            return redirect()->route('patients.show', $request->patient_id)->with('success', 'Teeth updated successfully.');
-        }
-
-        return redirect()->route('tooth.index')->with('success', 'Teeth updated successfully.');
-    }
+    return redirect()
+        ->route('patients.show', $request->patient_id)
+        ->with('success', 'Tooth updated successfully.');
+}
 
     public function destroy(Tooth $tooth)
     {

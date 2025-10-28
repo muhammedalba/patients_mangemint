@@ -52,7 +52,9 @@ Route::middleware(['auth','verified','role.redirect:admin|doctor'])->prefix('pat
     Route::get('edit/{patient}', 'edit')->name('patients.edit');
     Route::patch('update/{patient}', 'update')->name('patients.update');
     // show patient details
-    Route::get('show/{patient}', 'show')->name('patients.show');
+    Route::get('show/{patient}/{tooth?}', 'show')->name('patients.show');
+
+    // delete patient
     Route::delete('delete/{patient}', 'destroy')->name('patients.destroy');
 });
 // Procedures
