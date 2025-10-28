@@ -1,22 +1,24 @@
-import React from 'react';
 import { Inertia } from '@inertiajs/inertia';
-import { InertiaLink, usePage } from '@inertiajs/inertia-react';
+import { Link, usePage } from '@inertiajs/react';
 
 export default function Index() {
     const { invoices } = usePage().props;
 
     const handleDelete = (id) => {
-        if(confirm('هل تريد حذف الفاتورة؟')) {
+        if (confirm('هل تريد حذف الفاتورة؟')) {
             Inertia.delete(route('invoices.destroy', id));
         }
     };
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-4">الفواتير</h1>
-            <InertiaLink href={route('invoices.create')} className="bg-blue-500 text-white px-4 py-2 rounded mb-4 inline-block">
+            <h1 className="mb-4 text-2xl font-bold">الفواتير</h1>
+            <Link
+                href={route('invoices.create')}
+                className="mb-4 inline-block rounded bg-blue-500 px-4 py-2 text-white"
+            >
                 إضافة فاتورة
-            </InertiaLink>
+            </Link>
             <table className="w-full border">
                 <thead>
                     <tr className="bg-gray-100">
@@ -28,15 +30,27 @@ export default function Index() {
                     </tr>
                 </thead>
                 <tbody>
-                    {invoices.map(inv => (
+                    {invoices.map((inv) => (
                         <tr key={inv.id}>
                             <td className="border px-2 py-1">{inv.id}</td>
-                            <td className="border px-2 py-1">{inv.patient?.name}</td>
+                            <td className="border px-2 py-1">
+                                {inv.patient?.name}
+                            </td>
                             <td className="border px-2 py-1">{inv.total}</td>
                             <td className="border px-2 py-1">{inv.status}</td>
                             <td className="border px-2 py-1">
-                                <InertiaLink href={route('invoices.edit', inv.id)} className="bg-green-500 text-white px-2 py-1 rounded mr-2">تعديل</InertiaLink>
-                                <button onClick={() => handleDelete(inv.id)} className="bg-red-500 text-white px-2 py-1 rounded">حذف</button>
+                                <Link
+                                    href={route('invoices.edit', inv.id)}
+                                    className="mr-2 rounded bg-green-500 px-2 py-1 text-white"
+                                >
+                                    تعديل
+                                </Link>
+                                <button
+                                    onClick={() => handleDelete(inv.id)}
+                                    className="rounded bg-red-500 px-2 py-1 text-white"
+                                >
+                                    حذف
+                                </button>
                             </td>
                         </tr>
                     ))}

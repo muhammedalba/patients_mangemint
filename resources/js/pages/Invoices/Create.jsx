@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
-import { usePage } from '@inertiajs/inertia-react';
+import { usePage } from '@inertiajs/react';
+
 
 export default function Create() {
     const { patients, errors } = usePage().props;

@@ -33,12 +33,13 @@ export default function CreateProcedure({
         description: '',
         cost: '',
         duration_minutes: '',
-        tooth_id: '',
+        tooth_id:teeth[0]?.id || '',
         patient_id: patient_id || '',
     });
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        console.log(data, 'data');
         post(route('procedures.store', { patient_id }), {
             onSuccess: () => reset(),
         });
@@ -154,9 +155,11 @@ export default function CreateProcedure({
                     <div>
                         <select
                             name="tooth_id"
-                            value={data.tooth_id || teeth[0]?.id || ''}
+                            value={data.tooth_id}
+                            // value={data.tooth_id || teeth[0]?.id }
                             onChange={(e) =>
                                 setData('tooth_id', e.target.value)
+                                // console.log(e.target.value)
                             }
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         >

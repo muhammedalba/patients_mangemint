@@ -1,6 +1,6 @@
 import React from 'react';
 import { Inertia } from '@inertiajs/inertia';
-import { InertiaLink, usePage } from '@inertiajs/inertia-react';
+import { Link,usePage } from '@inertiajs/react';
 
 export default function Index() {
     const { payments } = usePage().props;
@@ -14,9 +14,9 @@ export default function Index() {
     return (
         <div>
             <h1 className="text-2xl font-bold mb-4">المدفوعات</h1>
-            <InertiaLink href={route('payments.create')} className="bg-blue-500 text-white px-4 py-2 rounded mb-4 inline-block">
+            <Link href={route('payments.create')} className="bg-blue-500 text-white px-4 py-2 rounded mb-4 inline-block">
                 إضافة دفعة
-            </InertiaLink>
+            </Link>
             <table className="w-full border">
                 <thead>
                     <tr className="bg-gray-100">
@@ -35,7 +35,7 @@ export default function Index() {
                             <td className="border px-2 py-1">{p.amount}</td>
                             <td className="border px-2 py-1">{p.date}</td>
                             <td className="border px-2 py-1">
-                                <InertiaLink href={route('payments.edit', p.id)} className="bg-green-500 text-white px-2 py-1 rounded mr-2">تعديل</InertiaLink>
+                                <Link href={route('payments.edit', p.id)} className="bg-green-500 text-white px-2 py-1 rounded mr-2">تعديل</Link>
                                 <button onClick={() => handleDelete(p.id)} className="bg-red-500 text-white px-2 py-1 rounded">حذف</button>
                             </td>
                         </tr>
