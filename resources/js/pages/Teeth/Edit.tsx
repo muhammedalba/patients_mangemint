@@ -11,6 +11,10 @@ interface tooth {
     tooth_number: string;
     status: string;
     notes: string;
+    patient?: {
+        name: string;
+        id:string;
+    };
     procedures: any[];
 }
 
@@ -26,6 +30,7 @@ console.log(props);
         tooth_number: tooth.tooth_number || '',
         status: tooth.status || '',
         notes: tooth.notes || '',
+
     });
 
     const [submitted, setSubmitted] = useState(false);
@@ -45,7 +50,7 @@ console.log(props);
             title: 'Edit tooth',
             href: '/EditTooth',
         },
-    ];
+    ];   {console.log(data) }
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="tooth" />
@@ -57,9 +62,10 @@ console.log(props);
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label className="mb-1 block text-gray-700">رقم المريض</label>
+
                         <input
                             type="text"
-                            value={data.patient_id}
+                            value={tooth?.patient?.name}
                             onChange={(e) => setData('patient_id', e.target.value)}
                             placeholder="رقم المريض"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"

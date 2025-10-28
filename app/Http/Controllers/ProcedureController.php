@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Patient;
 use Inertia\Inertia;
 use App\Models\Procedure;
 use App\Models\Tooth;
@@ -14,13 +15,56 @@ class ProcedureController extends Controller
         $procedures = Procedure::with('tooth')->latest()->paginate(10);
         return Inertia::render('Procedures/Index', ['procedures' => $procedures]);
     }
+public function create(Request $request, $patient_id = null)
+{
+    // تحديد معرّفات المريض والسن إن وُجدا
+    $patientId = $patient_id ?? $request->query('patient_id');
+    $toothId = $request->query('tooth_id');
 
-    public function create(Request $request)
-    {
-        $patient_id = $request->query('patient_id');
-        $teeth = $patient_id ? Tooth::where('patient_id', $patient_id)->get() : Tooth::all();
-        return Inertia::render('Procedures/Create', ['teeth' => $teeth, 'patient_id' => $patient_id]);
+    // بناء الاستعلام تدريجياً (أكثر مرونة وكفاءة)
+    $query = Tooth::query();
+
+    if ($toothId) {
+        $query->where('id', $toothId);
+    } elseif ($patientId) {
+        $query->where('patient_id', $patientId);
     }
+
+    $teeth = $query->get();
+
+    // جلب المرضى بأعمدة مختصرة لتقليل الحجم المرسَل للواجهة
+    $patients = Patient::select('id', 'name')->get();
+
+    return Inertia::render('Procedures/Create', [
+        'teeth' => $teeth,
+        'patient_id' => $patientId,
+        'patients' => $patients,
+    ]);
+}
+    // public function create(Request $request, $patient_id = null)
+    // {
+    //     // تحديد المريض إما من معرّف الـ route أو من query parameter
+    //     $patientId = $patient_id ?? $request->query('patient_id');
+    //     $tooth_id = $request->query('tooth_id');
+
+
+    //     // جلب الأسنان الخاصة بالمريض إن وجد، وإلا جلب جميع الأسنان
+    //     $teeth = $patientId
+    //         ? Tooth::where('patient_id', $patientId)->get()
+    //         : Tooth::all();
+    //     if ($tooth_id) {
+    //         $teeth = Tooth::where('id', $tooth_id)->get();
+    //     };
+
+    //     // جلب جميع المرضى لعرضهم في القائمة المنسدلة مثلًا
+    //     $patients = Patient::select('id', 'name')->get();
+
+    //     return Inertia::render('Procedures/Create', [
+    //         'teeth' => $teeth,
+    //         'patient_id' => $patientId,
+    //         'patients' => $patients,
+    //     ]);
+    // }
 
     public function store(Request $request)
     {

@@ -74,7 +74,10 @@ public function store(Request $request)
 
     public function edit(Tooth $tooth)
     {
-        $tooth->load('procedures');
+          $tooth->load([
+        'procedures',
+        'patient:id,name', // ← تحميل المريض فقط مع id و name
+    ]);
         return Inertia::render('Teeth/Edit', ['tooth' => $tooth]);
     }
 

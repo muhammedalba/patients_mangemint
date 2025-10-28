@@ -62,7 +62,7 @@ Route::middleware(['auth','verified','role.redirect:admin|doctor'])->prefix('pat
 
 Route::prefix('procedures')->controller(ProcedureController::class)->group(function () {
     Route::get('/', 'index')->name('procedures.index');
-    Route::get('create', 'create')->name('procedures.create');
+    Route::get('create/{patient_id?}', 'create')->name('procedures.create');
     Route::post('store', 'store')->name('procedures.store');
     Route::get('edit/{procedure}', 'edit')->name('procedures.edit');
     Route::post('update/{procedure}', 'update')->name('procedures.update');

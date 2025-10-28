@@ -1,22 +1,40 @@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
-export default function CreateProcedure({ teeth, patient_id }: { teeth: any[], patient_id?: number }) {
+export default function CreateProcedure({
+    teeth,
+    patient_id,
+    patients,
+}: {
+    teeth: any[];
+    patient_id?: number;
+    patients: any[];
+}) {
+    console.log(teeth, 'teeth');
+    console.log(patient_id, 'patient_id');
+    console.log(patients, 'patients');
+    const handleToothClick = (patient: any) => {
+        console.log(patient);
+
+        router.get(route('procedures.create', { patient_id: patient }));
+    };
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         description: string;
         cost: string;
         duration_minutes: string;
         tooth_id: string;
+        patient_id: string;
     }>({
         name: '',
         description: '',
         cost: '',
         duration_minutes: '',
         tooth_id: '',
+        patient_id: patient_id || '',
     });
 
     const handleSubmit = (e: FormEvent) => {
@@ -66,7 +84,9 @@ export default function CreateProcedure({ teeth, patient_id }: { teeth: any[], p
                         <textarea
                             name="description"
                             value={data.description}
-                            onChange={(e) => setData('description', e.target.value)}
+                            onChange={(e) =>
+                                setData('description', e.target.value)
+                            }
                             placeholder="وصف الإجراء"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
@@ -98,7 +118,9 @@ export default function CreateProcedure({ teeth, patient_id }: { teeth: any[], p
                             type="number"
                             name="duration_minutes"
                             value={data.duration_minutes}
-                            onChange={(e) => setData('duration_minutes', e.target.value)}
+                            onChange={(e) =>
+                                setData('duration_minutes', e.target.value)
+                            }
                             placeholder="المدة (بالدقائق)"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
@@ -111,12 +133,34 @@ export default function CreateProcedure({ teeth, patient_id }: { teeth: any[], p
 
                     <div>
                         <select
-                            name="tooth_id"
-                            value={data.tooth_id}
-                            onChange={(e) => setData('tooth_id', e.target.value)}
+                            name="patient_id"
+                            value={data.patient_id}
+                            onChange={(e) => handleToothClick(e.target.value)}
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         >
-                            <option value="">اختر السن</option>
+                            <option value="">select patient </option>
+                            {patients?.map((patient) => (
+                                <option key={patient.id} value={patient.id}>
+                                    {patient.name}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.patient_id && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.patient_id}
+                            </p>
+                        )}
+                    </div>
+                    <div>
+                        <select
+                            name="tooth_id"
+                            value={data.tooth_id || teeth[0]?.id || ''}
+                            onChange={(e) =>
+                                setData('tooth_id', e.target.value)
+                            }
+                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        >
+                            <option disabled>اختر السن</option>
                             {teeth.map((tooth) => (
                                 <option key={tooth.id} value={tooth.id}>
                                     {tooth.tooth_number}
@@ -129,7 +173,6 @@ export default function CreateProcedure({ teeth, patient_id }: { teeth: any[], p
                             </p>
                         )}
                     </div>
-
                     <div className="mt-4 text-center">
                         <button
                             type="submit"
