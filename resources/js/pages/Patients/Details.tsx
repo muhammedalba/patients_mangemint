@@ -16,12 +16,12 @@ export default function Show({
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'المرضى', href: route('patients.index') },
-        { title: patient.name, href: route('patients.show', patient.id) },
+        { title: patient.name, href: route('patients.details', patient.id) },
     ];
 
     const handleToothClick = (toothId: number) => {
         router.get(
-            route('patients.show', { patient: patient.id, tooth: toothId }),
+            route('patients.details', { patient: patient.id, tooth: toothId }),
         );
     };
 

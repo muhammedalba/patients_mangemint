@@ -1,7 +1,7 @@
 import Pagination from '@/components/Pagination';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem, type Patient } from '@/types';
-import { Head, Link as InertiaLink, router, usePage } from '@inertiajs/react';
+import { Head, Link , router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -34,6 +34,8 @@ export default function Index() {
         }
     };
     const [search, setSearch] = useState(filters.search || '');
+    console.log(filters.search, 'search');
+    console.log(search, 'search');
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -67,7 +69,7 @@ export default function Index() {
                         </div>
                     )}
                     <div className="mb-4 flex items-center justify-between">
-                        <InertiaLink
+                        <Link
                             href={route('patients.create')}
                             className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
                         >
@@ -75,7 +77,7 @@ export default function Index() {
                                 Add Patient
                                 <i className="material-icons text-lg">add</i>
                             </span>
-                        </InertiaLink>
+                        </Link>
                         <div className="relative w-full max-w-md">
                             <input
                                 type="text"
@@ -99,7 +101,7 @@ export default function Index() {
                                 <th className="border px-2 py-1">Contact</th>
                                 <th className="border px-2 py-1">Gender</th>
                                 <th className="border px-2 py-1">
-                                    Marital status
+                                     status
                                 </th>
                                 <th className="border px-2 py-1">
                                     Chronic Diseases
@@ -133,26 +135,27 @@ export default function Index() {
                                         {p.marital_status}
                                     </td>
                                     <td className="border px-2 py-1 text-center">
-                                        {p.diseases}
+                                        {p.address}
                                     </td>
 
                                     <td className="border px-2 py-1 text-center">
-                                        <InertiaLink
+                                        <Link
                                             href={route('patients.edit', p.id)}
                                             className="mr-2 text-xs font-bold text-gray-700"
                                         >
                                             <i className="material-icons">
                                                 edit
                                             </i>
-                                        </InertiaLink>
-                                        <InertiaLink
-                                            href={route('patients.show', p.id)}
+                                        </Link>
+                                        <Link
+                                            href={route('patients.details', p.id)
+}
                                             className="mr-2 text-xs font-bold text-blue-500"
                                         >
                                             <i className="material-icons">
                                                 visibility
                                             </i>
-                                        </InertiaLink>
+                                        </Link>
                                         {userHasDeletePermission && (
                                             <button
                                                 onClick={() =>

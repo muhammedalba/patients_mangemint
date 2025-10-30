@@ -19,8 +19,13 @@ export type Patient = {
     name: string;
     email: string;
     phone?: string;
+    address?: string;
+    notes?: string;
     teeth: Tooth[];
     procedures: Procedure[];
+    birth_date: string;
+    gender: 'male' | 'female' | 'other';
+    marital_status: 'single' | 'married' | 'divorced' | 'widowed';
 };
 
 export type Procedure = {

@@ -25,6 +25,7 @@ export default function Index({
         flash: { success?: string; error?: string };
     }>();
     const [search, setSearch] = useState(filters.search || '');
+console.log(users,"users");
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -51,6 +52,7 @@ export default function Index({
             return () => clearTimeout(timer);
         }
     }, [props.flash]);
+
     const handleDelete = (id: number): void => {
         if (confirm('هل تريد حذف المستخدم؟')) {
             router.delete(route('users.destroy', id));

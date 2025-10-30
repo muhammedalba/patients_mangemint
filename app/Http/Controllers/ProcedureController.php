@@ -81,7 +81,7 @@ public function create(Request $request, $patient_id = null)
         if ($request->has('tooth_id')) {
             $tooth = Tooth::find($request->tooth_id);
             if ($tooth) {
-                return redirect()->route('patients.show', $tooth->patient_id)->with('success', 'Procedure created successfully.');
+                return redirect()->route('patients.details', $tooth->patient_id)->with('success', 'Procedure created successfully.');
             }
         }
 
@@ -109,7 +109,7 @@ public function create(Request $request, $patient_id = null)
         if ($request->has('tooth_id')) {
             $tooth = Tooth::find($request->tooth_id);
             if ($tooth) {
-                return redirect()->route('patients.show', $tooth->patient_id)->with('success', 'Procedure updated successfully.');
+                return redirect()->route('patients.details', $tooth->patient_id)->with('success', 'Procedure updated successfully.');
             }
         }
 
@@ -124,7 +124,7 @@ public function create(Request $request, $patient_id = null)
         $procedure->delete();
 
         if ($patient_id) {
-            return redirect()->route('patients.show', $patient_id)->with('success', 'Procedure deleted successfully.');
+            return redirect()->route('patients.details', $patient_id)->with('success', 'Procedure deleted successfully.');
         }
 
         return redirect()->route('procedures.index')->with('success', 'Procedure deleted successfully.');

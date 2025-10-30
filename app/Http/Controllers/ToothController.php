@@ -27,7 +27,7 @@ class ToothController extends Controller
                             ->orWhere('description', 'like', "%{$search}%");
                     });
             })
-            ->orderBy('id', 'desc')
+               ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 
@@ -68,7 +68,7 @@ public function store(Request $request)
     Tooth::create($validated);
 
     return redirect()
-        ->route('patients.show', $request->patient_id)
+        ->route('patients.details', $request->patient_id)
         ->with('success', 'Tooth created successfully.');
 }
 
@@ -102,7 +102,7 @@ public function store(Request $request)
     $tooth->update($validated);
 
     return redirect()
-        ->route('patients.show', $request->patient_id)
+        ->route('patients.details', $request->patient_id)
         ->with('success', 'Tooth updated successfully.');
 }
 
@@ -111,6 +111,6 @@ public function store(Request $request)
         $patient_id = $tooth->patient_id;
         $tooth->delete();
 
-        return redirect()->route('patients.show', $patient_id)->with('success', 'Teeth deleted successfully.');
+        return redirect()->route('patients.details', $patient_id)->with('success', 'Teeth deleted successfully.');
     }
 }

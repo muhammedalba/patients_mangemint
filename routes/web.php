@@ -21,7 +21,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
-
 });
 
 
@@ -33,7 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // });
 
 // Users / Patients
-Route::middleware(['auth','verified','role.redirect:admin|doctor'])->prefix('users')->controller(UserController::class)->group(function () {
+Route::middleware(['auth', 'verified', 'role.redirect:admin|doctor'])->prefix('users')->controller(UserController::class)->group(function () {
     Route::get('/', 'index')->name('users.index');
     Route::get('create', 'create')->name('users.create');
     Route::post('store', 'store')->name('users.store');
@@ -45,18 +44,30 @@ Route::middleware(['auth','verified','role.redirect:admin|doctor'])->prefix('use
 
 
 
-Route::middleware(['auth','verified','role.redirect:admin|doctor'])->prefix('patients')->controller(PatientController::class)->group(function () {
-    Route::get('/', 'index')->name('patients.index');
-    Route::get('create', 'create')->name('patients.create');
-    Route::post('store', 'store')->name('patients.store');
-    Route::get('edit/{patient}', 'edit')->name('patients.edit');
-    Route::patch('update/{patient}', 'update')->name('patients.update');
-    // show patient details
-    Route::get('show/{patient}/{tooth?}', 'show')->name('patients.show');
+Route::middleware(['auth', 'verified', 'role.redirect:admin|doctor'])
+    ->prefix('patients')
+    ->as('patients.')
+    ->group(function () {
 
-    // delete patient
-    Route::delete('delete/{patient}', 'destroy')->name('patients.destroy');
-});
+        // Resource routes
+        Route::resource('', PatientController::class)
+            ->parameters(['' => 'patient'])
+            ->names([
+                'index'   => 'index',
+                'create'  => 'create',
+                'store'   => 'store',
+                'show'    => 'show',
+                'edit'    => 'edit',
+                'update'  => 'update',
+                'destroy' => 'destroy',
+            ]);
+
+        // ✅ route مخصص للتفاصيل
+        Route::get('details/{patient}/{tooth?}', [PatientController::class, 'details'])
+            ->name('details');
+    });
+
+
 // Procedures
 
 
@@ -113,5 +124,5 @@ Route::prefix('teeth')->controller(ToothController::class)->group(function () {
 });
 
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
