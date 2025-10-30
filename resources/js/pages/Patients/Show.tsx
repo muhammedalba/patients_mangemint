@@ -1,7 +1,6 @@
-import img from '@/assets/images/اسنان.jpg';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Patient } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -49,79 +48,242 @@ export default function Show({
             });
         }
     };
+    const [selectedTooth, setSelectedTooth] = useState<number | null>(null);
+    const [showForm, setShowForm] = useState(false);
+    const teethGrid = {
+        upperRight: [18, 17, 16, 15, 14, 13, 12, 11],
+        upperLeft: [21, 22, 23, 24, 25, 26, 27, 28],
+        lowerLeft: [38, 37, 36, 35, 34, 33, 32, 31],
+        lowerRight: [41, 42, 43, 44, 45, 46, 47, 48],
+    };
+
+    const renderTooth = (num: number) => (
+        <div
+            key={num}
+            onClick={() => setSelectedTooth(num)}
+            className={`flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-sm font-bold transition-all duration-200 ${
+                selectedTooth === num
+                    ? 'scale-110 bg-blue-600 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-700 hover:scale-105 hover:bg-blue-100'
+            }`}
+            title={`Tooth ${num}`}
+        >
+            {num}
+        </div>
+    );
+    const procedures: { [key: number]: { name: string; date: string }[] } = {
+        11: [{ name: 'Filling', date: '2025-10-01' }],
+        24: [{ name: 'Extraction', date: '2025-09-15' }],
+        36: [{ name: 'Crown', date: '2025-08-20' }],
+    };
+    const [newProcedure, setNewProcedure] = useState({
+        name: '',
+        description: '',
+        cost: '',
+        duration_minutes: '',
+    });
+    const [proceduresByTooth, setProceduresByTooth] = useState<{
+        [key: number]: any[];
+    }>({});
+    const handleAddProcedureTeeth = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!selectedTooth) return;
+
+        const updated = { ...proceduresByTooth };
+
+        if (!updated[selectedTooth]) updated[selectedTooth] = [];
+
+        updated[selectedTooth].push({
+            ...newProcedure,
+            date: new Date().toISOString().split('T')[0],
+        });
+
+        setProceduresByTooth(updated);
+        setNewProcedure({
+            name: '',
+            description: '',
+            cost: '',
+            duration_minutes: '',
+        });
+        setShowForm(false);
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`عرض المريض: ${patient.name}`} />
-            <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
-                    معلومات المريض
-                </h1>
+            <Head title={`Procedures : ${patient.name}`} />
 
-                <div className="space-y-4">
-                    <img src={img} alt="" />
-                    <div className="flex justify-between border-b py-2">
-                        <span className="font-semibold text-gray-600">
-                            الاسم الكامل:
-                        </span>
-                        <span className="text-gray-800">{patient.name}</span>
+            <div className="mx-auto max-w-3xl p-6">
+                <h2 className="mb-4 text-center text-xl font-semibold">
+                   FDI Tooth Grid
+                </h2>
+
+                <div className="flex flex-col items-center gap-4">
+                    {/* Top Row */}
+                    <div className="flex gap-4">
+                        <div className="flex gap-1">
+                            {teethGrid.upperRight.map(renderTooth)}
+                        </div>
+                        <div className="w-4" />
+                        <div className="flex gap-1">
+                            {teethGrid.upperLeft.map(renderTooth)}
+                        </div>
                     </div>
-                    <div className="flex justify-between border-b py-2">
-                        <span className="font-semibold text-gray-600">
-                            البريد الإلكتروني:
-                        </span>
-                        <span className="text-gray-800">
-                            {patient.email || '-'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between border-b py-2">
-                        <span className="font-semibold text-gray-600">
-                            رقم الهاتف:
-                        </span>
-                        <span className="text-gray-800">
-                            {patient.phone || '-'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between border-b py-2">
-                        <span className="font-semibold text-gray-600">
-                            تاريخ الميلاد:
-                        </span>
-                        <span className="text-gray-800">
-                            {patient.birth_date || '-'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between border-b py-2">
-                        <span className="font-semibold text-gray-600">
-                            الجنس:
-                        </span>
-                        <span className="text-gray-800">
-                            {patient.gender === 'male'
-                                ? 'ذكر'
-                                : patient.gender === 'female'
-                                  ? 'أنثى'
-                                  : '-'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between border-b py-2">
-                        <span className="font-semibold text-gray-600">
-                            العنوان:
-                        </span>
-                        <span className="text-gray-800">
-                            {patient.address || '-'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between py-2">
-                        <span className="font-semibold text-gray-600">
-                            ملاحظات:
-                        </span>
-                        <span className="text-gray-800">
-                            {patient.notes || '-'}
-                        </span>
+
+                    {/* Spacer */}
+                    <div className="h-4" />
+
+                    {/* Bottom Row */}
+                    <div className="flex gap-4">
+                        <div className="flex gap-1">
+                            {teethGrid.lowerLeft.map(renderTooth)}
+                        </div>
+                        <div className="w-4" />
+                        <div className="flex gap-1">
+                            {teethGrid.lowerRight.map(renderTooth)}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="mx-auto mt-10 max-w-4xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+                {selectedTooth && (
+                    <p className="mt-6 text-center font-medium text-blue-700">
+                        Selected Tooth: {selectedTooth}
+                    </p>
+                )}
+            </div>
+            {/* Procedure Panel */}
+            {selectedTooth && (
+                <div className="mt-6 rounded-lg bg-gray-50 p-4 shadow">
+                    <div className="mb-2 flex items-center justify-between">
+                        <h2 className="text-lg font-semibold">
+                            Procedures for Tooth {selectedTooth}
+                        </h2>
+                        <button
+                            onClick={() => setShowForm(true)}
+                            className="rounded bg-gray-400 px-4 py-2 text-gray-700"
+                        >
+                            Add Procedure
+                        </button>
+                    </div>
+
+                    {proceduresByTooth[selectedTooth]?.length ? (
+                        <table className="w-full border">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="border px-2 py-1">#</th>
+                                    <th className="border px-2 py-1">Name</th>
+                                    <th className="border px-2 py-1">
+                                        Description
+                                    </th>
+                                    <th className="border px-2 py-1">Cost</th>
+                                    <th className="border px-2 py-1">
+                                        Duration
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {proceduresByTooth[selectedTooth].map(
+                                    (procedure, i) => (
+                                        <tr key={i}>
+                                            <td className="border px-2 py-1">
+                                                {i + 1}
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                                {procedure.name}
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                                {procedure.description}
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                                {procedure.cost}
+                                            </td>
+                                            <td className="border px-2 py-1">
+                                                {procedure.duration_minutes}
+                                            </td>
+                                        </tr>
+                                    ),
+                                )}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <p className="text-sm text-gray-500">
+                            No procedures recorded.
+                        </p>
+                    )}
+                </div>
+            )}
+            {showForm && selectedTooth && (
+                <form
+                    onSubmit={handleAddProcedureTeeth}
+                    className="mt-4 space-y-3 rounded bg-white p-4 shadow"
+                >
+                    <h3 className="text-md font-semibold">
+                        Add Procedure for Tooth {selectedTooth}
+                    </h3>
+
+                    <input
+                        type="text"
+                        placeholder="Procedure name"
+                        value={newProcedure.name}
+                        onChange={(e) =>
+                            setNewProcedure({
+                                ...newProcedure,
+                                name: e.target.value,
+                            })
+                        }
+                        className="w-full rounded border px-3 py-2"
+                        required
+                    />
+
+                    <input
+                        type="text"
+                        placeholder="Description"
+                        value={newProcedure.description}
+                        onChange={(e) =>
+                            setNewProcedure({
+                                ...newProcedure,
+                                description: e.target.value,
+                            })
+                        }
+                        className="w-full rounded border px-3 py-2"
+                    />
+
+                    <input
+                        type="number"
+                        placeholder="Cost"
+                        value={newProcedure.cost}
+                        onChange={(e) =>
+                            setNewProcedure({
+                                ...newProcedure,
+                                cost: e.target.value,
+                            })
+                        }
+                        className="w-full rounded border px-3 py-2"
+                    />
+
+                    <input
+                        type="number"
+                        placeholder="Duration (minutes)"
+                        value={newProcedure.duration_minutes}
+                        onChange={(e) =>
+                            setNewProcedure({
+                                ...newProcedure,
+                                duration_minutes: e.target.value,
+                            })
+                        }
+                        className="w-full rounded border px-3 py-2"
+                    />
+
+                    <button
+                        type="submit"
+                        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                    >
+                        Save Procedure
+                    </button>
+                </form>
+            )}
+
+            {/* <div className="mx-auto mt-10 max-w-4xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-2xl font-bold">الأسنان</h2>
                     <Link
@@ -261,7 +423,7 @@ export default function Show({
                         </tbody>
                     </table>
                 </div>
-            )}
+            )} */}
         </AppLayout>
     );
 }

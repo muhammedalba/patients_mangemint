@@ -62,29 +62,28 @@ export default function EditUser({ user }: { user: User }) {
     };
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Create User',
+            title: 'Update User',
             href: '/CreateUser',
         },
     ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="uesrs" />
-            <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                <h1 className="mb-8 text-center text-3xl font-bold text-gray-800">
-                    تعديل المستخدم
+            <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+                <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
+                    Update User
                 </h1>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* الاسم */}
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="mb-1 block text-gray-700">
-                            الاسم
+                            Full Name
                         </label>
                         <input
                             type="text"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="الاسم الكامل"
+                            placeholder="Full Name"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
                         />
                         {errors.name && (
@@ -94,10 +93,9 @@ export default function EditUser({ user }: { user: User }) {
                         )}
                     </div>
 
-                    {/* البريد */}
                     <div>
                         <label className="mb-1 block text-gray-700">
-                            البريد الإلكتروني
+                            Email{' '}
                         </label>
                         <input
                             type="email"
@@ -116,7 +114,7 @@ export default function EditUser({ user }: { user: User }) {
                     {/* كلمة المرور */}
                     <div>
                         <label className="mb-1 block text-gray-700">
-                            كلمة المرور (اختياري)
+                            Password (Optional){' '}
                         </label>
                         <input
                             type="password"
@@ -124,7 +122,7 @@ export default function EditUser({ user }: { user: User }) {
                             onChange={(e) =>
                                 setData('password', e.target.value)
                             }
-                            placeholder="كلمة المرور الجديدة"
+                            placeholder="New Password"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
                         />
                         {errors.password && (
@@ -134,10 +132,27 @@ export default function EditUser({ user }: { user: User }) {
                         )}
                     </div>
 
-                    {/* الأدوار */}
+                    <div>
+                        <label className="mb-1 block text-gray-700">
+                            Phone
+                        </label>
+                        <input
+                            type="text"
+                            value={data.phone}
+                            onChange={(e) => setData('phone', e.target.value)}
+                            placeholder="Phone "
+                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                        />
+                        {errors.phone && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.phone}
+                            </p>
+                        )}
+                    </div>
+
                     <div>
                         <label className="mb-2 block text-gray-700">
-                            الأدوار
+                            Roles{' '}
                         </label>
                         <div className="flex flex-wrap gap-2">
                             {availableRoles.map((role) => {
@@ -165,42 +180,22 @@ export default function EditUser({ user }: { user: User }) {
                         )}
                     </div>
 
-                    {/* الهاتف */}
-                    <div>
-                        <label className="mb-1 block text-gray-700">
-                            رقم الهاتف
-                        </label>
-                        <input
-                            type="text"
-                            value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
-                            placeholder="رقم الهاتف"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
-                        />
-                        {errors.phone && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.phone}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* زر التحديث */}
-                    <div className="pt-4 text-center">
+                    <div className="mt-4 text-center">
                         <button
                             type="submit"
                             disabled={processing}
-                            className={`rounded-lg px-8 py-2.5 font-semibold text-white transition-all duration-200 ${
+                            className={`rounded-lg px-6 py-2 font-semibold text-white transition-all duration-200 ${
                                 processing
                                     ? 'cursor-not-allowed bg-green-400'
                                     : 'bg-green-600 hover:bg-green-700'
                             }`}
                         >
-                            {processing ? 'جارٍ التحديث...' : 'تحديث المستخدم'}
+                            {processing ? 'Updating...' : 'Update User'}
                         </button>
 
                         {submitted && (
                             <p className="mt-3 text-sm text-green-600">
-                                ✅ تم التحديث بنجاح!
+                                ✅ Update Successfully
                             </p>
                         )}
                     </div>

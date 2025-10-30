@@ -49,15 +49,17 @@ export default function CreateUser() {
     ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="uesrs" />
-            <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
-                    إضافة مستخدم جديد
+            <Head title="users" />
+            <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+                <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
+                    Add New User
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* الاسم */}
                     <div>
+                        <label className="mb-2 block text-gray-700">
+                            Full Name
+                        </label>
                         <input
                             type="text"
                             name="name"
@@ -73,8 +75,10 @@ export default function CreateUser() {
                         )}
                     </div>
 
-                    {/* البريد الإلكتروني */}
                     <div>
+                        <label className="mb-1 block text-gray-700">
+                            Email
+                        </label>
                         <input
                             type="email"
                             name="email"
@@ -90,8 +94,10 @@ export default function CreateUser() {
                         )}
                     </div>
 
-                    {/* كلمة المرور */}
                     <div>
+                        <label className="mb-1 block text-gray-700">
+                            Password
+                        </label>
                         <input
                             type="password"
                             name="password"
@@ -109,14 +115,16 @@ export default function CreateUser() {
                         )}
                     </div>
 
-                    {/* الهاتف */}
                     <div>
+                        <label className="mb-1 block text-gray-700">
+                            Phone
+                        </label>
                         <input
                             type="text"
                             name="phone"
                             value={data.phone}
                             onChange={(e) => setData('phone', e.target.value)}
-                            placeholder="رقم الهاتف"
+                            placeholder="Phone"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
                         {errors.phone && (
@@ -126,10 +134,9 @@ export default function CreateUser() {
                         )}
                     </div>
 
-                    {/* الأدوار */}
                     <div>
-                        <label className="mb-2 block text-gray-700">
-                            الأدوار
+                        <label className="mb-1 block text-gray-700">
+                            Roles
                         </label>
                         <div className="flex flex-wrap gap-2">
                             {availableRoles.map((role) => {
@@ -157,7 +164,6 @@ export default function CreateUser() {
                         )}
                     </div>
 
-                    {/* زر الإرسال */}
                     <div className="mt-4 text-center">
                         <button
                             type="submit"
@@ -168,7 +174,7 @@ export default function CreateUser() {
                                     : 'bg-blue-600 hover:bg-blue-700'
                             }`}
                         >
-                            {processing ? 'جارٍ الحفظ...' : 'حفظ المستخدم'}
+                            {processing ? 'Saving...' : 'Save user '}
                         </button>
                     </div>
                 </form>

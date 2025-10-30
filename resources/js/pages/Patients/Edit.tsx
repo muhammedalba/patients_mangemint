@@ -21,21 +21,21 @@ export default function EditPatient({ patient }: { patient: Patient }) {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'المرضى', href: route('patients.index') },
-        { title: `تعديل: ${patient.name}`, href: route('patients.edit', patient.id) },
+        { title: 'Patient', href: route('patients.index') },
+        { title: `Update: ${patient.name}`, href: route('patients.edit', patient.id) },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`تعديل المريض: ${patient.name}`} />
-            <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
-                    تعديل بيانات المريض
-                </h1>
+            <Head title={` Update Patient: ${patient.name}`} />
+            <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+                <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
+                    Update Patient Information
+                    </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label htmlFor="name" className="mb-2 block text-gray-700">الاسم الكامل</label>
+                        <label htmlFor="name" className="mb-2 block text-gray-700">Full Name</label>
                         <input
                             id="name"
                             type="text"
@@ -49,89 +49,81 @@ export default function EditPatient({ patient }: { patient: Patient }) {
                     </div>
 
                     <div>
-                        <label htmlFor="email" className="mb-2 block text-gray-700">البريد الإلكتروني</label>
-                        <input
-                            id="email"
-                            type="email"
-                            name="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="البريد الإلكتروني"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                        {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
-                    </div>
-
-                    <div>
-                        <label htmlFor="phone" className="mb-2 block text-gray-700">رقم الهاتف</label>
-                        <input
-                            id="phone"
-                            type="text"
-                            name="phone"
-                            value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
-                            placeholder="رقم الهاتف"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                        {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
-                    </div>
-
-                    <div>
-                        <label htmlFor="birth_date" className="mb-2 block text-gray-700">تاريخ الميلاد</label>
+                        <label htmlFor="birth_date" className="mb-2 block text-gray-700">Birth Date</label>
                         <input
                             id="birth_date"
                             type="date"
                             name="birth_date"
                             value={data.birth_date}
                             onChange={(e) => setData('birth_date', e.target.value)}
+                            placeholder="Birth year"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
                         {errors.birth_date && <p className="mt-1 text-sm text-red-500">{errors.birth_date}</p>}
                     </div>
 
                     <div>
-                        <label htmlFor="gender" className="mb-2 block text-gray-700">الجنس</label>
+                        <label htmlFor="phone" className="mb-2 block text-gray-700">Phone</label>
+                        <input
+                            id="phone"
+                            type="text"
+                            name="phone"
+                            value={data.phone}
+                            onChange={(e) => setData('phone', e.target.value)}
+                            placeholder="Phone"
+                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        />
+                        {errors.phone && <p className="mt-1 text-sm text-red-500">{errors.phone}</p>}
+                    </div>
+
+
+                    <div className='flex justify-between'>
+                        <div>
+                        <label htmlFor="gender" className="mb-2 block text-gray-700">Gender</label>
                         <select
                             id="gender"
                             name="gender"
                             value={data.gender}
                             onChange={(e) => setData('gender', e.target.value as 'male' | 'female')}
-                            className="w-full rounded-lg border bg-white px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         >
-                            <option value="">اختر الجنس</option>
-                            <option value="male">ذكر</option>
-                            <option value="female">أنثى</option>
+                            <option value="">Choose gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
                         </select>
                         {errors.gender && <p className="mt-1 text-sm text-red-500">{errors.gender}</p>}
                     </div>
-
                     <div>
-                        <label htmlFor="address" className="mb-2 block text-gray-700">العنوان</label>
-                        <textarea
-                            id="address"
-                            name="address"
-                            value={data.address}
-                            onChange={(e) => setData('address', e.target.value)}
-                            placeholder="العنوان"
+                        <label htmlFor="marital_status" className="mb-2 block text-gray-700">Marital status</label>
+                        <select
+                            id="marital_status"
+                            name="marital_status"
+                            value={data.marital_status}
+                            onChange={(e) => setData('gender', e.target.value as 'single' | 'married')}
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                            rows={3}
-                        ></textarea>
-                        {errors.address && <p className="mt-1 text-sm text-red-500">{errors.address}</p>}
+                        >
+                            <option value="">Choose status</option>
+                            <option value="male">Single</option>
+                            <option value="female">Married</option>
+                        </select>
+                        {errors.gender && <p className="mt-1 text-sm text-red-500">{errors.marital_status}</p>}
+                    </div>
                     </div>
 
                     <div>
-                        <label htmlFor="notes" className="mb-2 block text-gray-700">ملاحظات</label>
+                        <label htmlFor="address" className="mb-2 block text-gray-700">Chronic Diseases</label>
                         <textarea
-                            id="notes"
-                            name="notes"
-                            value={data.notes}
-                            onChange={(e) => setData('notes', e.target.value)}
-                            placeholder="ملاحظات"
+                            id="diseases"
+                            name="diseases"
+                            value={data.diseases}
+                            onChange={(e) => setData('diseases', e.target.value)}
+                            placeholder="Diseases"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                            rows={3}
+                            rows={1}
                         ></textarea>
-                        {errors.notes && <p className="mt-1 text-sm text-red-500">{errors.notes}</p>}
+                        {errors.address && <p className="mt-1 text-sm text-red-500">{errors.diseases}</p>}
                     </div>
+
 
                     <div className="mt-4 text-center">
                         <button
@@ -143,7 +135,7 @@ export default function EditPatient({ patient }: { patient: Patient }) {
                                     : 'bg-blue-600 hover:bg-blue-700'
                             }`}
                         >
-                            {processing ? 'جارٍ التحديث...' : 'تحديث بيانات المريض'}
+                            {processing ? 'Updating ...' : ' Update '}
                         </button>
                     </div>
                 </form>

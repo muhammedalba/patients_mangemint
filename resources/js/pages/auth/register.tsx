@@ -25,9 +25,9 @@ export default function Register() {
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                        <div className="space-y-4">
+                            <div className="space-y-1">
+                                <Label htmlFor="name" className="text-sm font-medium text-gray-700">Name</Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -37,6 +37,7 @@ export default function Register() {
                                     autoComplete="name"
                                     name="name"
                                     placeholder="Full name"
+                                    className='w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none'
                                 />
                                 <InputError
                                     message={errors.name}
@@ -44,8 +45,8 @@ export default function Register() {
                                 />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                            <div className="space-y-1">
+                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email address</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -54,12 +55,13 @@ export default function Register() {
                                     autoComplete="email"
                                     name="email"
                                     placeholder="email@example.com"
+                                    className='w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none'
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                            <div className="space-y-1">
+                                <Label htmlFor="password" className="text-sm font-medium text-gray-700">Password</Label>
                                 <Input
                                     id="password"
                                     type="password"
@@ -68,12 +70,13 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password"
                                     placeholder="Password"
+                                    className='w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none'
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
+                            <div className="space-y-1">
+                                <Label htmlFor="password_confirmation" className="text-sm font-medium text-gray-700">
                                     Confirm password
                                 </Label>
                                 <Input
@@ -84,6 +87,7 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password_confirmation"
                                     placeholder="Confirm password"
+                                    className='w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none'
                                 />
                                 <InputError
                                     message={errors.password_confirmation}
@@ -92,7 +96,7 @@ export default function Register() {
 
                             <Button
                                 type="submit"
-                                className="mt-2 w-full"
+                                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
                                 tabIndex={5}
                                 data-test="register-user-button"
                             >
