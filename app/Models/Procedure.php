@@ -17,6 +17,18 @@ class Procedure extends Model
         'follow_up_days',
         'tooth_id',
     ];
+// علاقة غير مباشرة للمريض عبر السن
+// public function patient()
+// {
+//     return $this->hasOneThrough(
+//         Patient::class, // النموذج النهائي
+//         Tooth::class,   // النموذج الوسيط
+//         'id',           // المفتاح الأساسي في جدول الأسنان
+//         'id',           // المفتاح الأساسي في جدول المرضى
+//         'tooth_id',     // المفتاح الخارجي في جدول الإجراءات الذي يشير إلى السن
+//         'patient_id'    // المفتاح الخارجي في جدول الأسنان الذي يشير إلى المريض
+//     );
+// }
 
     public function tooth()
 {

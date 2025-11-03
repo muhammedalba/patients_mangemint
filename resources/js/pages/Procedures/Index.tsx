@@ -1,3 +1,4 @@
+import Pagination from '@/components/Pagination';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link as InertiaLink, router, usePage } from '@inertiajs/react';
@@ -71,6 +72,7 @@ console.log(procedures,'procedures');
                             <tr className="bg-gray-100">
                                 <th className="border px-2 py-1">ID</th>
                                 <th className="border px-2 py-1">الاسم</th>
+                                <th className="border px-2 py-1">patient</th>
                                 <th className="border px-2 py-1">الوصف</th>
                                 <th className="border px-2 py-1">التكلفة</th>
                                 <th className="border px-2 py-1">المدة (بالدقائق)</th>
@@ -87,6 +89,9 @@ console.log(procedures,'procedures');
                                     <td className="border px-2 py-1">
                                         {p.name}
                                     </td>
+                                     <td className="border px-2 py-1">
+                                        {p.patient}
+                                    </td>
                                     <td className="border px-2 py-1">
                                         {p.description}
                                     </td>
@@ -97,7 +102,7 @@ console.log(procedures,'procedures');
                                         {p.duration_minutes}
                                     </td>
                                     <td className="border px-2 py-1">
-                                        {p.tooth.tooth_number}
+                                        {p.tooth_number}
                                     </td>
                                     <td className="border px-2 py-1">
                                         <InertiaLink
@@ -121,6 +126,7 @@ console.log(procedures,'procedures');
                             ))}
                         </tbody>
                     </table>
+                       <Pagination links={procedures.links} />
                 </div>
             </div>
         </AppLayout>

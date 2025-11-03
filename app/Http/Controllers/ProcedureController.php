@@ -13,7 +13,20 @@ class ProcedureController extends Controller
 {
     public function index()
     {
-        $procedures = Procedure::with('tooth')->latest()->paginate(10);
+        $procedures = Procedure::with(['tooth.patient'])->orderByDesc('id')->paginate(10);
+          $procedures->getCollection()->transform(function ($procedure) {
+        return [
+            'id' => $procedure->id,
+            'tooth_id' => $procedure->tooth_id,
+            'description' => $procedure->description,
+            'tooth_number' => $procedure->tooth?->tooth_number,
+            'cost' => $procedure->cost,
+            'name' => $procedure->name,
+            'duration_minutes' => $procedure->duration_minutes,
+            'follow_up_days' => $procedure->follow_up_days,
+            'patient' => $procedure->tooth?->patient?->name,
+        ];
+    });
         return Inertia::render('Procedures/Index', ['procedures' => $procedures]);
     }
     public function create(Request $request, $patient_id = null)
@@ -79,14 +92,15 @@ class ProcedureController extends Controller
             'cost' => 'required|numeric|min:0',
             'duration_minutes' => 'required|integer|min:1',
             "tooth_id" => "required|exists:teeth,id",
+            'patient_id' => 'nullable|exists:patients,id',
         ]);
-
+// @dd($request->all());
         $procedure = Procedure::create($request->all());
 
         if ($request->has('tooth_id')) {
             $tooth = Tooth::find($request->tooth_id)->select('tooth_number', 'id', 'patient_id')->first();
             if ($tooth) {
-                // @dd( $tooth);
+
                 return redirect()->route('patients.details', $tooth->patient_id)->with('success', 'Procedure created successfully.');
             }
         }
