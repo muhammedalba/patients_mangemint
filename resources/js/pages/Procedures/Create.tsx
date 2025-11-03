@@ -8,13 +8,17 @@ export default function CreateProcedure({
     teeth,
     patient_id,
     patients,
+    services,
 }: {
     teeth: any[];
     patient_id?: number;
     patients: any[];
+    services: any[];
 }) {
     console.log(teeth, 'teeth');
+
     console.log(patient_id, 'patient_id');
+    console.log(services, 'services');
     console.log(patients, 'patients');
     const handleToothClick = (patient: any) => {
         console.log(patient);

@@ -105,3 +105,10 @@ export type MedicalRecord = {
     doctor_id?: number;
     doctor?: User;
 };
+
+export type Service = {
+    id: number;
+    name: string;
+    description?: string;
+    price: number;
+};

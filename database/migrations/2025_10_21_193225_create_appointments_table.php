@@ -10,7 +10,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->foreignId('procedure_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null'); // الطبيب أو الموظف
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->date('appointment_date');
             $table->time('time');
             $table->enum('status', ['scheduled', 'completed', 'canceled'])->default('scheduled');

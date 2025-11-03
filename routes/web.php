@@ -8,6 +8,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\ToothController;
 
 use Inertia\Inertia;
@@ -24,12 +25,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 
-
-
-// الصفحة الرئيسية
-// Route::get('/', function () {
-//     return view('welcome');
-// });
 
 // Users / Patients
 Route::middleware(['auth', 'verified', 'role.redirect:admin|doctor'])->prefix('users')->controller(UserController::class)->group(function () {
@@ -82,6 +77,9 @@ Route::prefix('procedures')->controller(ProcedureController::class)->group(funct
 
 // Appointments
 Route::resource('appointments', AppointmentController::class)->middleware(['auth', 'verified']);
+
+// services
+Route::resource('services', ServicesController::class)->middleware(['auth', 'verified']);
 
 // Medical Records
 Route::prefix('medicalrecords')->controller(MedicalRecordController::class)->group(function () {

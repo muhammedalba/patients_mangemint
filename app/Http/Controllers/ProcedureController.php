@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use Inertia\Inertia;
 use App\Models\Procedure;
+use App\Models\Service;
 use App\Models\Tooth;
 use Illuminate\Http\Request;
 
@@ -15,32 +16,36 @@ class ProcedureController extends Controller
         $procedures = Procedure::with('tooth')->latest()->paginate(10);
         return Inertia::render('Procedures/Index', ['procedures' => $procedures]);
     }
-public function create(Request $request, $patient_id = null)
-{
-    // تحديد معرّفات المريض والسن إن وُجدا
-    $patientId = $patient_id ?? $request->query('patient_id');
-    $toothId = $request->query('tooth_id');
+    public function create(Request $request, $patient_id = null)
+    {
+        // تحديد معرّفات المريض والسن إن وُجدا
+        $patientId = $patient_id ?? $request->query('patient_id');
+        $toothId = $request->query('tooth_id');
 
-    // بناء الاستعلام تدريجياً (أكثر مرونة وكفاءة)
-    $query = Tooth::query();
+        // بناء الاستعلام تدريجياً (أكثر مرونة وكفاءة)
+        $query = Tooth::query();
 
-    if ($toothId) {
-        $query->where('id', $toothId);
-    } elseif ($patientId) {
-        $query->where('patient_id', $patientId);
+        if ($toothId) {
+            $query->where('id', $toothId);
+        } elseif ($patientId) {
+            $query->where('patient_id', $patientId);
+        }
+
+        $teeth = $query->get();
+
+        // جلب المرضى بأعمدة مختصرة لتقليل الحجم المرسَل للواجهة
+        $patients = Patient::select('id', 'name')->get();
+        // get all services
+        $services = Service::select('id', 'name', 'price')->get();
+
+
+        return Inertia::render('Procedures/Create', [
+            'teeth' => $teeth,
+            'services' => $services,
+            'patient_id' => $patientId,
+            'patients' => $patients,
+        ]);
     }
-
-    $teeth = $query->get();
-
-    // جلب المرضى بأعمدة مختصرة لتقليل الحجم المرسَل للواجهة
-    $patients = Patient::select('id', 'name')->get();
-
-    return Inertia::render('Procedures/Create', [
-        'teeth' => $teeth,
-        'patient_id' => $patientId,
-        'patients' => $patients,
-    ]);
-}
     // public function create(Request $request, $patient_id = null)
     // {
     //     // تحديد المريض إما من معرّف الـ route أو من query parameter
@@ -79,8 +84,9 @@ public function create(Request $request, $patient_id = null)
         $procedure = Procedure::create($request->all());
 
         if ($request->has('tooth_id')) {
-            $tooth = Tooth::find($request->tooth_id);
+            $tooth = Tooth::find($request->tooth_id)->select('tooth_number', 'id', 'patient_id')->first();
             if ($tooth) {
+                // @dd( $tooth);
                 return redirect()->route('patients.details', $tooth->patient_id)->with('success', 'Procedure created successfully.');
             }
         }
@@ -90,8 +96,10 @@ public function create(Request $request, $patient_id = null)
 
     public function edit(Procedure $procedure)
     {
-        $teeth = Tooth::all();
-        return Inertia::render('Procedures/Edit', ['procedure' => $procedure, 'teeth' => $teeth]);
+        $teeth = Tooth::select('tooth_number', 'id', 'patient_id')->get();
+        $services = Service::select('id', 'name', 'price')->get();
+
+        return Inertia::render('Procedures/Edit', ['procedure' => $procedure, 'teeth' => $teeth, 'services' => $services]);
     }
 
     public function update(Request $request, Procedure $procedure)
@@ -107,7 +115,7 @@ public function create(Request $request, $patient_id = null)
         $procedure->update($request->all());
 
         if ($request->has('tooth_id')) {
-            $tooth = Tooth::find($request->tooth_id);
+            $tooth = Tooth::find($request->tooth_id)->select('tooth_number', 'id', 'patient_id')->get();
             if ($tooth) {
                 return redirect()->route('patients.details', $tooth->patient_id)->with('success', 'Procedure updated successfully.');
             }
@@ -118,7 +126,7 @@ public function create(Request $request, $patient_id = null)
 
     public function destroy(Procedure $procedure)
     {
-        $tooth = Tooth::find($procedure->tooth_id);
+        $tooth = Tooth::find($procedure->tooth_id)->select('patient_id')->first();
         $patient_id = $tooth ? $tooth->patient_id : null;
 
         $procedure->delete();

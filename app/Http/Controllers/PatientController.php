@@ -7,6 +7,7 @@ use App\Http\Requests\PatientStoreRequest;
 use App\Http\Requests\PatientUpdateRequest;
 use Inertia\Inertia;
 use App\Models\Patient;
+use App\Models\Service;
 
 class PatientController extends Controller
 {
@@ -37,6 +38,7 @@ class PatientController extends Controller
 
     public function create()
     {
+        $services = Service::select('id', 'name', 'price')->get();
         return Inertia::render('Patients/Create', [
             'genders' => ['male' => 'Male', 'female' => 'Female', 'other' => 'Other'],
             'marital_statuses' => [
@@ -45,6 +47,7 @@ class PatientController extends Controller
                 'divorced' => 'Divorced',
                 'widowed' => 'Widowed',
             ],
+            'services' => $services,
         ]);
     }
 
@@ -75,6 +78,7 @@ class PatientController extends Controller
 
     public function edit(Patient $patient)
     {
+        $services = Service::select('id', 'name', 'price')->get();
         return Inertia::render('Patients/Edit', [
             'patient' => [
                 'id' => $patient->id,
@@ -98,6 +102,7 @@ class PatientController extends Controller
                 'divorced' => 'Divorced',
                 'widowed' => 'Widowed',
             ],
+            'services' => $services,
         ]);
     }
 
@@ -134,6 +139,8 @@ class PatientController extends Controller
         $patient->load('teeth');
 
         $toothWithProcedures = null;
+        //
+        $services = Service::select('id', 'name', 'price')->get();
 
         if ($toothId) {
             $toothWithProcedures = $patient->teeth()
@@ -163,6 +170,7 @@ class PatientController extends Controller
                     ];
                 }),
             ],
+            'services' => $services,
             'tooth' => $toothWithProcedures
                 ? [
                     'id' => $toothWithProcedures->id,

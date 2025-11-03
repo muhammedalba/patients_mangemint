@@ -60,6 +60,11 @@ const mainNavItems: NavItem[] = [
         href: '/teeth',
         icon: ClipboardPenLine,
     },
+    {
+        title: 'services',
+        href: '/services',
+        icon: ClipboardPenLine,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

@@ -10,7 +10,6 @@ class Tooth extends Model
     use HasFactory;
     // protected $table = 'teeth';
 
-    //
     protected $fillable = [
         'patient_id',
         'tooth_number',
