@@ -1,7 +1,8 @@
+import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Patient, User } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
 interface MedicalRecordFormData {
@@ -23,19 +24,29 @@ console.log(doctors);
         date: '',
         attachments: '',
     });
+    const [isLoading,setIsLoading] = useState(false);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('medicalrecords.store'), {
+        setIsLoading(false);
+        try {
+            post(route('medicalrecords.store'), {
             onSuccess: () => reset(),
         });
+        }
+        catch(error) {
+            console.error(error);
+        }
+        finally {
+            setIsLoading(false);
+        }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'السجلات الطبية', href: route('medicalrecords.index') },
         { title: 'إضافة سجل طبي جديد', href: route('medicalrecords.create') },
     ];
-
+    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="إضافة سجل طبي جديد" />

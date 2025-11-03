@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Patient } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -71,11 +71,7 @@ export default function Show({
             {num}
         </div>
     );
-    const procedures: { [key: number]: { name: string; date: string }[] } = {
-        11: [{ name: 'Filling', date: '2025-10-01' }],
-        24: [{ name: 'Extraction', date: '2025-09-15' }],
-        36: [{ name: 'Crown', date: '2025-08-20' }],
-    };
+
     const [newProcedure, setNewProcedure] = useState({
         name: '',
         description: '',
@@ -112,10 +108,50 @@ export default function Show({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Procedures : ${patient.name}`} />
+            <div
+                className="mt-4 w-full rounded-lg border bg-white px-4 shadow-sm"
+                dir="rtl"
+            >
+                <h2 className="mb-4 text-center text-xl font-bold text-blue-500">
+                    بيانات المريض
+                </h2>
+                <div className="grid grid-cols-6 gap-8 text-right text-gray-700">
+                    <div>
+                        <p className="font-semibold">الاسم</p>
+                        <p>{patient.name}</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold">رقم الهاتف </p>
+                        <p>{patient.phone} </p>
+                    </div>
+                    <div>
+                        <p className="font-semibold">الجنس </p>
+                        <p>{patient.gender} </p>
+                    </div>
+                    <div>
+                        <p className="font-semibold">تاريخ الميلاد </p>
+                        <p>{patient.birth_date}</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold">العنوان </p>
+                        <p>{patient.address}</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold">العمر </p>
+                        <p>
+                            {patient.birth_date
+                                ? new Date().getFullYear() -
+                                  new Date(patient.birth_date).getFullYear()
+                                : ''}{' '}
+                            سنة
+                        </p>
+                    </div>
+                </div>
+            </div>
 
             <div className="mx-auto max-w-3xl p-6">
                 <h2 className="mb-4 text-center text-xl font-semibold">
-                   FDI Tooth Grid
+                    FDI Tooth Grid
                 </h2>
 
                 <div className="flex flex-col items-center gap-4">
@@ -147,7 +183,7 @@ export default function Show({
 
                 {selectedTooth && (
                     <p className="mt-6 text-center font-medium text-blue-700">
-                        Selected Tooth: {selectedTooth}
+                        السن المحدد: {selectedTooth}
                     </p>
                 )}
             </div>
@@ -156,13 +192,13 @@ export default function Show({
                 <div className="mt-6 rounded-lg bg-gray-50 p-4 shadow">
                     <div className="mb-2 flex items-center justify-between">
                         <h2 className="text-lg font-semibold">
-                            Procedures for Tooth {selectedTooth}
+                            الإجراءات على السن {selectedTooth}
                         </h2>
                         <button
                             onClick={() => setShowForm(true)}
                             className="rounded bg-gray-400 px-4 py-2 text-gray-700"
                         >
-                            Add Procedure
+                            إضافة إجراء
                         </button>
                     </div>
 
@@ -170,15 +206,13 @@ export default function Show({
                         <table className="w-full border">
                             <thead>
                                 <tr className="bg-gray-100">
-                                    <th className="border px-2 py-1">#</th>
-                                    <th className="border px-2 py-1">Name</th>
+                                    <th className="border px-2 py-1">ID</th>
+                                    <th className="border px-2 py-1">اسم الإجراء</th>
                                     <th className="border px-2 py-1">
-                                        Description
+                                        الوصف
                                     </th>
-                                    <th className="border px-2 py-1">Cost</th>
-                                    <th className="border px-2 py-1">
-                                        Duration
-                                    </th>
+                                    <th className="border px-2 py-1">التكلفة</th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -196,9 +230,6 @@ export default function Show({
                                             </td>
                                             <td className="border px-2 py-1">
                                                 {procedure.cost}
-                                            </td>
-                                            <td className="border px-2 py-1">
-                                                {procedure.duration_minutes}
                                             </td>
                                         </tr>
                                     ),
@@ -261,19 +292,6 @@ export default function Show({
                         className="w-full rounded border px-3 py-2"
                     />
 
-                    <input
-                        type="number"
-                        placeholder="Duration (minutes)"
-                        value={newProcedure.duration_minutes}
-                        onChange={(e) =>
-                            setNewProcedure({
-                                ...newProcedure,
-                                duration_minutes: e.target.value,
-                            })
-                        }
-                        className="w-full rounded border px-3 py-2"
-                    />
-
                     <button
                         type="submit"
                         className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -283,7 +301,7 @@ export default function Show({
                 </form>
             )}
 
-            {/* <div className="mx-auto mt-10 max-w-4xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+            <div className="mx-auto mt-10 max-w-4xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-2xl font-bold">الأسنان</h2>
                     <Link
@@ -423,7 +441,7 @@ export default function Show({
                         </tbody>
                     </table>
                 </div>
-            )} */}
+            )}
         </AppLayout>
     );
 }

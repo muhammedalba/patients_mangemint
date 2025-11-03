@@ -1,7 +1,8 @@
+import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function CreateUser() {
@@ -16,14 +17,13 @@ export default function CreateUser() {
         email: '',
         password: '',
         phone: '',
-        roles: [], // يمكن اختيار أكثر من دور
+        roles: [],
     });
 
     const availableRoles = [
         { key: 'admin', label: 'مدير' },
         { key: 'doctor', label: 'طبيب' },
         { key: 'receptionist', label: 'استقبال' },
-        { key: 'patient', label: 'مريض' },
     ];
 
     const toggleRole = (role: string) => {
@@ -34,38 +34,50 @@ export default function CreateUser() {
                 : [...data.roles, role],
         );
     };
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        post(route('users.store'), {
-            onSuccess: () => reset('password'), // إعادة تعيين كلمة المرور بعد الحفظ
-        });
+        setIsLoading(true);
+        try {
+            post(route('users.store'), {
+                onSuccess: () => reset('password'),
+            });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Create User',
             href: '/CreateUser',
         },
     ];
+
+    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="users" />
-            <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+            <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
-                    Add New User
+                    إضافة مستخدم
                 </h1>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
+                <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
                         <label className="mb-2 block text-gray-700">
-                            Full Name
+                            الاسم الكامل
                         </label>
                         <input
                             type="text"
                             name="name"
                             value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="الاسم الكامل"
+                            placeholder="Full Name"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
                         {errors.name && (
@@ -77,7 +89,7 @@ export default function CreateUser() {
 
                     <div>
                         <label className="mb-1 block text-gray-700">
-                            Email
+                            البريد الإلكتروني
                         </label>
                         <input
                             type="email"
@@ -96,7 +108,7 @@ export default function CreateUser() {
 
                     <div>
                         <label className="mb-1 block text-gray-700">
-                            Password
+                            كلمة المرور
                         </label>
                         <input
                             type="password"
@@ -117,7 +129,7 @@ export default function CreateUser() {
 
                     <div>
                         <label className="mb-1 block text-gray-700">
-                            Phone
+                            رقم الهاتف
                         </label>
                         <input
                             type="text"
@@ -136,7 +148,7 @@ export default function CreateUser() {
 
                     <div>
                         <label className="mb-1 block text-gray-700">
-                            Roles
+                            الأدوار
                         </label>
                         <div className="flex flex-wrap gap-2">
                             {availableRoles.map((role) => {
@@ -163,6 +175,8 @@ export default function CreateUser() {
                             </p>
                         )}
                     </div>
+                    </div>
+
 
                     <div className="mt-4 text-center">
                         <button
@@ -174,7 +188,7 @@ export default function CreateUser() {
                                     : 'bg-blue-600 hover:bg-blue-700'
                             }`}
                         >
-                            {processing ? 'Saving...' : 'Save user '}
+                            {processing ? 'جارِ الحفظ...' : 'حفظ'}
                         </button>
                     </div>
                 </form>

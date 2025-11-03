@@ -1,7 +1,15 @@
+import { DynamicTable } from '@/components/DynamicTable';
+import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
-import { PaginatedData, type BreadcrumbItem, type MedicalRecord } from '@/types';
+import {
+    PaginatedData,
+    type BreadcrumbItem,
+    type MedicalRecord,
+} from '@/types';
 import { Head, Link as InertiaLink, router, usePage } from '@inertiajs/react';
+import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -18,6 +26,39 @@ export default function Index() {
         auth.user.roles.includes(role),
     );
     const [showToast, setShowToast] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const columns: ColumnDef<any>[] = [
+        { id: 'id', accessorKey: 'id', header: 'ID' },
+        {
+            id: 'patient.name',
+            accessorKey: 'patient.name',
+            header: 'اسم المريض',
+        },
+        { id: 'doctor.name', accessorKey: 'doctor.name', header: 'اسم الطبيب' },
+        { id: 'date', accessorKey: 'date', header: 'التاريخ' },
+        { id: 'details', accessorKey: 'details', header: 'ملاحظات' },
+        {
+            id: 'actions',
+            header: 'الإجراءات',
+            cell: ({ row }) => {
+                const records = row.original;
+                return (
+                    <TableActions
+                        item={records}
+                        routes={{
+                            edit: 'medicalrecords.update',
+                            delete: 'medicalrecords.destroy',
+                        }}
+                        showEdit={true}
+                        showView={false}
+                        showDelete={userHasDeletePermission}
+                        confirmMessage="هل أنت متأكد من حذف هذا السجل؟"
+                        onDelete={handleDelete}
+                    />
+                );
+            },
+        },
+    ];
 
     useEffect(() => {
         if (flash?.success) {
@@ -28,15 +69,22 @@ export default function Index() {
     }, [flash]);
 
     const handleDelete = (id: number): void => {
-        if (confirm('هل تريد حذف السجل الطبي؟')) {
-            router.delete(route('medicalrecords.destroy', id));
-        }
+        router.delete(route('medicalrecords.destroy', id));
     };
     const [search, setSearch] = useState(filters.search || '');
 
     useEffect(() => {
         const handler = setTimeout(() => {
-            router.get(route('medicalrecords.index'), { search }, { preserveState: true, replace: true });
+            setIsLoading(true);
+            router.get(
+                route('medicalrecords.index'),
+                { search },
+                {
+                    preserveState: true,
+                    replace: true,
+                    onFinish: () => setIsLoading(false),
+                },
+            );
         }, 300);
 
         return () => clearTimeout(handler);
@@ -48,7 +96,7 @@ export default function Index() {
             href: route('medicalrecords.index'),
         },
     ];
-
+    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="السجلات الطبية" />
@@ -60,74 +108,34 @@ export default function Index() {
                             {flash?.success || flash?.error}
                         </div>
                     )}
-                    <InertiaLink
+
+                    <div className='flex justify-between'>
+                        <InertiaLink
                         href={route('medicalrecords.create')}
                         className="mb-4 inline-block rounded bg-blue-500 px-4 py-2 text-white"
                     >
                         إضافة سجل طبي
                     </InertiaLink>
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="بحث عن سجل طبي"
-                        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    />
-                    <table className="w-full border">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border px-2 py-1">ID</th>
-                                <th className="border px-2 py-1">المريض</th>
-                                <th className="border px-2 py-1">الطبيب</th>
-                                <th className="border px-2 py-1">التاريخ</th>
-                                <th className="border px-2 py-1">التفاصيل</th>
-                                <th className="border px-2 py-1">المرفقات</th>
-                                <th className="border px-2 py-1">الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {records?.data?.map((record, i) => (
-                                <tr key={record.id}>
-                                    <td className="border px-2 py-1">
-                                        {i + 1}
-                                    </td>
-                                    <td className="border px-2 py-1">
-                                        {record.patient?.name}
-                                    </td>
-                                    <td className="border px-2 py-1">
-                                        {record.doctor?.name}
-                                    </td>
-                                    <td className="border px-2 py-1">
-                                        {record.date}
-                                    </td>
-                                    <td className="border px-2 py-1">
-                                        {record.details}
-                                    </td>
-                                    <td className="border px-2 py-1">
-                                        {record.attachments}
-                                    </td>
-                                    <td className="border px-2 py-1">
-                                        <InertiaLink
-                                            href={route('medicalrecords.edit', record.id)}
-                                            className="mr-2 rounded bg-green-500 px-2 py-1 text-white"
-                                        >
-                                            تعديل
-                                        </InertiaLink>
-                                        {userHasDeletePermission && (
-                                            <button
-                                                onClick={() =>
-                                                    handleDelete(record.id)
-                                                }
-                                                className="rounded bg-red-500 px-2 py-1 text-white"
-                                            >
-                                                حذف
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <div className="relative w-full max-w-md">
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search..."
+                            className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        />
+                        <span className="absolute top-2.5 left-3 text-gray-400">
+                            <i className="material-icons text-lg">search</i>
+                        </span>
+                    </div>
+                    </div>
+
+                    <section className="p-6">
+                        <DynamicTable
+                            data={[...records.data].reverse()}
+                            columns={columns}
+                        />
+                    </section>
                     <Pagination links={records.links} />
                 </div>
             </div>

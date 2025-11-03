@@ -1,17 +1,13 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import AppLayout from '@/layouts/app-layout';
-import { Appointment, PageProps, PaginatedData } from '@/types';
-import { Link, router } from '@inertiajs/react';
+import { DynamicTable } from '@/components/DynamicTable';
+import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
-import { MoreHorizontal } from 'lucide-react';
+import TableActions from '@/components/TableActionsProps';
+import { Badge } from '@/components/ui/badge';
+import AppLayout from '@/layouts/app-layout';
+import { Appointment, BreadcrumbItem, PageProps, PaginatedData } from '@/types';
+import { Head, Link as InertiaLink, router } from '@inertiajs/react';
+import { ColumnDef } from '@tanstack/react-table';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 const StatusBadge = ({ status }: { status: Appointment['status'] }) => {
@@ -29,122 +25,83 @@ const StatusBadge = ({ status }: { status: Appointment['status'] }) => {
 
 export default function Index({
     appointments,
-}: PageProps<{ appointments: PaginatedData<Appointment> }>) {
+    auth,
+}: PageProps<{
+    appointments: PaginatedData<Appointment>;
+    auth: { user: { roles: string[] } };
+}>) {
     console.log(appointments, 'appointments.data');
+    const [isLoading, setIsLoading] = useState(false);
+    const canDeleteRoles = ['doctor', 'admin'];
+    const userHasDeletePermission = canDeleteRoles.some((role) =>
+        auth.user.roles.includes(role),
+    );
+    const columns: ColumnDef<any>[] = [
+        { id: 'patient', accessorKey: 'patient', header: 'Patient' },
+        { id: 'doctor', accessorKey: 'doctor', header: 'Doctor' },
+        { id: 'procedure', accessorKey: 'procedure', header: 'Procedure' },
+        { id: 'date', accessorKey: 'date', header: 'Date' },
+        { id: 'time', accessorKey: 'time', header: 'Time' },
+        { id: 'status', accessorKey: 'status', header: 'Status' },
+        {
+            id: 'actions',
+            header: 'Actions',
+            cell: ({ row }) => {
+                const appointment = row.original;
+                return (
+                    <TableActions
+                        item={appointment}
+                        routes={{
+                            edit: 'appointments.edit',
+                            delete: 'appointments.destroy',
+                        }}
+                        showEdit={true}
+                        showView={false}
+                        showDelete={userHasDeletePermission}
+                        confirmMessage="Are you sure you want to delete this appointment?"
+                        onDelete={handleDelete}
+                    />
+                );
+            },
+        },
+    ];
 
     const handleDelete = (id: number) => {
-        if (confirm('Are you sure you want to delete this appointment?')) {
-            router.delete(route('appointments.destroy', id));
-        }
+        router.delete(route('appointments.destroy', id));
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Appointments',
+            href: route('appointments.index'),
+        },
+    ];
+
+    if (isLoading) return <LoadingPage />;
     return (
-        <AppLayout>
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Appointments</CardTitle>
-                    <Button asChild>
-                        <Link href={route('appointments.create')}>
-                            Add Appointment
-                        </Link>
-                    </Button>
-                </CardHeader>
-                <CardContent>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                                    >
-                                        Patient
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                                    >
-                                        Doctor
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                                    >
-                                        Procedure
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                                    >
-                                        Date
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                                    >
-                                        Time
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
-                                    >
-                                        Status
-                                    </th>
-                                    <th
-                                        scope="col"
-                                        className="px-6 py-3 text-right text-xs font-medium tracking-wider text-gray-500 uppercase"
-                                    >
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {appointments.data.map((appointment) => (
-                                    <tr key={appointment.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {appointment.patient?.name}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {appointment.doctor?.name}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {appointment.procedure?.name}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {new Date(appointment.appointment_date).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {appointment.times?.join(', ')}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <StatusBadge status={appointment.status} />
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0">
-                                                        <span className="sr-only">Open menu</span>
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem asChild>
-                                                        <Link href={route('appointments.edit', appointment.id)}>Edit</Link>
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleDelete(appointment.id)} className="text-red-600">
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                    </table>
-                    </div>
-                    <Pagination links={appointments.links} />
-                </CardContent>
-            </Card>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Appointment" />
+            <div className="flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <h1 className="mb-4 text-2xl font-bold">المواعيد</h1>
+                <InertiaLink
+                    href={route('appointments.create')}
+                    className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
+                >
+                    <span className="flex items-center gap-1">
+                        <i className="material-icons text-lg">add</i>
+                        إضافة موعد
+                    </span>
+                </InertiaLink>
+            </div>
+            <div className="overflow-x-auto">
+                <section className="p-6">
+                    <DynamicTable
+                        data={[...appointments.data].reverse()}
+                        columns={columns}
+                    />
+                </section>
+            </div>
+            <Pagination links={appointments.links} />
         </AppLayout>
     );
 }

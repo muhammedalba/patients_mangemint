@@ -1,7 +1,8 @@
+import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, MedicalRecord, Patient, User } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
 interface MedicalRecordFormData {
@@ -26,10 +27,20 @@ console.log(doctors,"doctors");
         date: record.date || '',
         attachments: record.attachments || '',
     });
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('medicalrecords.update', record.id));
+        setIsLoading(true);
+        try {
+            post(route('medicalrecords.update', record.id));
+        }
+        catch(error) {
+            console.error(error);
+        }
+        finally {
+            setIsLoading(false);
+        }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -37,6 +48,7 @@ console.log(doctors,"doctors");
         { title: `تعديل سجل طبي: ${record?.id}`, href: route('medicalrecords.edit', record?.id) },
     ];
 
+    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`تعديل سجل طبي: ${record.id}`} />

@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { route } from 'ziggy-js';
+import { useState } from 'react';
+import LoadingPage from '@/components/LoadingPage';
 
 const generateTimeSlots = () => {
     const slots = [];
@@ -39,7 +41,7 @@ export default function Edit({  appointment, patients, doctors, procedures }: Pa
         status: appointment.status,
     });
 console.log(errors);
-
+    const [isLoading,setIsLoading] = useState(false);
     const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
         setData('times', selectedOptions);
@@ -47,11 +49,19 @@ console.log(errors);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(data,'data edit');
+        setIsLoading(true);
+        try {
+            console.log(data,'data edit');
 
         put(route('appointments.update', appointment.id));
+        }
+        catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
-
+    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout>
             <Card>

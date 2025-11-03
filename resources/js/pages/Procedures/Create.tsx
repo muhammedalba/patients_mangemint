@@ -1,7 +1,9 @@
+import LoadingPage from '@/components/LoadingPage';
+import TreatmentsForm from '@/components/ui/TreatmentsForm';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function CreateProcedure({
@@ -15,38 +17,45 @@ export default function CreateProcedure({
     patients: any[];
     services: any[];
 }) {
-    console.log(teeth, 'teeth');
-
-    console.log(patient_id, 'patient_id');
-    console.log(services, 'services');
-    console.log(patients, 'patients');
     const handleToothClick = (patient: any) => {
         console.log(patient);
-
-        router.get(route('procedures.create', { patient_id: patient }));
+        setData('patient_id', patient);
     };
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         description: string;
         cost: string;
-        duration_minutes: string;
         tooth_id: string;
         patient_id: string;
     }>({
         name: '',
         description: '',
         cost: '',
-        duration_minutes: '',
-        tooth_id:teeth[0]?.id || '',
+        tooth_id: teeth[0]?.id || '',
         patient_id: patient_id || '',
     });
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleTreatmentSelect = (treatment: {
+        name: string;
+        cost: number;
+    }) => {
+        setData('name', treatment.name);
+        setData('cost', treatment.cost.toString());
+    };
+
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        console.log(data, 'data');
-        post(route('procedures.store', { patient_id }), {
-            onSuccess: () => reset(),
-        });
+        setIsLoading(true);
+        try {
+            router.post(route('procedures.store', { patient_id }), data, {
+                onSuccess: () => reset(),
+            });
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -59,33 +68,50 @@ export default function CreateProcedure({
             href: route('procedures.create'),
         },
     ];
-
+    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Procedure" />
-            <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
+            <div className="mx-auto mt-4 w-3xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+                <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     إضافة إجراء جديد
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <TreatmentsForm onSelect={handleTreatmentSelect} />
                     <div>
+                        <label className="mt-4 block text-right text-gray-700">
+                            المعالجة المختارة
+                        </label>
                         <input
                             type="text"
-                            name="name"
+                            name="treatment_name"
                             value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            placeholder="اسم الإجراء"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            readOnly
+                            className="w-full rounded-lg border px-3 py-2"
                         />
-                        {errors.name && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.name}
-                            </p>
-                        )}
                     </div>
 
                     <div>
+                        <label className="mt-4 block text-right text-gray-700">
+                            كلفة الإجراء
+                        </label>
+                        <input
+                            type="number"
+                            name="cost"
+                            value={data.cost}
+                            readOnly
+                            className="w-full rounded-lg border px-3 py-2"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            htmlFor="name"
+                            className="mt-4 block text-right text-gray-700"
+                        >
+                            الوصف
+                        </label>
                         <textarea
                             name="description"
                             value={data.description}
@@ -93,7 +119,7 @@ export default function CreateProcedure({
                                 setData('description', e.target.value)
                             }
                             placeholder="وصف الإجراء"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
                         {errors.description && (
                             <p className="mt-1 text-sm text-red-500">
@@ -103,45 +129,11 @@ export default function CreateProcedure({
                     </div>
 
                     <div>
-                        <input
-                            type="number"
-                            name="cost"
-                            value={data.cost}
-                            onChange={(e) => setData('cost', e.target.value)}
-                            placeholder="التكلفة"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                        {errors.cost && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.cost}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <input
-                            type="number"
-                            name="duration_minutes"
-                            value={data.duration_minutes}
-                            onChange={(e) =>
-                                setData('duration_minutes', e.target.value)
-                            }
-                            placeholder="المدة (بالدقائق)"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                        {errors.duration_minutes && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.duration_minutes}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
                         <select
                             name="patient_id"
                             value={data.patient_id}
                             onChange={(e) => handleToothClick(e.target.value)}
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         >
                             <option value="">select patient </option>
                             {patients?.map((patient) => (
@@ -160,19 +152,23 @@ export default function CreateProcedure({
                         <select
                             name="tooth_id"
                             value={data.tooth_id}
-                            // value={data.tooth_id || teeth[0]?.id }
                             onChange={(e) =>
                                 setData('tooth_id', e.target.value)
-                                // console.log(e.target.value)
                             }
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         >
-                            <option disabled>اختر السن</option>
-                            {teeth.map((tooth) => (
-                                <option key={tooth.id} value={tooth.id}>
-                                    {tooth.tooth_number}
-                                </option>
-                            ))}
+                            <option value="" disabled>
+                                اختر السن
+                            </option>
+                            {teeth?.length > 0 ? (
+                                teeth.map((tooth) => (
+                                    <option key={tooth.id} value={tooth.id}>
+                                        {tooth.tooth_number}
+                                    </option>
+                                ))
+                            ) : (
+                                <option disabled>لا توجد أسنان متاحة</option>
+                            )}
                         </select>
                         {errors.tooth_id && (
                             <p className="mt-1 text-sm text-red-500">

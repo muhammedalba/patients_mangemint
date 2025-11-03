@@ -1,3 +1,4 @@
+import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
@@ -9,7 +10,6 @@ interface Procedure {
     name: string;
     description: string;
     cost: number;
-    duration_minutes: number;
     tooth_id: number;
 }
 
@@ -22,21 +22,29 @@ export default function EditProcedure({ procedure, teeth }: { procedure: Procedu
         name: procedure.name || '',
         description: procedure.description || '',
         cost: procedure.cost || 0,
-        duration_minutes: procedure.duration_minutes || 0,
         tooth_id: procedure.tooth_id || '',
     });
 
     const [submitted, setSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('procedures.update', procedure.id), {
+        setIsLoading(true);
+        try {
+            post(route('procedures.update', procedure.id), {
             preserveScroll: true,
             onSuccess: () => {
                 setSubmitted(true);
                 setTimeout(() => setSubmitted(false), 2500);
             },
         });
+        }catch (error) {
+            console.log(error)
+        }
+        finally {
+            setIsLoading(false);
+        }
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -50,11 +58,13 @@ export default function EditProcedure({ procedure, teeth }: { procedure: Procedu
         },
     ];
 
+
+    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Procedure" />
-            <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                <h1 className="mb-8 text-center text-3xl font-bold text-gray-800">
+            <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+                <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     تعديل الإجراء
                 </h1>
 
@@ -108,24 +118,6 @@ export default function EditProcedure({ procedure, teeth }: { procedure: Procedu
                         {errors.cost && (
                             <p className="mt-1 text-sm text-red-500">
                                 {errors.cost}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="mb-1 block text-gray-700">
-                            المدة (بالدقائق)
-                        </label>
-                        <input
-                            type="number"
-                            value={data.duration_minutes}
-                            onChange={(e) => setData('duration_minutes', e.target.valueAsNumber)}
-                            placeholder="المدة (بالدقائق)"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
-                        />
-                        {errors.duration_minutes && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.duration_minutes}
                             </p>
                         )}
                     </div>

@@ -1,7 +1,11 @@
+import { DynamicTable } from '@/components/DynamicTable';
+import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem, type Patient } from '@/types';
-import { Head, Link , router, usePage } from '@inertiajs/react';
+import { ColumnDef } from '@tanstack/react-table';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -29,40 +33,135 @@ export default function Index() {
     }, [flash]);
 
     const handleDelete = (id: number): void => {
-        if (confirm('Are you sure you want to delete this patient?   ')) {
-            router.delete(route('patients.destroy', id));
-        }
+        router.delete(route('patients.destroy', id));
     };
     const [search, setSearch] = useState(filters.search || '');
-    console.log(filters.search, 'search');
-    console.log(search, 'search');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const handler = setTimeout(() => {
+            setIsLoading(true);
             router.get(
                 route('patients.index'),
                 { search },
-                { preserveState: true, replace: true },
+                {
+                    preserveState: true,
+                    replace: true,
+                    onFinish: () => setIsLoading(false),
+                },
             );
         }, 300);
 
         return () => clearTimeout(handler);
     }, [search]);
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'patients',
+            title: 'Patients',
             href: route('patients.index'),
         },
     ];
+
+    const columns: ColumnDef<any>[] = [
+        { id: 'id', accessorKey: 'id', header: 'ID' },
+        { id: 'name', accessorKey: 'name', header: 'Full Name' },
+        {
+            id: 'age',
+            header: 'Age',
+            cell: ({ row }) => {
+                const p = row.original;
+                return (
+                    <td className="border px-2 py-1 text-center">
+                        {getAgeFromBirthDate(p.birth_date)} سنة
+                    </td>
+                );
+            },
+        },
+        {
+            id: 'contact',
+            header: 'Contact',
+            cell: ({ row }) => {
+                const p = row.original;
+                return (
+                    <td className="justify-between gap-1 border px-1 py-1 text-center">
+                        {p.phone && (
+                            <>
+                                <a
+                                    href={`tel:${p.phone}`}
+                                    className="inline-block"
+                                    title="Call"
+                                >
+                                    <i className="material-icons text-xs leading-none font-bold text-gray-700">
+                                        phone_enabled
+                                    </i>
+                                </a>
+                                <a
+                                    href={`https://wa.me/${p.phone}`}
+                                    className="ml-4 inline-block"
+                                    title="WhatsApp"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <i className="fab fa-whatsapp text-2xl leading-none text-green-500"></i>
+                                </a>
+                            </>
+                        )}
+
+                        {p.email && (
+                            <a
+                                href={`mailto:${p.email}`}
+                                className="ml-4 inline-block"
+                                title="Email"
+                            >
+                                <i className="material-icons text-xs leading-none font-bold text-blue-500">
+                                    email
+                                </i>
+                            </a>
+                        )}
+                    </td>
+                );
+            },
+        },
+        { id: 'gender', accessorKey: 'gender', header: 'Gender' },
+        {
+            id: 'marital_status',
+            accessorKey: 'marital_status',
+            header: 'Marital status',
+        },
+        {
+            id: 'actions',
+            header: 'Actions',
+            cell: ({ row }) => {
+                const patient = row.original;
+                return (
+                    <TableActions
+                        item={patient}
+                        routes={{
+                            edit: 'patients.edit',
+                            view: 'patients.details',
+                            delete: 'patients.destroy',
+                        }}
+                        showEdit={true}
+                        showView={true}
+                        showDelete={userHasDeletePermission}
+                        confirmMessage="هل أنت متأكد من حذف هذا المريض؟"
+                        onDelete={handleDelete}
+                    />
+                );
+            },
+        },
+    ];
+
     const getAgeFromBirthDate = (birthDate: string): number =>
         new Date().getFullYear() - new Date(birthDate).getFullYear();
 
+    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="patients" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
-                    <h1 className="mb-4 text-2xl font-bold">Patients</h1>
+                    <h1 className="mb-4 text-2xl font-bold">المرضى</h1>
                     {showToast && (
                         <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
                             {flash?.success || flash?.error}
@@ -74,8 +173,8 @@ export default function Index() {
                             className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
                         >
                             <span className="flex items-center gap-1">
-                                Add Patient
                                 <i className="material-icons text-lg">add</i>
+                                إضافة مريض
                             </span>
                         </Link>
                         <div className="relative w-full max-w-md">
@@ -91,88 +190,13 @@ export default function Index() {
                             </span>
                         </div>
                     </div>
+                    <section className="p-6">
+                        <DynamicTable
+                            data={[...patients.data].reverse()}
+                            columns={columns}
+                        />
+                    </section>
 
-                    <table className="w-full border">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border px-2 py-1">ID</th>
-                                <th className="border px-2 py-1">Full Name</th>
-                                <th className="border px-2 py-1">Age</th>
-                                <th className="border px-2 py-1">Contact</th>
-                                <th className="border px-2 py-1">Gender</th>
-                                <th className="border px-2 py-1">
-                                     status
-                                </th>
-                                <th className="border px-2 py-1">
-                                    Chronic Diseases
-                                </th>
-                                <th className="border px-2 py-1">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {patients?.data?.map((p, i) => (
-                                <tr key={p.id}>
-                                    <td className="border px-2 py-1 text-center">
-                                        {i + 1}
-                                    </td>
-                                    <td className="border px-2 py-1 text-center">
-                                        {p.name}
-                                    </td>
-                                    <td className="border px-2 py-1 text-center">
-                                        {getAgeFromBirthDate(p.birth_date)}{' '}
-                                        years
-                                    </td>
-                                    <td className="border px-1 py-1 text-center">
-                                        <i className="material-icons text-xs font-bold text-gray-700">
-                                            phone enabled
-                                        </i>
-                                        <i className="fab fa-whatsapp text-xl text-green-500"></i>
-                                    </td>
-                                    <td className="border px-2 py-1 text-center">
-                                        {p.gender}
-                                    </td>
-                                    <td className="border px-2 py-1">
-                                        {p.marital_status}
-                                    </td>
-                                    <td className="border px-2 py-1 text-center">
-                                        {p.address}
-                                    </td>
-
-                                    <td className="border px-2 py-1 text-center">
-                                        <Link
-                                            href={route('patients.edit', p.id)}
-                                            className="mr-2 text-xs font-bold text-gray-700"
-                                        >
-                                            <i className="material-icons">
-                                                edit
-                                            </i>
-                                        </Link>
-                                        <Link
-                                            href={route('patients.details', p.id)
-}
-                                            className="mr-2 text-xs font-bold text-blue-500"
-                                        >
-                                            <i className="material-icons">
-                                                visibility
-                                            </i>
-                                        </Link>
-                                        {userHasDeletePermission && (
-                                            <button
-                                                onClick={() =>
-                                                    handleDelete(p.id)
-                                                }
-                                                className="mr-2 text-xs font-bold text-red-500"
-                                            >
-                                                <i className="material-icons">
-                                                    delete
-                                                </i>
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
                     <Pagination links={patients.links} />
                 </div>
             </div>

@@ -1,3 +1,4 @@
+import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
@@ -31,6 +32,7 @@ export default function EditUser({ user }: { user: User }) {
     });
 
     const [submitted, setSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     // جميع الأدوار الممكنة في النظام
     const availableRoles = [
@@ -52,20 +54,30 @@ export default function EditUser({ user }: { user: User }) {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('users.update', user.id), {
+        setIsLoading(true);
+        try {
+            post(route('users.update', user.id), {
             preserveScroll: true,
             onSuccess: () => {
                 setSubmitted(true);
                 setTimeout(() => setSubmitted(false), 2500);
             },
         });
+        }
+        catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+
     };
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Update User',
-            href: '/CreateUser',
+             title: `Update: ${user.name}`, href: route('patients.edit', user.id),
         },
     ];
+    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="uesrs" />

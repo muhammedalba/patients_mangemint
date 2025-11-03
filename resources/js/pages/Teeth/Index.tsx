@@ -1,8 +1,10 @@
-
+import { DynamicTable } from '@/components/DynamicTable';
 import Pagination from '@/components/Pagination';
+import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, PageProps, PaginatedData } from '@/types';
 import { Head, Link as InertiaLink, router, usePage } from '@inertiajs/react';
+import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -28,13 +30,14 @@ export default function Index({
         flash: { success?: string; error?: string };
     }>();
     const [search, setSearch] = useState(filters.search || '');
-console.log(teeth,'teethData');
-console.log(auth,'auth');
-
 
     useEffect(() => {
         const handler = setTimeout(() => {
-            router.get(route('tooth.index'), { search }, { preserveState: true, replace: true });
+            router.get(
+                route('tooth.index'),
+                { search },
+                { preserveState: true, replace: true },
+            );
         }, 300);
 
         return () => clearTimeout(handler);
@@ -45,6 +48,38 @@ console.log(auth,'auth');
         auth.user.roles.includes(role),
     );
     const [showToast, setShowToast] = useState(false);
+    const columns: ColumnDef<any>[] = [
+        { id: 'id', accessorKey: 'id', header: 'ID' },
+        { id: 'patient.name', accessorKey: 'patient.name', header: 'الاسم' },
+        {
+            id: 'tooth_number',
+            accessorKey: 'tooth_number',
+            header: ' رقم السن',
+        },
+        { id: 'status', accessorKey: 'status', header: 'الحالة' },
+        { id: 'notes', accessorKey: 'notes', header: 'ملاحظات' },
+        {
+            id: 'actions',
+            header: 'الإجراءات',
+            cell: ({ row }) => {
+                const teeth = row.original;
+                return (
+                    <TableActions
+                        item={teeth}
+                        routes={{
+                            edit: 'users.edit',
+                            delete: 'users.destroy',
+                        }}
+                        showEdit={true}
+                        showView={false}
+                        showDelete={userHasDeletePermission}
+                        confirmMessage="Are you sure you want to delete this teeth?"
+                        onDelete={handleDelete}
+                    />
+                );
+            },
+        },
+    ];
 
     useEffect(() => {
         if (props.flash?.success) {
@@ -55,9 +90,7 @@ console.log(auth,'auth');
     }, [props.flash]);
 
     const handleDelete = (id: number): void => {
-        if (confirm('هل تريد حذف السن؟')) {
-            router.delete(route('tooth.destroy', id));
-        }
+        router.delete(route('tooth.destroy', id));
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -78,60 +111,36 @@ console.log(auth,'auth');
                             {props.flash?.success || props.flash?.error}
                         </div>
                     )}
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="mb-4 flex items-center justify-between">
                         <InertiaLink
                             href={route('tooth.create')}
                             className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
                         >
-                            إضافة سن
+                            <span className="flex items-center gap-1">
+                                <i className="material-icons text-lg">add</i>
+                                إضافة سن
+                            </span>
                         </InertiaLink>
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="بحث..."
-                            className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                        />
+                        <div className="relative w-full max-w-md">
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search..."
+                                className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            />
+                            <span className="absolute top-2.5 left-3 text-gray-400">
+                                <i className="material-icons text-lg">search</i>
+                            </span>
+                        </div>
                     </div>
-                    <table className="w-full border">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border px-2 py-1">ID</th>
-                                <th className="border px-2 py-1">اسم المريض</th>
-                                <th className="border px-2 py-1">رقم السن</th>
-                                <th className="border px-2 py-1">الحالة</th>
-                                <th className="border px-2 py-1">ملاحظات</th>
-                                <th className="border px-2 py-1">الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {teeth?.data?.map((t, i) => (
-                                <tr key={t.id}>
-                                    <td className="border px-2 py-1">{i + 1}</td>
-                                    <td className="border px-2 py-1">{t.patient?.name}</td>
-                                    <td className="border px-2 py-1">{t.tooth_number}</td>
-                                    <td className="border px-2 py-1">{t.status}</td>
-                                    <td className="border px-2 py-1">{t.notes}</td>
-                                    <td className="border px-2 py-1">
-                                        <InertiaLink
-                                            href={route('tooth.edit', t.id)}
-                                            className="mr-2 rounded bg-green-500 px-2 py-1 text-white"
-                                        >
-                                            تعديل
-                                        </InertiaLink>
-                                        {userHasDeletePermission && (
-                                            <button
-                                                onClick={() => handleDelete(t.id)}
-                                                className="rounded bg-red-500 px-2 py-1 text-white"
-                                            >
-                                                حذف
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+
+                    <section className="p-6">
+                        <DynamicTable
+                            data={[...teeth.data].reverse()}
+                            columns={columns}
+                        />
+                    </section>
                     <Pagination links={teeth.links} />
                 </div>
             </div>
