@@ -10,14 +10,14 @@ use Illuminate\Support\Str;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Service>
  */
-class ServiceFactory extends Factory
+class ServiceCategoryFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Service::class;
+    protected $model = ServiceCategory::class;
 
     /**
      * Define the model's default state.
@@ -28,9 +28,8 @@ class ServiceFactory extends Factory
     {
         return [
             'name' => Str::limit(fake()->unique()->name(), 50),
-            'price' => fake()->randomFloat(2, 10, 500),
             'description' => Str::random(10),
-            'category_id' => ServiceCategory::factory(),
+
 
         ];
     }

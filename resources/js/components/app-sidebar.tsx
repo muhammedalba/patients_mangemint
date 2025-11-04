@@ -65,6 +65,11 @@ const mainNavItems: NavItem[] = [
         href: '/services',
         icon: ClipboardPenLine,
     },
+    {
+        title: 'service-categories',
+        href: '/service-categories',
+        icon: ClipboardPenLine,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

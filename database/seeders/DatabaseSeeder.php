@@ -59,8 +59,9 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $this->call([
-            PatientSeeder::class,
-            ToothSeeder::class,
+            // PatientSeeder::class,
+            // ToothSeeder::class,
+            ServiceCategorySeeder::class,
             ServiceSeeder::class,
         ]);
 

@@ -90,7 +90,7 @@ class ProcedureController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'cost' => 'required|numeric|min:0',
-           // 'duration_minutes' => 'required|integer|min:1',
+           'duration_minutes' => 'required|integer|min:1',
             "tooth_id" => "required|exists:teeth,id",
             'patient_id' => 'nullable|exists:patients,id',
         ]);

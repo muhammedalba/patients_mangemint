@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Tooth;
+use App\Models\ServiceCategory;
 use Illuminate\Database\Seeder;
 
-class ToothSeeder extends Seeder
+class ServiceCategorySeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,6 +13,6 @@ class ToothSeeder extends Seeder
     public function run(): void
     {
 
-        Tooth::factory()->count(30)->create();
+        ServiceCategory::factory()->count(30)->create();
     }
 }

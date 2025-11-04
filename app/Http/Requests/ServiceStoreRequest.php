@@ -25,6 +25,7 @@ class ServiceStoreRequest extends FormRequest
             'name' => 'required|string|max:255|unique:services,name',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
+            'category_id' => 'required|exists:service_categories,id',
         ];
     }
 }

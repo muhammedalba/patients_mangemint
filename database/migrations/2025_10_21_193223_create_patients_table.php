@@ -7,20 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-      Schema::create('patients', function (Blueprint $table) {
-    $table->id();
-    $table->string('name', 60);
-    $table->string('email', 60)->unique()->nullable();
-    $table->timestamp('email_verified_at')->nullable();
-    $table->enum('gender', ['male', 'female', 'other'])->nullable();
-    $table->date('birth_date');
-    $table->string('phone', 15)->nullable();
-    $table->string('address', 300)->nullable();
-    $table->text('notes')->nullable();
-    $table->string('password', 20)->nullable(); 
-    $table->timestamps();
-});
-
+        Schema::create('patients', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 100);
+            $table->string('email', 100)->unique()->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->enum('gender', ['male', 'female', 'other']);
+            $table->date('birth_date');
+            $table->enum('marital_status', ['single', 'married', 'divorced', 'widowed'])->nullable();
+            $table->string('phone', 50)->nullable();
+            $table->string('address', 300)->nullable();
+            $table->text('notes')->nullable();
+            $table->string('password', 20)->nullable();
+            $table->timestamps();
+        });
     }
 
     public function down(): void

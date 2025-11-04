@@ -12,6 +12,10 @@ class Service extends Model
         'name',
         'description',
         'price',
+        'category_id',
     ];
-
+    public function category()
+    {
+        return $this->belongsTo(ServiceCategory::class, 'category_id');
+    }
 }

@@ -17,6 +17,8 @@ export default function Index() {
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
+    console.log(services, 'services');
+
     const [showToast, setShowToast] = useState(false);
 
     useEffect(() => {
@@ -91,6 +93,7 @@ export default function Index() {
                         <thead>
                             <tr className="bg-gray-100">
                                 <th className="border px-2 py-1">ID</th>
+                                <th className="border px-2 py-1">category</th>
                                 <th className="border px-2 py-1">Name</th>
                                 <th className="border px-2 py-1">Description</th>
                                 <th className="border px-2 py-1">Price</th>
@@ -101,6 +104,7 @@ export default function Index() {
                             {services?.data?.map((service, i) => (
                                 <tr key={service.id}>
                                     <td className="border px-2 py-1 text-center">{i + 1}</td>
+                                    <td className="border px-2 py-1 text-center">{service.category}</td>
                                     <td className="border px-2 py-1 text-center">{service.name}</td>
                                     <td className="border px-2 py-1 text-center">{service.description}</td>
                                     <td className="border px-2 py-1 text-center">{service.price}</td>

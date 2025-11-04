@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
@@ -8,14 +8,24 @@ interface ServiceFormData {
     name: string;
     description: string;
     price: number;
+    category_id: string;
 }
 
 export default function CreateService() {
+    const { categories } = usePage<{
+        categories: any;
+        auth: { user: { roles: string[] } };
+        flash: { success?: string; error?: string };
+        filters: { search?: string };
+    }>().props;
+    console.log(categories, 'categories');
+
     const { data, setData, post, processing, errors, reset } =
         useForm<ServiceFormData>({
             name: '',
             description: '',
             price: 0,
+            category_id: '',
         });
 
     const handleSubmit = (e: FormEvent) => {
@@ -39,8 +49,36 @@ export default function CreateService() {
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* select category */}
                     <div>
-                        <label htmlFor="name" className="mb-2 block text-gray-700">
+                        <label
+                            htmlFor="category_id"
+                            className="mb-2 block text-gray-700"
+                        >
+                            Category
+                        </label>
+                        <select
+                            id="category_id"
+                            name="category_id"
+                            value={data.category_id}
+                            onChange={(e) =>
+                                setData('category_id', e.target.value)
+                            }
+                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        >
+                            <option value="">Select a category</option>
+                            {categories.map((category: any) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label
+                            htmlFor="name"
+                            className="mb-2 block text-gray-700"
+                        >
                             Name
                         </label>
                         <input
@@ -53,12 +91,17 @@ export default function CreateService() {
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
                         {errors.name && (
-                            <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.name}
+                            </p>
                         )}
                     </div>
 
                     <div>
-                        <label htmlFor="price" className="mb-2 block text-gray-700">
+                        <label
+                            htmlFor="price"
+                            className="mb-2 block text-gray-700"
+                        >
                             Price
                         </label>
                         <input
@@ -66,30 +109,41 @@ export default function CreateService() {
                             type="number"
                             name="price"
                             value={data.price}
-                            onChange={(e) => setData('price', parseFloat(e.target.value))}
+                            onChange={(e) =>
+                                setData('price', parseFloat(e.target.value))
+                            }
                             placeholder="Service price"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
                         {errors.price && (
-                            <p className="mt-1 text-sm text-red-500">{errors.price}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.price}
+                            </p>
                         )}
                     </div>
 
                     <div>
-                        <label htmlFor="description" className="mb-2 block text-gray-700">
+                        <label
+                            htmlFor="description"
+                            className="mb-2 block text-gray-700"
+                        >
                             Description
                         </label>
                         <textarea
                             id="description"
                             name="description"
                             value={data.description}
-                            onChange={(e) => setData('description', e.target.value)}
+                            onChange={(e) =>
+                                setData('description', e.target.value)
+                            }
                             placeholder="Service description"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             rows={3}
                         ></textarea>
                         {errors.description && (
-                            <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.description}
+                            </p>
                         )}
                     </div>
 

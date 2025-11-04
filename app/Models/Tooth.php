@@ -20,10 +20,8 @@ class Tooth extends Model
     {
         return $this->belongsTo(Patient::class);
     }
- public function procedures()
-{
-    return $this->hasMany(Procedure::class, 'tooth_id');
-}
-
-
+    public function procedures()
+    {
+        return $this->hasMany(Procedure::class, 'tooth_id');
+    }
 }

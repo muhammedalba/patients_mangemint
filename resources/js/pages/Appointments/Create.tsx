@@ -54,6 +54,7 @@ export default function Create({
         status: 'scheduled',
     });
     const [isLoading, setIsLoading] = useState(false);
+console.log(procedures,'procedures');
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedOptions = Array.from(e.target.selectedOptions).map(

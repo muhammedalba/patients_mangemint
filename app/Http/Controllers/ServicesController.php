@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ServiceStoreRequest;
 use App\Http\Requests\ServiceUpdateRequest;
 use App\Models\Service;
+use App\Models\ServiceCategory;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -17,26 +18,48 @@ class ServicesController extends Controller
     {
         $search = request()->query('search');
 
-        $services = Service::query()
-            ->when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->orderByDesc('id')
+        $services = Service::with('category')
+            ->when(
+                $search,
+                fn($query) =>
+                $query->where('name', 'like', "%{$search}%")
+            )
+            ->latest()
             ->paginate(10)
             ->withQueryString();
 
+        // تعديل البيانات لتضمين اسم الفئة فقط
+        $services->getCollection()->transform(function ($service) {
+            return [
+                'id' => $service->id,
+                'name' => $service->name,
+                'description' => $service->description,
+                'price' => $service->price,
+                'category' => $service->category?->name,
+            ];
+        });
+
         return Inertia::render('Services/Index', [
             'services' => $services,
-            'filters' => ['search' => $search],
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        return Inertia::render('Services/Create');
+
+
+        // get all services categories to show in select input
+        $categories = ServiceCategory::select('id', 'name')->get();
+        return Inertia::render('Services/Create', [
+            'categories' => $categories,
+        ]);
     }
 
     /**
@@ -70,8 +93,11 @@ class ServicesController extends Controller
      */
     public function edit(Service $service)
     {
+        // get all services categories to show in select input
+        $categories = ServiceCategory::select('id', 'name')->get();
         return Inertia::render('Services/Edit', [
             'service' => $service,
+            'categories' => $categories,
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Patient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +19,7 @@ class ToothFactory extends Factory
     {
         return [
             //
-            'patient_id' => \App\Models\Patient::factory(),
+            'patient_id' => Patient::factory(),
             'tooth_number' => $this->faker->numberBetween(1, 32),
             'status' => $this->faker->randomElement(['healthy', 'decayed', 'filled', 'missing']),
             'notes' => $this->faker->sentence(),

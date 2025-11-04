@@ -8,6 +8,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ServiceCategoriesController;
 use App\Http\Controllers\ServicesController;
 use App\Http\Controllers\ToothController;
 
@@ -120,7 +121,16 @@ Route::prefix('teeth')->controller(ToothController::class)->group(function () {
     Route::post('update/{tooth}', 'update')->name('tooth.update');
     Route::delete('delete/{tooth}', 'destroy')->name('tooth.destroy');
 });
-
+//service-categories
+Route::resource('service-categories', ServiceCategoriesController::class)->names([
+    'index' => 'service-categories.index',
+    'create' => 'service-categories.create',
+    'store' => 'service-categories.store',
+    'show' => 'service-categories.show',
+    'edit' => 'service-categories.edit',
+    'update' => 'service-categories.update',
+    'destroy' => 'service-categories.destroy',
+]);
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

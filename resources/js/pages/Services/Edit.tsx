@@ -4,11 +4,17 @@ import { Head, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
-export default function EditService({ service }: { service: Service }) {
-    const { data, setData, patch, processing, errors } = useForm({
+export default function EditService({ service, categories }: { service: Service, categories: any[] }) {
+    const { data, setData, patch, processing, errors } = useForm<{
+        name: string;
+        description: string;
+        price: number;
+        category_id: string;
+    }>({
         name: service.name || '',
         description: service.description || '',
         price: service.price || 0,
+        category_id: service.category_id || '',
     });
 
     const handleSubmit = (e: FormEvent) => {
@@ -33,6 +39,31 @@ export default function EditService({ service }: { service: Service }) {
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                                        {/* select category */}
+                    <div>
+                        <label
+                            htmlFor="category_id"
+                            className="mb-2 block text-gray-700"
+                        >
+                            Category
+                        </label>
+                        <select
+                            id="category_id"
+                            name="category_id"
+                            value={data.category_id}
+                            onChange={(e) =>
+                                setData('category_id', e.target.value)
+                            }
+                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        >
+                            <option value="">Select a category</option>
+                            {categories.map((category: any) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <div>
                         <label htmlFor="name" className="mb-2 block text-gray-700">
                             Name

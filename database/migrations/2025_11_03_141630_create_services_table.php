@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('category_id')->constrained('service_categories')->onDelete('cascade');
             $table->string('name')->unique();
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2)->default(0);

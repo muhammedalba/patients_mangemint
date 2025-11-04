@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class ServiceUpdateRequest extends FormRequest
+class ServiceCategoryStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,18 +21,9 @@ class ServiceUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $serviceId = $this->route('service')->id;
-
         return [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('services')->ignore($serviceId),
-            ],
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'category_id' => 'required|exists:service_categories,id',
+            'name' => ['required', 'string', 'max:255', 'unique:service_categories'],
+            'description' => ['nullable', 'string'],
         ];
     }
 }
