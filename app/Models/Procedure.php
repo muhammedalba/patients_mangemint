@@ -29,6 +29,10 @@ class Procedure extends Model
 //         'patient_id'    // المفتاح الخارجي في جدول الأسنان الذي يشير إلى المريض
 //     );
 // }
+// public function patient()
+// {
+//     return $this->belongsTo(Patient::class, 'patient_id');
+// }
 
     public function tooth()
 {

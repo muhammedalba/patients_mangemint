@@ -6,6 +6,7 @@ use App\Models\Patient;
 use Inertia\Inertia;
 use App\Models\Procedure;
 use App\Models\Service;
+use App\Models\ServiceCategory;
 use App\Models\Tooth;
 use Illuminate\Http\Request;
 
@@ -13,20 +14,20 @@ class ProcedureController extends Controller
 {
     public function index()
     {
-        $procedures = Procedure::with(['tooth.patient'])->orderByDesc('id')->paginate(10);
-          $procedures->getCollection()->transform(function ($procedure) {
-        return [
-            'id' => $procedure->id,
-            'tooth_id' => $procedure->tooth_id,
-            'description' => $procedure->description,
-            'tooth_number' => $procedure->tooth?->tooth_number,
-            'cost' => $procedure->cost,
-            'name' => $procedure->name,
-            'duration_minutes' => $procedure->duration_minutes,
-            'follow_up_days' => $procedure->follow_up_days,
-            'patient' => $procedure->tooth?->patient?->name,
-        ];
-    });
+        $procedures = Procedure::with(['tooth.patient'])->orderByDesc('id')->paginate(100);
+        $procedures->getCollection()->transform(function ($procedure) {
+            return [
+                'id' => $procedure->id,
+                'tooth_id' => $procedure->tooth_id,
+                'description' => $procedure->description,
+                'tooth_number' => $procedure->tooth?->tooth_number,
+                'cost' => $procedure->cost,
+                'name' => $procedure->name,
+                'duration_minutes' => $procedure->duration_minutes,
+                'follow_up_days' => $procedure->follow_up_days,
+                'patient' => $procedure->tooth?->patient?->name,
+            ];
+        });
         return Inertia::render('Procedures/Index', ['procedures' => $procedures]);
     }
     public function create(Request $request, $patient_id = null)
@@ -90,11 +91,11 @@ class ProcedureController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'cost' => 'required|numeric|min:0',
-           'duration_minutes' => 'required|integer|min:1',
+            'duration_minutes' => 'required|integer|min:1',
             "tooth_id" => "required|exists:teeth,id",
             'patient_id' => 'nullable|exists:patients,id',
         ]);
-// @dd($request->all());
+        // @dd($request->all());
         $procedure = Procedure::create($request->all());
 
         if ($request->has('tooth_id')) {
@@ -110,11 +111,21 @@ class ProcedureController extends Controller
 
     public function edit(Procedure $procedure)
     {
-        $teeth = Tooth::select('tooth_number', 'id', 'patient_id')->get();
-        $services = Service::select('id', 'name', 'price')->get();
+        $teeth = Tooth::select('id', 'tooth_number', 'patient_id')
+            ->where('patient_id', $procedure->tooth->patient_id)
+            ->get();
 
-        return Inertia::render('Procedures/Edit', ['procedure' => $procedure, 'teeth' => $teeth, 'services' => $services]);
+        $services_category = ServiceCategory::with('services:category_id,id,name')
+            ->select('id', 'name')
+            ->get();
+        // $services_category = ServiceCategory::with('services')->select('id', 'name')->get();
+        return Inertia::render('Procedures/Edit', [
+            'procedure' => $procedure,
+            'teeth' => $teeth,
+            'services_category' => $services_category,
+        ]);
     }
+
 
     public function update(Request $request, Procedure $procedure)
     {

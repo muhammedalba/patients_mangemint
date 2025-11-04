@@ -13,7 +13,7 @@ interface Procedure {
     tooth_id: number;
 }
 
-export default function EditProcedure({ procedure, teeth }: { procedure: Procedure, teeth: any[] }) {
+export default function EditProcedure({ procedure, teeth,services_category }: { procedure: Procedure, teeth: any[], services_category: any[] }) {
     const { props } = usePage<{
         flash: { success?: string; error?: string };
     }>();
@@ -24,6 +24,10 @@ export default function EditProcedure({ procedure, teeth }: { procedure: Procedu
         cost: procedure.cost || 0,
         tooth_id: procedure.tooth_id || '',
     });
+console.log(services_category,'services_category edit');
+console.log(teeth,'teeth edit');
+console.log(procedure,'procedure edit');
+
 
     const [submitted, setSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);

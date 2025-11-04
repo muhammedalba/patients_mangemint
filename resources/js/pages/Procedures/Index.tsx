@@ -38,6 +38,7 @@ export default function Index() {
     const [isLoading, setISLoading] = useState(false);
     const columns: ColumnDef<any>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
+        { id: 'patient_name', accessorKey: 'patient', header: 'اسم المريض' },
         { id: 'name', accessorKey: 'name', header: 'اسم المعالجة' },
         { id: 'description', accessorKey: 'description', header: 'الوصف' },
         { id: 'cost', accessorKey: 'cost', header: 'التكلفة' },
