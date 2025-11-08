@@ -51,8 +51,8 @@ const mainNavItems: NavItem[] = [
         icon: ClipboardPenLine,
     },
      {
-        title: 'medicalrecords',
-        href: '/medicalrecords',
+        title: 'medical records',
+        href: '/medical-records',
         icon: ClipboardPenLine,
     },
     {

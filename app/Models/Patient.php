@@ -42,7 +42,7 @@ class Patient extends Model
     //     return $this->hasMany(Invoice::class);
     // }
 
-//     public function medicalRecords() {
-//         return $this->hasMany(MedicalRecord::class);
-//     }
+  public function medicalRecord() {
+    return $this->hasOne(MedicalRecord::class);
+}
 }

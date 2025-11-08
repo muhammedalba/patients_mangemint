@@ -82,14 +82,16 @@ Route::resource('appointments', AppointmentController::class)->middleware(['auth
 // services
 Route::resource('services', ServicesController::class)->middleware(['auth', 'verified']);
 
+
 // Medical Records
-Route::prefix('medicalrecords')->controller(MedicalRecordController::class)->group(function () {
-    Route::get('/', 'index')->name('medicalrecords.index');
-    Route::get('create', 'create')->name('medicalrecords.create');
-    Route::post('store', 'store')->name('medicalrecords.store');
-    Route::get('edit/{medicalRecord}', 'edit')->name('medicalrecords.edit');
-    Route::post('update/{medicalRecord}', 'update')->name('medicalrecords.update');
-    Route::delete('delete/{medicalRecord}', 'destroy')->name('medicalrecords.destroy');
+
+Route::prefix('medical-records')->controller(MedicalRecordController::class)->group(function () {
+    Route::get('/', 'index')->name('medical-records.index');
+    Route::get('create', 'create')->name('medical-records.create');
+    Route::post('store', 'store')->name('medical-records.store');
+    Route::get('edit/{id}', 'edit')->name('medical-records.edit');
+    Route::post('update/{id}', 'update')->name('medical-records.update');
+    Route::delete('delete/{id}', 'destroy')->name('medical-records.destroy');
 });
 
 // Invoices

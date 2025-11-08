@@ -16,54 +16,55 @@ class DatabaseSeeder extends Seeder
     {
 
         //  create roles and permissions
-        //   $permissions = [
-        //     'manage patients',
-        //     'manage appointments',
-        //     'view medical records',
-        //     'edit medical records',
-        //     'manage billing',
-        //     'view dashboard',
-        // ];
+          $permissions = [
+            'manage patients',
+            'manage appointments',
+            'view medical records',
+            'edit medical records',
+            'manage billing',
+            'view dashboard',
+        ];
 
-        // foreach ($permissions as $permission) {
-        //     Permission::firstOrCreate(['name' => $permission]);
-        // }
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
 
-        // $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        // $adminRole->syncPermissions($permissions);
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole->syncPermissions($permissions);
 
-        // $doctorRole = Role::firstOrCreate(['name' => 'doctor']);
-        // $doctorRole->syncPermissions([
-        //     'view medical records',
-        //     'edit medical records',
-        //     'manage billing',
-        //     'view dashboard',
-        // ]);
+        $doctorRole = Role::firstOrCreate(['name' => 'doctor']);
+        $doctorRole->syncPermissions([
+            'view medical records',
+            'edit medical records',
+            'manage billing',
+            'view dashboard',
+        ]);
 
-        // $receptionistRole = Role::firstOrCreate(['name' => 'receptionist']);
-        // $receptionistRole->syncPermissions([
-        //     'manage appointments',
-        //     'manage patients',
-        //     'manage billing',
-        //     'view dashboard',
-        // ]);
+        $receptionistRole = Role::firstOrCreate(['name' => 'receptionist']);
+        $receptionistRole->syncPermissions([
+            'manage appointments',
+            'manage patients',
+            'manage billing',
+            'view dashboard',
+        ]);
 
-        // Role::firstOrCreate(['name' => 'patient']);
+        Role::firstOrCreate(['name' => 'patient']);
 
-        //  $user = User::firstOrCreate(
-        //     ['email' => 'codeProps@gmail.com'],
-        //     ['name' => 'Super Admin', 'password' => bcrypt('password')]
-        // );
-        // $user->assignRole('admin');
+         $user = User::firstOrCreate(
+            ['email' => 'codeProps@gmail.com'],
+            ['name' => 'Super Admin', 'password' => bcrypt('password')]
+        );
+        $user->assignRole('admin');
 
-        // User::factory(10)->create();
+        User::factory(10)->create();
 
         $this->call([
-            // PatientSeeder::class,
-            // ToothSeeder::class,
-            // ServiceCategorySeeder::class,
-            // ServiceSeeder::class,
+            PatientSeeder::class,
+            ToothSeeder::class,
+            ServiceCategorySeeder::class,
+            ServiceSeeder::class,
             ProcedureSeeder::class,
+            MedicalRecordSeeder::class,
         ]);
 
 
