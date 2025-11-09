@@ -30,6 +30,7 @@ export default function Index({
         flash: { success?: string; error?: string };
     }>();
     const [search, setSearch] = useState(filters.search || '');
+console.log(teeth.data);
 
     useEffect(() => {
         const handler = setTimeout(() => {

@@ -37,8 +37,14 @@ class ToothController extends Controller
 
     public function create(Request $request)
     {
+        // patient_id from query params if exists
         $patient_id = $request->query('patient_id');
-        $patients = Patient::all();
+        $patients = null;
+        if ($patient_id) {
+            $patients = Patient::where('id', $patient_id)->select('id', 'name')->get();
+        } else {
+            $patients = Patient::all()->select('id', 'name');
+        }
         return Inertia::render('Teeth/Create', [
             'patients' => $patients,
             'patient_id' => $patient_id,
@@ -62,7 +68,7 @@ class ToothController extends Controller
     {
         $tooth->load([
             'procedures',
-            'patient:id,name', // ← تحميل المريض فقط مع id و name
+            'patient:id,name',
         ]);
         return Inertia::render('Teeth/Edit', ['tooth' => $tooth]);
     }

@@ -1,11 +1,16 @@
-
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
-export default function CreateTeeth({ patients, patient_id }: { patients: any[], patient_id?: number }) {
+export default function CreateTeeth({
+    patients,
+    patient_id,
+}: {
+    patients: any[];
+    patient_id?: number;
+}) {
     const { data, setData, post, processing, errors, reset } = useForm<{
         patient_id: string;
         tooth_number: string;
@@ -17,6 +22,8 @@ export default function CreateTeeth({ patients, patient_id }: { patients: any[],
         status: '',
         notes: '',
     });
+    console.log(patients);
+    console.log(patient_id, 'patient_id');
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -43,7 +50,9 @@ export default function CreateTeeth({ patients, patient_id }: { patients: any[],
                         <select
                             name="patient_id"
                             value={data.patient_id}
-                            onChange={(e) => setData('patient_id', e.target.value)}
+                            onChange={(e) =>
+                                setData('patient_id', e.target.value)
+                            }
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             disabled={!!patient_id}
                         >
@@ -55,7 +64,9 @@ export default function CreateTeeth({ patients, patient_id }: { patients: any[],
                             ))}
                         </select>
                         {errors.patient_id && (
-                            <p className="mt-1 text-sm text-red-500">{errors.patient_id}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.patient_id}
+                            </p>
                         )}
                     </div>
 
@@ -64,12 +75,16 @@ export default function CreateTeeth({ patients, patient_id }: { patients: any[],
                             type="text"
                             name="tooth_number"
                             value={data.tooth_number}
-                            onChange={(e) => setData('tooth_number', e.target.value)}
+                            onChange={(e) =>
+                                setData('tooth_number', e.target.value)
+                            }
                             placeholder="رقم السن"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
                         {errors.tooth_number && (
-                            <p className="mt-1 text-sm text-red-500">{errors.tooth_number}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.tooth_number}
+                            </p>
                         )}
                     </div>
 
@@ -83,7 +98,9 @@ export default function CreateTeeth({ patients, patient_id }: { patients: any[],
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
                         {errors.status && (
-                            <p className="mt-1 text-sm text-red-500">{errors.status}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.status}
+                            </p>
                         )}
                     </div>
 
@@ -96,7 +113,9 @@ export default function CreateTeeth({ patients, patient_id }: { patients: any[],
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
                         {errors.notes && (
-                            <p className="mt-1 text-sm text-red-500">{errors.notes}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.notes}
+                            </p>
                         )}
                     </div>
 
