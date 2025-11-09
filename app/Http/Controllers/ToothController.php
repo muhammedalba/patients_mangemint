@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Teeth\DTOs\ToothData;
+use App\Domain\Teeth\Services\ToothService;
+use App\Http\Requests\ToothStoreRequest;
+use App\Http\Requests\ToothUpdateRequest;
 use App\Models\Tooth;
 use App\Models\Patient;
 use Inertia\Inertia;
@@ -10,26 +14,18 @@ use Illuminate\Validation\Rule;
 
 class ToothController extends Controller
 {
+    private ToothService $service;
+
+    public function __construct(ToothService $service)
+    {
+        $this->service = $service;
+    }
 
     public function index(Request $request)
     {
         $search = $request->query('search');
 
-        $teeth = Tooth::with(['patient', 'procedures'])
-            ->when($search, function ($query, $search) {
-                $query->where('tooth_number', 'like', "%{$search}%")
-                    ->orWhereHas('patient', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%")
-                            ->orWhere('phone', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('procedures', function ($q) use ($search) {
-                        $q->where('type', 'like', "%{$search}%")
-                            ->orWhere('description', 'like', "%{$search}%");
-                    });
-            })
-               ->orderByDesc('id')
-            ->paginate(10)
-            ->withQueryString();
+        $teeth = $this->service->listTeeth($search, 10);
 
         return Inertia::render('Teeth/Index', [
             'teeth' => $teeth,
@@ -49,67 +45,46 @@ class ToothController extends Controller
         ]);
     }
 
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'patient_id' => 'required|exists:patients,id',
-        'tooth_number' => [
-            'required',
-            'string',
-            'max:255',
-            Rule::unique('teeth')->where(function ($query) use ($request) {
-                return $query->where('patient_id', $request->patient_id);
-            }),
-        ],
-        'status' => 'nullable|string|max:255',
-        'notes' => 'nullable|string',
-    ]);
+    public function store(ToothStoreRequest $request)
+    {
+        $validated = $request->validated();
 
-    Tooth::create($validated);
+        $data = ToothData::fromValidated($validated);
 
-    return redirect()
-        ->route('patients.details', $request->patient_id)
-        ->with('success', 'Tooth created successfully.');
-}
+        $this->service->create($data);
+
+        return redirect()
+            ->route('patients.details', $request->patient_id)
+            ->with('success', 'Tooth created successfully.');
+    }
 
     public function edit(Tooth $tooth)
     {
-          $tooth->load([
-        'procedures',
-        'patient:id,name', // ← تحميل المريض فقط مع id و name
-    ]);
+        $tooth->load([
+            'procedures',
+            'patient:id,name', // ← تحميل المريض فقط مع id و name
+        ]);
         return Inertia::render('Teeth/Edit', ['tooth' => $tooth]);
     }
 
-   public function update(Request $request, Tooth $tooth)
-{
-    $validated = $request->validate([
-        'patient_id' => 'required|exists:patients,id',
-        'tooth_number' => [
-            'required',
-            'string',
-            'max:255',
-            Rule::unique('teeth')
-                ->where(function ($query) use ($request) {
-                    return $query->where('patient_id', $request->patient_id);
-                })
-                ->ignore($tooth->id), // ← تجاهل السجل الحالي أثناء التحقق من التفرد
-        ],
-        'status' => 'nullable|string|max:255',
-        'notes' => 'nullable|string',
-    ]);
+    public function update(ToothUpdateRequest $request, Tooth $tooth)
+    {
+        $validated = $request->validated();
 
-    $tooth->update($validated);
+        $data = ToothData::fromValidated($validated);
 
-    return redirect()
-        ->route('patients.details', $request->patient_id)
-        ->with('success', 'Tooth updated successfully.');
-}
+        $this->service->update($tooth, $data);
+
+        return redirect()
+            ->route('patients.details', $request->patient_id)
+            ->with('success', 'Tooth updated successfully.');
+    }
 
     public function destroy(Tooth $tooth)
     {
         $patient_id = $tooth->patient_id;
-        $tooth->delete();
+
+        $this->service->delete($tooth);
 
         return redirect()->route('patients.details', $patient_id)->with('success', 'Teeth deleted successfully.');
     }

@@ -1,11 +1,14 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\Appointment;
 use App\Models\Patient;
 use App\Models\Procedure;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+
 class AppointmentController extends Controller
 {
     /**

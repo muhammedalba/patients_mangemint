@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Seeders;
+
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
 
         //  create roles and permissions
-          $permissions = [
+        $permissions = [
             'manage patients',
             'manage appointments',
             'view medical records',
@@ -50,7 +51,7 @@ class DatabaseSeeder extends Seeder
 
         Role::firstOrCreate(['name' => 'patient']);
 
-         $user = User::firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => 'codeProps@gmail.com'],
             ['name' => 'Super Admin', 'password' => bcrypt('password')]
         );
@@ -66,7 +67,5 @@ class DatabaseSeeder extends Seeder
             ProcedureSeeder::class,
             MedicalRecordSeeder::class,
         ]);
-
-
     }
 }

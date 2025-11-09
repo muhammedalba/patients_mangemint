@@ -48,7 +48,7 @@ class MedicalRecordController extends Controller
     public function create(): Response
     {
         $patients = Patient::all();
-        $doctors = User::whereHas('roles', fn ($q) => $q->where('name', 'doctor'))->get();
+        $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->get();
         return Inertia::render('MedicalRecords/Create', [
             'patients' => $patients,
             'doctors' => $doctors,
@@ -83,7 +83,7 @@ class MedicalRecordController extends Controller
     {
         $medicalRecord->load('patient', 'doctor');
         $patients = Patient::all();
-        $doctors = User::whereHas('roles', fn ($q) => $q->where('name', 'doctor'))->get();
+        $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->get();
         return Inertia::render('MedicalRecords/Edit', [
             'medicalRecord' => $medicalRecord,
             'patients' => $patients,

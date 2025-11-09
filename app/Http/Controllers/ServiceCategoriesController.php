@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\ServiceCategories\DTOs\ServiceCategoryData;
+use App\Domain\ServiceCategories\Services\ServiceCategoryService;
 use App\Http\Requests\ServiceCategoryStoreRequest;
 use App\Http\Requests\ServiceCategoryUpdateRequest;
 use App\Models\ServiceCategory;
@@ -12,6 +14,13 @@ use Inertia\Response;
 
 class ServiceCategoriesController extends Controller
 {
+    private ServiceCategoryService $service;
+
+    public function __construct(ServiceCategoryService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,14 +29,9 @@ class ServiceCategoriesController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = ServiceCategory::latest();
+        $search = $request->input('search');
 
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->input('search') . '%')
-                  ->orWhere('description', 'like', '%' . $request->input('search') . '%');
-        }
-
-        $serviceCategories = $query->paginate(10)->withQueryString();
+        $serviceCategories = $this->service->listCategories($search, 10);
 
         return Inertia::render('ServiceCategories/Index', [
             'serviceCategories' => $serviceCategories,
@@ -43,7 +47,9 @@ class ServiceCategoriesController extends Controller
      */
     public function store(ServiceCategoryStoreRequest $request): RedirectResponse
     {
-        ServiceCategory::create($request->validated());
+        $data = ServiceCategoryData::fromValidated($request->validated());
+
+        $this->service->create($data);
 
         return redirect()->route('service-categories.index')->with('success', 'Service category created successfully.');
     }
@@ -94,7 +100,9 @@ class ServiceCategoriesController extends Controller
      */
     public function update(ServiceCategoryUpdateRequest $request, ServiceCategory $serviceCategory): RedirectResponse
     {
-        $serviceCategory->update($request->validated());
+        $data = ServiceCategoryData::fromValidated($request->validated());
+
+        $this->service->update($serviceCategory, $data);
 
         return redirect()->route('service-categories.index')->with('success', 'Service category updated successfully.');
     }
@@ -107,7 +115,7 @@ class ServiceCategoriesController extends Controller
      */
     public function destroy(ServiceCategory $serviceCategory): RedirectResponse
     {
-        $serviceCategory->delete();
+        $this->service->delete($serviceCategory);
 
         return redirect()->route('service-categories.index')->with('success', 'Service category deleted successfully.');
     }

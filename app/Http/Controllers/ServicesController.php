@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Services\DTOs\ServiceData;
+use App\Domain\Services\Services\ServiceService;
 use App\Http\Requests\ServiceStoreRequest;
 use App\Http\Requests\ServiceUpdateRequest;
 use App\Models\Service;
@@ -11,6 +13,13 @@ use Inertia\Inertia;
 
 class ServicesController extends Controller
 {
+    private ServiceService $service;
+
+    public function __construct(ServiceService $service)
+    {
+        $this->service = $service;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -18,26 +27,7 @@ class ServicesController extends Controller
     {
         $search = request()->query('search');
 
-        $services = Service::with('category')
-            ->when(
-                $search,
-                fn($query) =>
-                $query->where('name', 'like', "%{$search}%")
-            )
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
-
-        // تعديل البيانات لتضمين اسم الفئة فقط
-        $services->getCollection()->transform(function ($service) {
-            return [
-                'id' => $service->id,
-                'name' => $service->name,
-                'description' => $service->description,
-                'price' => $service->price,
-                'category' => $service->category?->name,
-            ];
-        });
+        $services = $this->service->listServices($search, 10);
 
         return Inertia::render('Services/Index', [
             'services' => $services,
@@ -57,6 +47,7 @@ class ServicesController extends Controller
 
         // get all services categories to show in select input
         $categories = ServiceCategory::select('id', 'name')->get();
+
         return Inertia::render('Services/Create', [
             'categories' => $categories,
         ]);
@@ -68,8 +59,9 @@ class ServicesController extends Controller
     public function store(ServiceStoreRequest $request)
     {
         try {
-            $validated = $request->validated();
-            Service::create($validated);
+            $data = ServiceData::fromValidated($request->validated());
+
+            $this->service->create($data);
 
             return redirect()
                 ->route('services.index')
@@ -95,6 +87,7 @@ class ServicesController extends Controller
     {
         // get all services categories to show in select input
         $categories = ServiceCategory::select('id', 'name')->get();
+
         return Inertia::render('Services/Edit', [
             'service' => $service,
             'categories' => $categories,
@@ -107,8 +100,9 @@ class ServicesController extends Controller
     public function update(ServiceUpdateRequest $request, Service $service)
     {
         try {
-            $validated = $request->validated();
-            $service->update($validated);
+            $data = ServiceData::fromValidated($request->validated());
+
+            $this->service->update($service, $data);
 
             return redirect()
                 ->route('services.index')
@@ -134,7 +128,7 @@ class ServicesController extends Controller
     public function destroy(Service $service)
     {
         try {
-            $service->delete();
+            $this->service->delete($service);
 
             return redirect()
                 ->route('services.index')

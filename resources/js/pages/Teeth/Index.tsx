@@ -67,8 +67,8 @@ export default function Index({
                     <TableActions
                         item={teeth}
                         routes={{
-                            edit: 'users.edit',
-                            delete: 'users.destroy',
+                            edit: 'tooth.edit',
+                            delete: 'tooth.destroy',
                         }}
                         showEdit={true}
                         showView={false}
@@ -137,7 +137,7 @@ export default function Index({
 
                     <section className="p-6">
                         <DynamicTable
-                            data={[...teeth.data].reverse()}
+                            data={[...teeth.data]}
                             columns={columns}
                         />
                     </section>

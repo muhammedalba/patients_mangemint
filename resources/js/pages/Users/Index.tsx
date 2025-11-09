@@ -28,6 +28,9 @@ export default function Index({
     const { props } = usePage<{
         flash: { success?: string; error?: string };
     }>();
+    console.log(props.flash,'props');
+// console.log(users,'users');
+
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
     const columns: ColumnDef<any>[] = [
@@ -84,7 +87,7 @@ export default function Index({
     const [showToast, setShowToast] = useState(false);
 
     useEffect(() => {
-        if (props.flash?.success) {
+        if (props.flash?.success || props.flash?.error) {
             setShowToast(true);
             const timer = setTimeout(() => setShowToast(false), 3000);
             return () => clearTimeout(timer);
@@ -140,7 +143,7 @@ export default function Index({
 
                     <section className="p-6">
                         <DynamicTable
-                            data={[...users.data].reverse()}
+                            data={[...users.data]}
                             columns={columns}
                         />
                     </section>

@@ -50,12 +50,13 @@ class ProcedureController extends Controller
         // جلب المرضى بأعمدة مختصرة لتقليل الحجم المرسَل للواجهة
         $patients = Patient::select('id', 'name')->get();
         // get all services
-        $services = Service::select('id', 'name', 'price')->get();
-
+        $services_category = ServiceCategory::with('services:category_id,id,name')
+            ->select('id', 'name')
+            ->get();
 
         return Inertia::render('Procedures/Create', [
             'teeth' => $teeth,
-            'services' => $services,
+            'services_category' => $services_category,
             'patient_id' => $patientId,
             'patients' => $patients,
         ]);
@@ -118,7 +119,7 @@ class ProcedureController extends Controller
         $services_category = ServiceCategory::with('services:category_id,id,name')
             ->select('id', 'name')
             ->get();
-        // $services_category = ServiceCategory::with('services')->select('id', 'name')->get();
+
         return Inertia::render('Procedures/Edit', [
             'procedure' => $procedure,
             'teeth' => $teeth,
