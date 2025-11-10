@@ -25,8 +25,9 @@ class MedicalRecordUpdateRequest extends FormRequest
         return [
             'patient_id' => [
                 'required',
-                Rule::unique('medical_records')->ignore($this->medical_record),
+                Rule::unique('medical_records')->ignore($this->route('medicalRecord')->id),
             ],
+
             'doctor_id' => 'nullable|exists:users,id',
             'chief_complaint' => 'nullable|string',
             'present_illness_history' => 'nullable|string',

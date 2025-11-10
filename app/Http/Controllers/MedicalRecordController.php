@@ -7,6 +7,8 @@ use App\Http\Requests\MedicalRecordUpdateRequest;
 use App\Models\MedicalRecord;
 use App\Models\Patient;
 use App\Models\User;
+use App\Domain\MedicalRecords\DTOs\MedicalRecordData;
+use App\Domain\MedicalRecords\Services\MedicalRecordService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,31 +16,26 @@ use Inertia\Response;
 
 class MedicalRecordController extends Controller
 {
+    private MedicalRecordService $service;
+
+    public function __construct(MedicalRecordService $service)
+    {
+        $this->service = $service;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request): Response
     {
-        $query = MedicalRecord::with('patient', 'doctor');
+        $search = $request->query('search');
 
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('chief_complaint', 'like', "%{$search}%")
-                    ->orWhereHas('patient', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('doctor', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        $medicalRecords = $query->latest()->paginate(10)->withQueryString();
+        $medicalRecords = $this->service->listMedicalRecords($search, 10);
 
         return Inertia::render('MedicalRecords/Index', [
             'medicalRecords' => $medicalRecords,
-            'filters' => $request->only(['search']),
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -60,7 +57,9 @@ class MedicalRecordController extends Controller
      */
     public function store(MedicalRecordStoreRequest $request): RedirectResponse
     {
-        MedicalRecord::create($request->validated());
+        $data = MedicalRecordData::fromValidated($request->validated());
+
+        $this->service->create($data);
 
         return redirect()->route('medical-records.index')->with('success', 'Medical record created successfully.');
     }
@@ -68,25 +67,25 @@ class MedicalRecordController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(MedicalRecord $medicalRecord): Response
-    {
-        $medicalRecord->load('patient', 'doctor');
-        return Inertia::render('MedicalRecords/Show', [
-            'medicalRecord' => $medicalRecord,
-        ]);
-    }
+    // public function show(MedicalRecord $medicalRecord): Response
+    // {
+    //     $medicalRecord->load('patient', 'doctor');
+    //     return Inertia::render('MedicalRecords/Show', [
+    //         'medicalRecord' => $medicalRecord,
+    //     ]);
+    // }
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(MedicalRecord $medicalRecord): Response
     {
-        $medicalRecord->load('patient', 'doctor');
-        $patients = Patient::all();
+        // get medical record with patient and doctor relationships
+        $medicalRecord->load('patient:id,name', 'doctor:id,name');
         $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->get();
+
         return Inertia::render('MedicalRecords/Edit', [
             'medicalRecord' => $medicalRecord,
-            'patients' => $patients,
             'doctors' => $doctors,
         ]);
     }
@@ -96,7 +95,10 @@ class MedicalRecordController extends Controller
      */
     public function update(MedicalRecordUpdateRequest $request, MedicalRecord $medicalRecord): RedirectResponse
     {
-        $medicalRecord->update($request->validated());
+        // dd($request->getContent());
+        // dd($request->json()->all());
+        $data = MedicalRecordData::fromValidated($request->validated());
+        $this->service->update($medicalRecord, $data);
 
         return redirect()->route('medical-records.index')->with('success', 'Medical record updated successfully.');
     }
@@ -106,7 +108,7 @@ class MedicalRecordController extends Controller
      */
     public function destroy(MedicalRecord $medicalRecord): RedirectResponse
     {
-        $medicalRecord->delete();
+        $this->service->delete($medicalRecord);
 
         return redirect()->route('medical-records.index')->with('success', 'Medical record deleted successfully.');
     }

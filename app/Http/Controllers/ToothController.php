@@ -10,7 +10,6 @@ use App\Models\Tooth;
 use App\Models\Patient;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ToothController extends Controller
 {
@@ -39,12 +38,7 @@ class ToothController extends Controller
     {
         // patient_id from query params if exists
         $patient_id = $request->query('patient_id');
-        $patients = null;
-        if ($patient_id) {
-            $patients = Patient::where('id', $patient_id)->select('id', 'name')->get();
-        } else {
-            $patients = Patient::all()->select('id', 'name');
-        }
+        $patients = $patient_id ? Patient::where('id', $patient_id)->select('id', 'name')->get() : Patient::all()->select('id', 'name');
         return Inertia::render('Teeth/Create', [
             'patients' => $patients,
             'patient_id' => $patient_id,

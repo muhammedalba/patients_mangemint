@@ -28,6 +28,8 @@ export default function Index({
     const { props } = usePage<{
         flash: { success?: string; error?: string };
     }>();
+    console.log(medicalRecords,'medicalRecords');
+
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
 
@@ -59,7 +61,7 @@ export default function Index({
                         routes={{
                             edit: 'medical-records.edit',
                             delete: 'medical-records.destroy',
-                            show: 'medical-records.show',
+                            show: 'medical-records.edit',
                         }}
                         showEdit={true}
                         showView={true}
