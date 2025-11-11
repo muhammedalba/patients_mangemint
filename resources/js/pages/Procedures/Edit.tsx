@@ -13,7 +13,15 @@ interface Procedure {
     tooth_id: number;
 }
 
-export default function EditProcedure({ procedure, teeth,services_category }: { procedure: Procedure, teeth: any[], services_category: any[] }) {
+export default function EditProcedure({
+    procedure,
+    teeth,
+    services_category,
+}: {
+    procedure: Procedure;
+    teeth: any[];
+    services_category: any[];
+}) {
     const { props } = usePage<{
         flash: { success?: string; error?: string };
     }>();
@@ -24,29 +32,29 @@ export default function EditProcedure({ procedure, teeth,services_category }: { 
         cost: procedure.cost || 0,
         tooth_id: procedure.tooth_id || '',
     });
-console.log(services_category,'services_category edit');
-console.log(teeth,'teeth edit');
-console.log(procedure,'procedure edit');
-
+    console.log(services_category, 'services_category edit');
+    console.log(teeth, 'teeth edit');
+    console.log(procedure, 'procedure edit');
 
     const [submitted, setSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        console.log(data, 'data');
+
         setIsLoading(true);
         try {
             post(route('procedures.update', procedure.id), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setSubmitted(true);
-                setTimeout(() => setSubmitted(false), 2500);
-            },
-        });
-        }catch (error) {
-            console.log(error)
-        }
-        finally {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSubmitted(true);
+                    setTimeout(() => setSubmitted(false), 2500);
+                },
+            });
+        } catch (error) {
+            console.log(error);
+        } finally {
             setIsLoading(false);
         }
     };
@@ -61,7 +69,6 @@ console.log(procedure,'procedure edit');
             href: route('procedures.edit', procedure.id),
         },
     ];
-
 
     if (isLoading) return <LoadingPage />;
     return (
@@ -97,7 +104,9 @@ console.log(procedure,'procedure edit');
                         </label>
                         <textarea
                             value={data.description}
-                            onChange={(e) => setData('description', e.target.value)}
+                            onChange={(e) =>
+                                setData('description', e.target.value)
+                            }
                             placeholder="وصف الإجراء"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
                         />
@@ -115,7 +124,9 @@ console.log(procedure,'procedure edit');
                         <input
                             type="number"
                             value={data.cost}
-                            onChange={(e) => setData('cost', e.target.valueAsNumber)}
+                            onChange={(e) =>
+                                setData('cost', e.target.valueAsNumber)
+                            }
                             placeholder="التكلفة"
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
                         />
@@ -127,13 +138,13 @@ console.log(procedure,'procedure edit');
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-gray-700">
-                            السن
-                        </label>
+                        <label className="mb-1 block text-gray-700">السن</label>
                         <select
                             name="tooth_id"
                             value={data.tooth_id}
-                            onChange={(e) => setData('tooth_id', e.target.value)}
+                            onChange={(e) =>
+                                setData('tooth_id', e.target.value)
+                            }
                             className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
                         >
                             <option value="">اختر السن</option>

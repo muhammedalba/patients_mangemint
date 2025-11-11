@@ -189,6 +189,13 @@ class PatientController extends Controller
         ]);
     }
 
+    public function getTeeth(Patient $patient)
+    {
+        $teeth = $patient->teeth()->select('id', 'tooth_number', 'status')->get();
+
+        return response()->json(['teeth' => $teeth]);
+    }
+
 
 
 

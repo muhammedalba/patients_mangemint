@@ -7,6 +7,8 @@ use App\Http\Controllers\ProcedureController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Requests\ProcedureStoreRequest;
+use App\Http\Requests\ProcedureUpdateRequest;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ServiceCategoriesController;
 use App\Http\Controllers\ServicesController;
@@ -70,10 +72,11 @@ Route::middleware(['auth', 'verified', 'role.redirect:admin|doctor'])
 Route::prefix('procedures')->controller(ProcedureController::class)->group(function () {
     Route::get('/', 'index')->name('procedures.index');
     Route::get('create/{patient_id?}', 'create')->name('procedures.create');
-    Route::post('store', 'store')->name('procedures.store');
+    Route::post('store', 'store')->name('procedures.store'); // Updated to use ProcedureStoreRequest implicitly
     Route::get('edit/{procedure}', 'edit')->name('procedures.edit');
     Route::post('update/{procedure}', 'update')->name('procedures.update');
     Route::delete('delete/{procedure}', 'destroy')->name('procedures.destroy');
+    Route::get('get-teeth/{patient}', 'getTeeth')->name('procedures.getTeeth');
 });
 
 // Appointments
@@ -133,6 +136,7 @@ Route::resource('service-categories', ServiceCategoriesController::class)->names
     'update' => 'service-categories.update',
     'destroy' => 'service-categories.destroy',
 ]);
+
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

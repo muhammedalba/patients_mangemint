@@ -117,7 +117,7 @@ export default function Index() {
                     </InertiaLink>
                     <section className="p-6">
                         <DynamicTable
-                            data={[...procedures.data].reverse()}
+                            data={[...procedures.data]}
                             columns={columns}
                         />
                     </section>

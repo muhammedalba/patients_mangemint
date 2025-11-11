@@ -1,27 +1,46 @@
 import LoadingPage from '@/components/LoadingPage';
-import TreatmentsForm from '@/components/ui/TreatmentsForm';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
+import axios from 'axios';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
+
+interface Tooth {
+    id: number;
+    name: string;
+    tooth_number: string;
+}
+
+interface Patient {
+    id: number;
+    name: string;
+}
+
+interface Service {
+    id: number;
+    name: string;
+    price: number;
+}
+
+interface ServiceCategory {
+    id: number;
+    name: string;
+    services: Service[];
+}
 
 export default function CreateProcedure({
     teeth,
     patient_id,
     patients,
-    services,
+    services_category,
 }: {
-    teeth: any[];
+    teeth: Tooth[];
     patient_id?: number;
-    patients: any[];
-    services: any[];
+    patients: Patient[];
+    services_category: ServiceCategory[];
 }) {
-    const handleToothClick = (patient: any) => {
-        console.log(patient);
-        setData('patient_id', patient);
-    };
-    const { data, setData, post, processing, errors, reset } = useForm<{
+    const { data, setData, processing, errors, reset } = useForm<{
         name: string;
         description: string;
         cost: string;
@@ -31,24 +50,53 @@ export default function CreateProcedure({
         name: '',
         description: '',
         cost: '',
-        tooth_id: teeth[0]?.id || '',
-        patient_id: patient_id || '',
+        tooth_id: teeth[0]?.id?.toString() || '',
+        patient_id: patient_id?.toString() || '',
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [filteredTeeth, setFilteredTeeth] = useState(teeth);
 
-    const handleTreatmentSelect = (treatment: {
-        name: string;
-        cost: number;
-    }) => {
-        setData('name', treatment.name);
-        setData('cost', treatment.cost.toString());
+    const handleServiceSelect = (service: { name: string; price: number }) => {
+        console.log('Selected Service:', service); // Debugging log
+        setData('name', service.name);
+        setData('cost', service.price.toString());
+    };
+
+    const handlePatientSelect = async (patientId: string) => {
+        setData('patient_id', patientId);
+        console.log('Selected Patient ID:', patientId); // Debugging log
+
+        try {
+            const response = await axios.get(
+                route('procedures.getTeeth', { patient: patientId }),
+            );
+            console.log('Response:', response.data); // Log the response for debugging
+
+            if (response.data.teeth && Array.isArray(response.data.teeth)) {
+                setFilteredTeeth(response.data.teeth);
+                setData(
+                    'tooth_id',
+                    response.data.teeth[0]?.id?.toString() || '',
+                );
+            } else {
+                console.error('Teeth data is missing or invalid');
+                setFilteredTeeth([]);
+                setData('tooth_id', '');
+            }
+        } catch (error) {
+            console.error('Error fetching teeth:', error);
+            setFilteredTeeth([]);
+            setData('tooth_id', '');
+        }
     };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        console.log(data, 'data');
+
         try {
-            router.post(route('procedures.store', { patient_id }), data, {
+            router.post(route('procedures.store'), data, {
                 onSuccess: () => reset(),
             });
         } catch (error) {
@@ -69,6 +117,34 @@ export default function CreateProcedure({
         },
     ];
     if (isLoading) return <LoadingPage />;
+
+    const patient =
+        patients && patients.length > 0 ? (
+            patients.map((patient) => (
+                <option key={patient.id} value={patient.id}>
+                    {patient.name}
+                </option>
+            ))
+        ) : (
+            <option key="no-patients" value={patients.id}>
+                {' '}
+                {patients.name}{' '}
+            </option>
+        );
+    const tooth =
+        teeth && teeth.length > 0 ? (
+            teeth.map((tooth) => (
+                <option key={tooth.id} value={tooth.id}>
+                    {tooth.tooth_number}
+                </option>
+            ))
+        ) : (
+            <option key="no-teeth" value={teeth.id}>
+                {' '}
+                {teeth.name}{' '}
+            </option>
+        );
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Procedure" />
@@ -78,14 +154,46 @@ export default function CreateProcedure({
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <TreatmentsForm onSelect={handleTreatmentSelect} />
+                    {services_category.map((category) => (
+                        <div key={category.id} className="mb-4">
+                            <label className="block text-right text-gray-700">
+                                اختر خدمة من {category.name}
+                            </label>
+                            <select
+                                title={`اختر خدمة من ${category.name}`}
+                                onChange={(e) => {
+                                    const selectedService =
+                                        category.services.find(
+                                            (service) =>
+                                                service.id ===
+                                                parseInt(e.target.value),
+                                        );
+                                    if (selectedService) {
+                                        handleServiceSelect(selectedService);
+                                    }
+                                }}
+                                className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            >
+                                <option value="" disabled>
+                                    اختر خدمة من {category.name}
+                                </option>
+                                {category.services.map((service) => (
+                                    <option key={service.id} value={service.id}>
+                                        {service.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    ))}
+
                     <div>
                         <label className="mt-4 block text-right text-gray-700">
-                            المعالجة المختارة
+                            اسم الإجراء
                         </label>
                         <input
                             type="text"
-                            name="treatment_name"
+                            name="name"
+                            title="اسم الإجراء"
                             value={data.name}
                             readOnly
                             className="w-full rounded-lg border px-3 py-2"
@@ -99,8 +207,9 @@ export default function CreateProcedure({
                         <input
                             type="number"
                             name="cost"
+                            title="كلفة الإجراء"
                             value={data.cost}
-                            readOnly
+                            onChange={(e) => setData('cost', e.target.value)}
                             className="w-full rounded-lg border px-3 py-2"
                         />
                     </div>
@@ -114,6 +223,7 @@ export default function CreateProcedure({
                         </label>
                         <textarea
                             name="description"
+                            title="وصف الإجراء"
                             value={data.description}
                             onChange={(e) =>
                                 setData('description', e.target.value)
@@ -131,16 +241,16 @@ export default function CreateProcedure({
                     <div>
                         <select
                             name="patient_id"
+                            title="اختر المريض"
                             value={data.patient_id}
-                            onChange={(e) => handleToothClick(e.target.value)}
+                            onChange={(e) =>
+                                handlePatientSelect(e.target.value)
+                            }
                             className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         >
                             <option value="">select patient </option>
-                            {patients?.map((patient) => (
-                                <option key={patient.id} value={patient.id}>
-                                    {patient.name}
-                                </option>
-                            ))}
+
+                            {patient}
                         </select>
                         {errors.patient_id && (
                             <p className="mt-1 text-sm text-red-500">
@@ -148,9 +258,11 @@ export default function CreateProcedure({
                             </p>
                         )}
                     </div>
+
                     <div>
                         <select
                             name="tooth_id"
+                            title="اختر السن"
                             value={data.tooth_id}
                             onChange={(e) =>
                                 setData('tooth_id', e.target.value)
@@ -160,8 +272,8 @@ export default function CreateProcedure({
                             <option value="" disabled>
                                 اختر السن
                             </option>
-                            {teeth?.length > 0 ? (
-                                teeth.map((tooth) => (
+                            {filteredTeeth?.length > 0 ? (
+                                filteredTeeth.map((tooth) => (
                                     <option key={tooth.id} value={tooth.id}>
                                         {tooth.tooth_number}
                                     </option>
@@ -176,6 +288,7 @@ export default function CreateProcedure({
                             </p>
                         )}
                     </div>
+
                     <div className="mt-4 text-center">
                         <button
                             type="submit"
