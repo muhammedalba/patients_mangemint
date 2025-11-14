@@ -17,8 +17,8 @@ class PaymentUpdateRequest extends FormRequest
             'patient_id' => 'required|exists:patients,id',
             'amount' => 'required|numeric',
             'payment_date' => 'required|date',
-            'notes' => 'required|string',
-            'paid_at' => 'required|string',
+            'notes' => 'nullable|string|max:500',
+
         ];
     }
 }

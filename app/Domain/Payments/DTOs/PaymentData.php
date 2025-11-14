@@ -8,7 +8,6 @@ class PaymentData
         public int $patient_id,
         public float $amount,
         public string $payment_date,
-        public ?string $paid_at,
         public ?string $notes
 
     ) {}
@@ -16,9 +15,8 @@ class PaymentData
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['invoice_id'],
+            $data['patient_id'],
             $data['amount'],
-            $data['paid_at']?? null,
             $data['payment_date'],
             $data['notes'] ?? null
 
@@ -31,7 +29,6 @@ class PaymentData
             'patient_id' => $this->patient_id,
             'amount' => $this->amount,
             'payment_date' => $this->payment_date,
-            'paid_at' => $this->paid_at,
             'notes' => $this->notes
         ];
     }

@@ -1,41 +1,47 @@
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog"
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from './ui/button';
 
 interface ConfirmDialogProps {
-  trigger: React.ReactNode
-  message: string
-  onConfirm: () => void
+    children: React.ReactNode;
+    title: string;
+    description: string;
+    onConfirm: () => void;
 }
 
-export default function ConfirmDialog({ trigger, message, onConfirm }: ConfirmDialogProps) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{message}</DialogTitle>
-        </DialogHeader>
-        <DialogFooter className="flex justify-end gap-2">
-          <DialogClose asChild>
-            <button className="px-2 py-1 text-xs bg-gray-200 rounded">Cancel</button>
-          </DialogClose>
-          <DialogClose asChild>
-            <button
-              onClick={onConfirm}
-              className="px-2 py-1 text-xs bg-red-500 text-white rounded"
-            >
-              Confirm
-            </button>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
+export default function ConfirmDialog({
+    children,
+    title,
+    description,
+    onConfirm,
+}: ConfirmDialogProps) {
+    return (
+        <Dialog>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>{title}</DialogTitle>
+                    <DialogDescription>{description}</DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="flex justify-end gap-2">
+                    <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <DialogClose asChild>
+                        <Button onClick={onConfirm} variant="destructive">
+                            Confirm
+                        </Button>
+                    </DialogClose>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
 }

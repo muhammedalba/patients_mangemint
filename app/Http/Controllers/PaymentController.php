@@ -38,9 +38,14 @@ class PaymentController extends Controller
 
     public function edit(Payment $payment)
     {
-        // get all patients
-        $patients = Patient::select('id', 'name')->orderBy('name', 'asc')->get();
-        return Inertia::render('Payments/Edit', ['payment' => $payment, 'Patients' => $patients]);
+        // get  patient by id
+        $patients = Patient::where('id', $payment->patient_id)
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // $patients = Patient::select('id', 'name')->orderBy('name', 'asc')->get();
+        return Inertia::render('Payments/Edit', ['payment' => $payment, 'patients' => $patients]);
     }
 
     public function update(PaymentUpdateRequest $request, Payment $payment)

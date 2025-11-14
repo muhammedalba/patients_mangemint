@@ -13,7 +13,6 @@ class Payment extends Model
         'patient_id',
         'amount',
         'payment_date',
-        'paid_at',
         'notes'
     ];
 
