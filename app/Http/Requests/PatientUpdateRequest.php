@@ -27,14 +27,15 @@ class PatientUpdateRequest extends FormRequest
     {
         $patientToUpdate = $this->route('patient');
 
+
         return [
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'notes' => 'nullable|string|max:500',
-            'birth_date' => 'nullable|date',
-            'gender' => 'nullable|string|in:male,female,other',
-            'marital_status' => 'string|in:single,married,divorced,widowed',
+            'birth_date' => 'required|date',
+            'gender' => 'required|string|in:male,female,other',
+            'marital_status' => 'required|string|in:single,married,divorced,widowed',
             'email' => [
                 'nullable',
                 'email',

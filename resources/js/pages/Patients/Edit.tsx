@@ -5,7 +5,11 @@ import { Head, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
-export default function EditPatient({ patient }: { patient: Patient }) {
+export default function EditPatient({ genders,
+    marital_statuses, patient }) {
+    console.log(genders);
+    console.log(marital_statuses);
+
     const { data, setData, patch, processing, errors } = useForm({
         name: patient.name || '',
         email: patient.email || '',

@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
-// Users / Patients
+// Users
 Route::middleware(['auth', 'verified', 'role.redirect:admin|doctor'])->prefix('users')->controller(UserController::class)->group(function () {
     Route::get('/', 'index')->name('users.index');
     Route::get('create', 'create')->name('users.create');
@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified', 'role.redirect:admin|doctor'])->prefix('u
 });
 
 
-
+// Patients
 
 Route::middleware(['auth', 'verified', 'role.redirect:admin|doctor'])
     ->prefix('patients')
@@ -54,13 +54,12 @@ Route::middleware(['auth', 'verified', 'role.redirect:admin|doctor'])
                 'index'   => 'index',
                 'create'  => 'create',
                 'store'   => 'store',
-                'show'    => 'show',
                 'edit'    => 'edit',
                 'update'  => 'update',
                 'destroy' => 'destroy',
             ]);
 
-        // ✅ route مخصص للتفاصيل
+        // details route
         Route::get('details/{patient}/{tooth?}', [PatientController::class, 'details'])
             ->name('details');
     });
@@ -112,9 +111,9 @@ Route::prefix('payments')->controller(PaymentController::class)->group(function 
     Route::get('/', 'index')->name('payments.index');
     Route::get('create', 'create')->name('payments.create');
     Route::post('store', 'store')->name('payments.store');
-    Route::get('edit/{id}', 'edit')->name('payments.edit');
-    Route::post('update/{id}', 'update')->name('payments.update');
-    Route::delete('delete/{id}', 'destroy')->name('payments.destroy');
+    Route::get('edit/{payment}', 'edit')->name('payments.edit');
+    Route::post('update/{payment}', 'update')->name('payments.update');
+    Route::delete('delete/{payment}', 'destroy')->name('payments.destroy');
 });
 
 // Teeth

@@ -54,10 +54,10 @@ class ProcedureController extends Controller
         $teeth = $toothId ? Tooth::select('tooth_number', 'id')->where('id', $toothId)->get() : [];
 
         // جلب المرضى بأعمدة مختصرة لتقليل الحجم المرسَل للواجهة
-        $patients = $patientId ? Patient::select('id', 'name')->find($patientId) : Patient::select('id', 'name')->get();
+        $patients = $patientId ? Patient::select('id', 'name')->find($patientId) : Patient::select('id', 'name')->orderBy('name', 'asc')->get();
         // get all services
         $services_category = ServiceCategory::with('services:category_id,id,name,price')
-            ->select('id', 'name')
+            ->select('id', 'name')->orderBy('name', 'asc')
             ->get();
 
         return Inertia::render('Procedures/Create', [
@@ -86,7 +86,7 @@ class ProcedureController extends Controller
             ->get();
 
         $services_category = ServiceCategory::with('services:category_id,id,name')
-            ->select('id', 'name')
+            ->select('id', 'name')->orderBy('name', 'asc')
             ->get();
 
         return Inertia::render('Procedures/Edit', [

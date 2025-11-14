@@ -41,6 +41,11 @@ const mainNavItems: NavItem[] = [
         icon: Contact,
     },
     {
+        title: 'payments',
+        href: '/payments',
+        icon: ClipboardPenLine,
+    },
+    {
         title: 'appointments',
         href: '/appointments',
         icon: CalendarCheck,

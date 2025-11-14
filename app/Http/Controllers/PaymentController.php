@@ -4,56 +4,56 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Payment;
-use App\Models\Invoice;
-use Illuminate\Http\Request;
+use App\Models\Patient;
+use App\Domain\Payments\Services\PaymentService;
+use App\Domain\Payments\DTOs\PaymentData;
+use App\Http\Requests\PaymentStoreRequest;
+use App\Http\Requests\PaymentUpdateRequest;
 
 class PaymentController extends Controller
 {
+    public function __construct(private PaymentService $service) {}
+
     public function index()
     {
-        $payments = Payment::with('invoice')->get();
+        $payments = $this->service->getAllPayments();
         return Inertia::render('Payments/Index', ['payments' => $payments]);
     }
 
     public function create()
     {
-        $invoices = Invoice::all();
-        return Inertia::render('Payments/Create', compact('invoices'));
+        // get all patients
+        $patients = Patient::select('id', 'name')->orderBy('name', 'asc')->get();
+        // @dd( $patients);
+        return Inertia::render('Payments/Create',  ['patients' => $patients,]);
     }
 
-    public function store(Request $request)
+    public function store(PaymentStoreRequest $request)
     {
-        $request->validate([
-            'invoice_id' => 'required|exists:invoices,id',
-            'amount' => 'required|numeric',
-            'payment_date' => 'required|date',
-        ]);
+        $data = PaymentData::fromArray($request->validated());
+        $this->service->createPayment($data);
 
-        Payment::create($request->all());
         return redirect()->route('payments.index');
     }
 
     public function edit(Payment $payment)
     {
-        $invoices = Invoice::all();
-        return Inertia::render('Payments/Edit', ['payment' => $payment, 'invoices' => $invoices]);
+        // get all patients
+        $patients = Patient::select('id', 'name')->orderBy('name', 'asc')->get();
+        return Inertia::render('Payments/Edit', ['payment' => $payment, 'Patients' => $patients]);
     }
 
-    public function update(Request $request, Payment $payment)
+    public function update(PaymentUpdateRequest $request, Payment $payment)
     {
-        $request->validate([
-            'invoice_id' => 'required|exists:invoices,id',
-            'amount' => 'required|numeric',
-            'payment_date' => 'required|date',
-        ]);
+        $data = PaymentData::fromArray($request->validated());
+        $this->service->updatePayment($payment, $data);
 
-        $payment->update($request->all());
         return redirect()->route('payments.index');
     }
 
     public function destroy(Payment $payment)
     {
-        $payment->delete();
+        $this->service->deletePayment($payment);
         return redirect()->route('payments.index');
     }
 }

@@ -8,29 +8,21 @@ use App\Http\Requests\PatientUpdateRequest;
 use Inertia\Inertia;
 use App\Models\Patient;
 use App\Models\Service;
+use App\Domain\Patients\Services\PatientService;
+use App\Domain\Patients\DTOs\PatientData;
 
 class PatientController extends Controller
 {
+    public function __construct(private PatientService $service) {}
+
     public function index()
     {
-        $search = request()->query('search');
-
-        $patients = Patient::query()
-            ->select('id', 'name', 'email', 'phone', 'birth_date', 'gender', 'marital_status') // جلب فقط الأعمدة المطلوبة
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%");
-                });
-            })
-            ->orderByDesc('id')
-            ->paginate(10)
-            ->withQueryString(); // يحافظ على قيمة البحث عند التنقل بين الصفحات
+        $filters = request()->only('search');
+        $patients = $this->service->getAllPatients($filters);
 
         return Inertia::render('Patients/Index', [
             'patients' => $patients,
-            'filters' => ['search' => $search],
+            'filters' => $filters,
         ]);
     }
 
@@ -38,7 +30,6 @@ class PatientController extends Controller
 
     public function create()
     {
-        $services = Service::select('id', 'name', 'price')->get();
         return Inertia::render('Patients/Create', [
             'genders' => ['male' => 'Male', 'female' => 'Female', 'other' => 'Other'],
             'marital_statuses' => [
@@ -47,7 +38,6 @@ class PatientController extends Controller
                 'divorced' => 'Divorced',
                 'widowed' => 'Widowed',
             ],
-            'services' => $services,
         ]);
     }
 
@@ -55,9 +45,10 @@ class PatientController extends Controller
     public function store(PatientStoreRequest $request)
     {
         try {
-            $validated = $request->validated();
+            $data = PatientData::fromArray($request->validated());
 
-            Patient::create($validated);
+            $this->service->createPatient($data);
+
             return redirect()
                 ->route('patients.index')
                 ->with('success', __('Patient created successfully.'));
@@ -78,7 +69,6 @@ class PatientController extends Controller
 
     public function edit(Patient $patient)
     {
-        $services = Service::select('id', 'name', 'price')->get();
         return Inertia::render('Patients/Edit', [
             'patient' => [
                 'id' => $patient->id,
@@ -102,7 +92,6 @@ class PatientController extends Controller
                 'divorced' => 'Divorced',
                 'widowed' => 'Widowed',
             ],
-            'services' => $services,
         ]);
     }
 
@@ -110,9 +99,8 @@ class PatientController extends Controller
     public function update(PatientUpdateRequest $request, Patient $patient)
     {
         try {
-            $validated = $request->validated();
-
-            $patient->update($validated);
+            $data = PatientData::fromArray($request->validated());
+            $this->service->updatePatient($patient, $data);
 
             return redirect()
                 ->route('patients.index')
@@ -136,57 +124,9 @@ class PatientController extends Controller
 
     public function details(Patient $patient, $toothId = null)
     {
-        $patient->load('teeth');
+        $patientDetails = $this->service->getPatientDetails($patient, $toothId);
 
-        $toothWithProcedures = null;
-        //
-        $services = Service::select('id', 'name', 'price')->get();
-
-        if ($toothId) {
-            $toothWithProcedures = $patient->teeth()
-                ->where('id', $toothId)
-                ->with('procedures')
-                ->first();
-        }
-
-        return Inertia::render('Patients/Details', [
-            'patient' => [
-                'id' => $patient->id,
-                'name' => $patient->name,
-                'email' => $patient->email,
-                'phone' => $patient->phone,
-                'address' => $patient->address,
-                'notes' => $patient->notes,
-                'birth_date' => $patient->birth_date,
-                'gender' => $patient->gender,
-                'marital_status' => $patient->marital_status,
-                'teeth' => $patient->teeth->map(function ($tooth) {
-                    return [
-                        'id' => $tooth->id,
-                        'tooth_number' => $tooth->tooth_number,
-                        'status' => $tooth->status,
-                        'notes' => $tooth->notes,
-                        'status' => $tooth->status,
-                    ];
-                }),
-            ],
-            'services' => $services,
-            'tooth' => $toothWithProcedures
-                ? [
-                    'id' => $toothWithProcedures->id,
-                    'tooth_number' => $toothWithProcedures->tooth_number,
-                    'procedures' => $toothWithProcedures->procedures
-                    // ->map(function ($procedure) {
-                    //     return [
-                    //         'id' => $procedure->id,
-                    //         'name' => $procedure->name,
-                    //         'cost' => $procedure->cost,
-                    //         'notes' => $procedure->notes,
-                    //     ];
-                    // }),
-                ]
-                : null,
-        ]);
+        return Inertia::render('Patients/Details', $patientDetails);
     }
 
     public function getTeeth(Patient $patient)
@@ -207,7 +147,7 @@ class PatientController extends Controller
     public function destroy(Patient $patient)
     {
         try {
-            $patient->delete();
+            $this->service->deletePatient($patient);
 
             return redirect()
                 ->route('patients.index')

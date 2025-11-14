@@ -4,19 +4,22 @@ import Pagination from '@/components/Pagination';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem, type Patient } from '@/types';
-import { ColumnDef } from '@tanstack/react-table';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { patients, auth, flash, filters } = usePage<{
-        patients: PaginatedData<Patient>;
-        auth: { user: { roles: string[] } };
-        flash: { success?: string; error?: string };
-        filters: { search?: string };
-    }>().props;
+    const { patients, auth, flash, filters, genders, marital_statuses } =
+        usePage<{
+            patients: PaginatedData<Patient>;
+            auth: { user: { roles: string[] } };
+            flash: { success?: string; error?: string };
+            filters: { search?: string };
+        }>().props;
     console.log(patients, 'patients');
+    console.log(genders, 'genders');
+    console.log(marital_statuses, 'marital_statuses');
 
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
@@ -192,7 +195,7 @@ export default function Index() {
                     </div>
                     <section className="p-6">
                         <DynamicTable
-                            data={[...patients.data].reverse()}
+                            data={[...patients.data]}
                             columns={columns}
                         />
                     </section>

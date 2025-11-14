@@ -8,12 +8,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Payment extends Model
 {
     use HasFactory;
-    public function procedure()
-    {
-        return $this->belongsTo(Procedure::class);
-    }
-    // public function invoice()
+
+    protected $fillable = [
+        'patient_id',
+        'amount',
+        'payment_date',
+        'paid_at',
+        'notes'
+    ];
+
+    // public function procedure()
     // {
-    //     return $this->belongsTo(Invoice::class);
+    //     return $this->belongsTo(Procedure::class);
     // }
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
 }

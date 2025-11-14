@@ -7,19 +7,23 @@ import { route } from 'ziggy-js';
 
 interface PatientFormData {
     name: string;
-    email: string;
-    phone: string;
-    notes: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    notes?: string;
     birth_date: string;
     gender: 'male' | 'female' | 'other';
     marital_status: 'single' | 'married' | 'divorced' | 'widowed';
 }
 
-export default function CreatePatient() {
+export default function CreatePatient(
+    genders: any[],
+    marital_statuses: any[],
+) {
     const { data, setData, post, processing, errors, reset } =
         useForm<PatientFormData>({
             name: '',
-            email: 'mm@gmail.com',
+            email: '',
             phone: '',
             address: '',
             notes: '',
@@ -28,10 +32,16 @@ export default function CreatePatient() {
             marital_status: '' as 'single' | 'married' | 'divorced' | 'widowed',
         });
     const [isLoading, setIsLoading] = useState(false);
+    console.log(errors, 'errors');
+    console.log(genders,'genders');
+    console.log(marital_statuses,'marital_statuses');
+
+
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        console.log(data, 'data');
         try {
             post(route('patients.store'), {
                 onSuccess: () => reset(),

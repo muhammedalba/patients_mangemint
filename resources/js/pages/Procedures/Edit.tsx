@@ -25,12 +25,14 @@ export default function EditProcedure({
     const { props } = usePage<{
         flash: { success?: string; error?: string };
     }>();
+    console.log(props, 'props');
 
     const { data, setData, post, processing, errors } = useForm({
         name: procedure.name || '',
         description: procedure.description || '',
         cost: procedure.cost || 0,
         tooth_id: procedure.tooth_id || '',
+        patient_id: procedure.tooth?.patient_id || '',
     });
     console.log(services_category, 'services_category edit');
     console.log(teeth, 'teeth edit');

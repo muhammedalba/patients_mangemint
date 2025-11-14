@@ -30,9 +30,9 @@ class PatientStoreRequest extends FormRequest
             'email' => 'nullable|email|unique:patients,email',
             'address' => 'nullable|string|max:500',
             'notes' => 'nullable|string|max:500',
-            'birth_date' => 'nullable|date',
-            'gender' => 'nullable|in:male,female,other',
-            'marital_status' => 'string|in:single,married,divorced,widowed|max:20',
+            'birth_date' => 'required|date',
+            'gender' => 'required|string|in:male,female,other',
+            'marital_status' => 'required|string|in:single,married,divorced,widowed|max:20',
 
 
 

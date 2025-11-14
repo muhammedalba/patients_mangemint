@@ -38,9 +38,9 @@ class Patient extends Model
         return $this->hasManyThrough(Procedure::class, Tooth::class);
     }
 
-    // public function invoices() {
-    //     return $this->hasMany(Invoice::class);
-    // }
+    public function payment() {
+        return $this->hasMany(Payment::class);
+    }
 
   public function medicalRecord() {
     return $this->hasOne(MedicalRecord::class);

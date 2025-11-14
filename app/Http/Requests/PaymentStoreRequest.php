@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class PaymentStoreRequest extends FormRequest
+{
+      public function authorize(): bool
+      {
+            return true;
+      }
+
+      public function rules(): array
+      {
+            return [
+                  'patient_id' => 'required|exists:patients,id',
+                  'amount' => 'required|numeric',
+                  'payment_date' => 'required|date',
+                  'notes' => 'required|string',
+                  'paid_at' => 'required|string',
+
+            ];
+      }
+}
