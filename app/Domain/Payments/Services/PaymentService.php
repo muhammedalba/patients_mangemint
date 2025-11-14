@@ -5,14 +5,14 @@ namespace App\Domain\Payments\Services;
 use App\Domain\Payments\DTOs\PaymentData;
 use App\Domain\Payments\Repositories\PaymentRepository;
 use App\Models\Payment;
-
+use \Illuminate\Contracts\Pagination\LengthAwarePaginator;
 class PaymentService
 {
       public function __construct(private PaymentRepository $repository) {}
 
-      public function getAllPayments(): \Illuminate\Support\Collection
+      public function getAllPayments(array $filters = []):LengthAwarePaginator
       {
-            return $this->repository->getAllPayments();
+            return $this->repository->getAllPayments($filters);
       }
 
       public function createPayment(PaymentData $data): Payment

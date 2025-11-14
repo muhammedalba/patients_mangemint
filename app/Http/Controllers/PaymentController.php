@@ -16,7 +16,9 @@ class PaymentController extends Controller
 
     public function index()
     {
-        $payments = $this->service->getAllPayments();
+        $filters = request()->only('search');
+
+        $payments = $this->service->getAllPayments($filters);
         return Inertia::render('Payments/Index', ['payments' => $payments]);
     }
 
@@ -24,7 +26,7 @@ class PaymentController extends Controller
     {
         // get all patients
         $patients = Patient::select('id', 'name')->orderBy('name', 'asc')->get();
-        // @dd( $patients);
+
         return Inertia::render('Payments/Create',  ['patients' => $patients,]);
     }
 
@@ -33,7 +35,7 @@ class PaymentController extends Controller
         $data = PaymentData::fromArray($request->validated());
         $this->service->createPayment($data);
 
-        return redirect()->route('payments.index');
+        return redirect()->route('payments.index')->with('success', 'create deleted successfully.');
     }
 
     public function edit(Payment $payment)
@@ -44,7 +46,7 @@ class PaymentController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-        // $patients = Patient::select('id', 'name')->orderBy('name', 'asc')->get();
+
         return Inertia::render('Payments/Edit', ['payment' => $payment, 'patients' => $patients]);
     }
 
@@ -53,12 +55,12 @@ class PaymentController extends Controller
         $data = PaymentData::fromArray($request->validated());
         $this->service->updatePayment($payment, $data);
 
-        return redirect()->route('payments.index');
+        return redirect()->route('payments.index')->with('success', 'Patient Edit successfully.');
     }
 
     public function destroy(Payment $payment)
     {
         $this->service->deletePayment($payment);
-        return redirect()->route('payments.index');
+        return redirect()->route('payments.index')->with('success', 'delete Edit successfully.');
     }
 }
