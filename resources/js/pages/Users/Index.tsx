@@ -1,17 +1,20 @@
 import { DynamicTable } from '@/components/DynamicTable';
+import { IconTooltip } from '@/components/IconToolTip';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, PageProps, PaginatedData } from '@/types';
-import { Head, Link as InertiaLink, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
+import { User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export interface User {
     id: number;
-    name: number;
+    name: string;
     email: string;
     roles: string[];
     phone: string;
@@ -33,15 +36,54 @@ export default function Index({
 
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
-    const columns: ColumnDef<any>[] = [
+    const [showToast, setShowToast] = useState(false);
+    const canDeleteRoles = ['doctor', 'admin'];
+    const userHasDeletePermission = canDeleteRoles.some((role) =>
+        auth.user.roles.includes(role),
+    );
+
+    const columns: ColumnDef<User>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'name', accessorKey: 'name', header: 'الاسم' },
         { id: 'email', accessorKey: 'email', header: 'البريد الإلكتروني' },
-        { id: 'role', accessorKey: 'role', header: 'الدور' },
-        { id: 'phone', accessorKey: 'phone', header: 'الهاتف' },
+        {
+            id: 'roles',
+            accessorKey: 'roles',
+            header: 'الأدوار',
+            cell: ({ row }) => {
+                const roles: string[] = row.original.roles;
+                return <span>{roles.join(', ')}</span>;
+            },
+        },
+        {
+            id: 'phone',
+            header: 'الهاتف',
+            cell: ({ row }) => {
+                const p = row.original;
+                return (
+                    <td className="justify-between gap-1 border px-1 py-1 text-center">
+                        {p.phone && (
+                            <>
+                                <a
+                                    href={`tel:${p.phone}`}
+                                    className="inline-block"
+                                    title="Call"
+                                >
+                                    <IconTooltip label={`${p.phone}`}>
+                                        <i className="material-icons text-xs leading-none font-bold text-green-500">
+                                            phone_enabled
+                                        </i>
+                                    </IconTooltip>
+                                </a>
+                            </>
+                        )}
+                    </td>
+                );
+            },
+        },
         {
             id: 'actions',
-            header: 'Actions',
+            header: 'الإجراءات',
             cell: ({ row }) => {
                 const user = row.original;
                 return (
@@ -80,12 +122,6 @@ export default function Index({
         return () => clearTimeout(handler);
     }, [search]);
 
-    const canDeleteRoles = ['doctor', 'admin'];
-    const userHasDeletePermission = canDeleteRoles.some((role) =>
-        auth.user.roles.includes(role),
-    );
-    const [showToast, setShowToast] = useState(false);
-
     useEffect(() => {
         if (props.flash?.success || props.flash?.error) {
             setShowToast(true);
@@ -100,15 +136,17 @@ export default function Index({
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'users',
+            title: 'المستخدمون',
             href: route('users.index'),
         },
     ];
+
     if (isLoading) return <LoadingPage />;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="uesrs" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <Head title="users" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 text-right">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">المستخدمون</h1>
                     {showToast && (
@@ -116,32 +154,17 @@ export default function Index({
                             {props.flash?.success || props.flash?.error}
                         </div>
                     )}
-                    <div className="mb-4 flex items-center justify-between">
-                        <InertiaLink
-                            href={route('users.create')}
-                            className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
-                        >
-                            <span className="flex items-center gap-1">
-                                <i className="material-icons text-lg">add</i>
-                                إضافة مستخدم
-                            </span>
-                        </InertiaLink>
 
-                        <div className="relative w-full max-w-md">
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search..."
-                                className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            />
-                            <span className="absolute top-2.5 left-3 text-gray-400">
-                                <i className="material-icons text-lg">search</i>
-                            </span>
-                        </div>
-                    </div>
+                    <SearchBar
+                        value={search}
+                        onChange={setSearch}
+                        showSearch={true}
+                        showButton={true}
+                        buttonLabel="إضافة مستخدم"
+                        buttonRoute="users.create"
+                    />
 
-                    <section className="p-6">
+                    <section className="p-4">
                         <DynamicTable
                             data={[...users.data]}
                             columns={columns}

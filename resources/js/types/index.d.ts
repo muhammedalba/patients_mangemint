@@ -1,5 +1,3 @@
-import { type PageProps  } from '@inertiajs/core';
-
 export type User = {
     id: number;
     name: string;
@@ -50,18 +48,20 @@ export type Appointment = {
     times: string[];
 };
 
-export type PageProps<T extends Record<string, unknown> = Record<string, unknown>> = T & {
+export type PageProps<
+    T extends Record<string, unknown> = Record<string, unknown>,
+> = T & {
     auth: {
         user: User;
     };
     ziggy: {
         location: string;
         query: Record<string, string>;
-    }
+    };
     flash: {
         success?: string;
         error?: string;
-    }
+    };
 };
 
 export type PaginatedData<T> = {

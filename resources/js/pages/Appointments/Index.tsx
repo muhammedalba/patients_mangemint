@@ -1,11 +1,12 @@
 import { DynamicTable } from '@/components/DynamicTable';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { Appointment, BreadcrumbItem, PageProps, PaginatedData } from '@/types';
-import { Head, Link as InertiaLink, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
@@ -83,24 +84,24 @@ export default function Index({
             <Head title="Appointment" />
             <div className="flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <h1 className="mb-4 text-2xl font-bold">المواعيد</h1>
-                <InertiaLink
-                    href={route('appointments.create')}
-                    className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
-                >
-                    <span className="flex items-center gap-1">
-                        <i className="material-icons text-lg">add</i>
-                        إضافة موعد
-                    </span>
-                </InertiaLink>
+
+                <SearchBar
+                    value={''}
+                    onChange={() => {}}
+                    showSearch={true}
+                    showButton={true}
+                    buttonLabel="إضافة موعد"
+                    buttonRoute="appointments.create"
+                />
             </div>
-            <div className="overflow-x-auto">
-                <section className="p-6">
-                    <DynamicTable
-                        data={[...appointments.data].reverse()}
-                        columns={columns}
-                    />
-                </section>
-            </div>
+
+            <section className="p-4">
+                <DynamicTable
+                    data={[...appointments.data].reverse()}
+                    columns={columns}
+                />
+            </section>
+
             <Pagination links={appointments.links} />
         </AppLayout>
     );

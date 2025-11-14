@@ -1,6 +1,6 @@
 import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, Service } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { FormEvent, useState } from 'react';
@@ -40,19 +40,30 @@ export default function CreateProcedure({
     patients: Patient[];
     services_category: ServiceCategory[];
 }) {
-    const { data, setData, processing, errors, reset } = useForm<{
+
+    const handleToothClick = (patient: any) => {
+        console.log(patient);
+        setData('patient_id', patient);
+    };
+
+       console.log(services_category,'services');
+    const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         description: string;
         cost: string;
         tooth_id: string;
         patient_id: string;
+        category: string;
     }>({
         name: '',
         description: '',
         cost: '',
-        tooth_id: teeth[0]?.id?.toString() || '',
-        patient_id: patient_id?.toString() || '',
+        tooth_id: teeth[0]?.id || '',
+        patient_id: patient_id || '',
+        category: '',
     });
+
+    const [selectedTreatment, setSelectedTreatment] = useState<Service | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [filteredTeeth, setFilteredTeeth] = useState(teeth);
 
@@ -88,6 +99,11 @@ export default function CreateProcedure({
             setFilteredTeeth([]);
             setData('tooth_id', '');
         }
+
+        const handleTreatmentSelect = (treatment: Service) => {
+        setSelectedTreatment(treatment);
+        setData('name', treatment.name);
+        setData('cost', treatment.price.toString());
     };
 
     const handleSubmit = async (e: FormEvent) => {
@@ -145,165 +161,164 @@ export default function CreateProcedure({
             </option>
         );
 
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Procedure" />
-            <div className="mx-auto mt-4 w-3xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
-                    إضافة إجراء جديد
-                </h1>
+ return (
+  <AppLayout breadcrumbs={breadcrumbs}>
+    <Head title="Create Procedure" />
+    <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
+      <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
+        إضافة إجراء جديد
+      </h1>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {services_category.map((category) => (
-                        <div key={category.id} className="mb-4">
-                            <label className="block text-right text-gray-700">
-                                اختر خدمة من {category.name}
-                            </label>
-                            <select
-                                title={`اختر خدمة من ${category.name}`}
-                                onChange={(e) => {
-                                    const selectedService =
-                                        category.services.find(
-                                            (service) =>
-                                                service.id ===
-                                                parseInt(e.target.value),
-                                        );
-                                    if (selectedService) {
-                                        handleServiceSelect(selectedService);
-                                    }
-                                }}
-                                className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                            >
-                                <option value="" disabled>
-                                    اختر خدمة من {category.name}
-                                </option>
-                                {category.services.map((service) => (
-                                    <option key={service.id} value={service.id}>
-                                        {service.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    ))}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {services_category.map((category) => (
+          <div key={category.id} className="mb-4">
+            <label className="block text-right text-gray-700">
+              اختر خدمة من {category.name}
+            </label>
+            <select
+              title={`اختر خدمة من ${category.name}`}
+              onChange={(e) => {
+                const selectedService = category.services.find(
+                  (service) => service.id === parseInt(e.target.value),
+                );
+                if (selectedService) {
+                  handleServiceSelect(selectedService);
+                }
+              }}
+              className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="" disabled>
+                اختر خدمة من {category.name}
+              </option>
+              {category.services.map((service) => (
+                <option key={service.id} value={service.id}>
+                  {service.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ))}
 
-                    <div>
-                        <label className="mt-4 block text-right text-gray-700">
-                            اسم الإجراء
-                        </label>
-                        <input
-                            type="text"
-                            name="name"
-                            title="اسم الإجراء"
-                            value={data.name}
-                            readOnly
-                            className="w-full rounded-lg border px-3 py-2"
-                        />
-                    </div>
+        <div>
+          <label className="mt-4 block text-right text-gray-700">
+            اسم الإجراء
+          </label>
+          <input
+            type="text"
+            name="name"
+            title="اسم الإجراء"
+            value={data.name}
+            readOnly
+            className="w-full rounded-lg border px-3 py-2"
+          />
+        </div>
 
-                    <div>
-                        <label className="mt-4 block text-right text-gray-700">
-                            كلفة الإجراء
-                        </label>
-                        <input
-                            type="number"
-                            name="cost"
-                            title="كلفة الإجراء"
-                            value={data.cost}
-                            onChange={(e) => setData('cost', e.target.value)}
-                            className="w-full rounded-lg border px-3 py-2"
-                        />
-                    </div>
+        {selectedTreatment && (
+          <div className="mt-6">
+            <label className="block text-right text-gray-700">
+              المعالجة المختارة
+            </label>
+            <input
+              type="text"
+              name="treatment_name"
+              value={selectedTreatment.name}
+              readOnly
+              className="w-full rounded-lg border px-3 py-2"
+            />
+          </div>
+        )}
 
-                    <div>
-                        <label
-                            htmlFor="name"
-                            className="mt-4 block text-right text-gray-700"
-                        >
-                            الوصف
-                        </label>
-                        <textarea
-                            name="description"
-                            title="وصف الإجراء"
-                            value={data.description}
-                            onChange={(e) =>
-                                setData('description', e.target.value)
-                            }
-                            placeholder="وصف الإجراء"
-                            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                        {errors.description && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.description}
-                            </p>
-                        )}
-                    </div>
+        <div>
+          <label className="mt-4 block text-right text-gray-700">
+            كلفة الإجراء
+          </label>
+          <input
+            type="number"
+            name="cost"
+            title="كلفة الإجراء"
+            value={data.cost}
+            onChange={(e) => setData('cost', e.target.value)}
+            className="w-full rounded-lg border px-3 py-2"
+          />
+        </div>
 
-                    <div>
-                        <select
-                            name="patient_id"
-                            title="اختر المريض"
-                            value={data.patient_id}
-                            onChange={(e) =>
-                                handlePatientSelect(e.target.value)
-                            }
-                            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        >
-                            <option value="">select patient </option>
+        <div>
+          <label
+            htmlFor="description"
+            className="mt-4 block text-right text-gray-700"
+          >
+            الوصف
+          </label>
+          <textarea
+            name="description"
+            title="وصف الإجراء"
+            value={data.description}
+            onChange={(e) => setData('description', e.target.value)}
+            placeholder="وصف الإجراء"
+            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+          {errors.description && (
+            <p className="mt-1 text-sm text-red-500">{errors.description}</p>
+          )}
+        </div>
 
-                            {patient}
-                        </select>
-                        {errors.patient_id && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.patient_id}
-                            </p>
-                        )}
-                    </div>
+        <div>
+          <select
+            name="patient_id"
+            title="اختر المريض"
+            value={data.patient_id}
+            onChange={(e) => handlePatientSelect(e.target.value)}
+            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+            <option value="">select patient</option>
+            {patient}
+          </select>
+          {errors.patient_id && (
+            <p className="mt-1 text-sm text-red-500">{errors.patient_id}</p>
+          )}
+        </div>
 
-                    <div>
-                        <select
-                            name="tooth_id"
-                            title="اختر السن"
-                            value={data.tooth_id}
-                            onChange={(e) =>
-                                setData('tooth_id', e.target.value)
-                            }
-                            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        >
-                            <option value="" disabled>
-                                اختر السن
-                            </option>
-                            {filteredTeeth?.length > 0 ? (
-                                filteredTeeth.map((tooth) => (
-                                    <option key={tooth.id} value={tooth.id}>
-                                        {tooth.tooth_number}
-                                    </option>
-                                ))
-                            ) : (
-                                <option disabled>لا توجد أسنان متاحة</option>
-                            )}
-                        </select>
-                        {errors.tooth_id && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.tooth_id}
-                            </p>
-                        )}
-                    </div>
+        <div>
+          <select
+            name="tooth_id"
+            title="اختر السن"
+            value={data.tooth_id}
+            onChange={(e) => setData('tooth_id', e.target.value)}
+            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+            <option value="" disabled>
+              اختر السن
+            </option>
+            {filteredTeeth?.length > 0 ? (
+              filteredTeeth.map((tooth) => (
+                <option key={tooth.id} value={tooth.id}>
+                  {tooth.tooth_number}
+                </option>
+              ))
+            ) : (
+              <option disabled>لا توجد أسنان متاحة</option>
+            )}
+          </select>
+          {errors.tooth_id && (
+            <p className="mt-1 text-sm text-red-500">{errors.tooth_id}</p>
+          )}
+        </div>
 
-                    <div className="mt-4 text-center">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className={`rounded-lg px-6 py-2 font-semibold text-white transition-all duration-200 ${
-                                processing
-                                    ? 'cursor-not-allowed bg-blue-400'
-                                    : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
-                        >
-                            {processing ? 'جارٍ الحفظ...' : 'حفظ الإجراء'}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </AppLayout>
-    );
-}
+        <div className="mt-4 text-center">
+          <button
+            type="submit"
+            disabled={processing}
+            className={`rounded-lg px-6 py-2 font-semibold text-white transition-all duration-200 ${
+              processing
+                ? 'cursor-not-allowed bg-blue-400'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {processing ? 'جارٍ الحفظ...' : 'حفظ الإجراء'}
+          </button>
+        </div>
+      </form>
+    </div>
+  </AppLayout>
+);
+    }}

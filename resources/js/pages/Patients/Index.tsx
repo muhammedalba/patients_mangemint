@@ -1,10 +1,12 @@
 import { DynamicTable } from '@/components/DynamicTable';
+import { IconTooltip } from '@/components/IconToolTip';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem, type Patient } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -40,6 +42,8 @@ export default function Index() {
     };
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
+    const getAgeFromBirthDate = (birthDate: string): number =>
+        new Date().getFullYear() - new Date(birthDate).getFullYear();
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -58,16 +62,9 @@ export default function Index() {
         return () => clearTimeout(handler);
     }, [search]);
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'Patients',
-            href: route('patients.index'),
-        },
-    ];
-
-    const columns: ColumnDef<any>[] = [
+    const columns: ColumnDef<Patient>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
-        { id: 'name', accessorKey: 'name', header: 'Full Name' },
+        { id: 'name', accessorKey: 'name', header: 'الاسم الكامل' },
         {
             id: 'age',
             header: 'Age',
@@ -82,7 +79,7 @@ export default function Index() {
         },
         {
             id: 'contact',
-            header: 'Contact',
+            header: 'التواصل',
             cell: ({ row }) => {
                 const p = row.original;
                 return (
@@ -94,18 +91,22 @@ export default function Index() {
                                     className="inline-block"
                                     title="Call"
                                 >
-                                    <i className="material-icons text-xs leading-none font-bold text-gray-700">
+                                    <IconTooltip label={`${p.phone}`}>
+                                        <i className="material-icons text-xs leading-none font-bold text-gray-700">
                                         phone_enabled
                                     </i>
+                                    </IconTooltip>
                                 </a>
                                 <a
                                     href={`https://wa.me/${p.phone}`}
-                                    className="ml-4 inline-block"
+                                    className="mr-2 inline-block"
                                     title="WhatsApp"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    <i className="fab fa-whatsapp text-2xl leading-none text-green-500"></i>
+                                    <IconTooltip label={`${p.phone}`}>
+                                        <i className="fab fa-whatsapp text-2xl leading-none text-green-500"></i>
+                                    </IconTooltip>
                                 </a>
                             </>
                         )}
@@ -113,27 +114,29 @@ export default function Index() {
                         {p.email && (
                             <a
                                 href={`mailto:${p.email}`}
-                                className="ml-4 inline-block"
+                                className="mr-2 inline-block"
                                 title="Email"
                             >
-                                <i className="material-icons text-xs leading-none font-bold text-blue-500">
-                                    email
-                                </i>
+                                <IconTooltip label={`${p.email}`}>
+                                    <i className="material-icons text-xs leading-none font-bold text-blue-500">
+                                        email
+                                    </i>
+                                </IconTooltip>
                             </a>
                         )}
                     </td>
                 );
             },
         },
-        { id: 'gender', accessorKey: 'gender', header: 'Gender' },
+        { id: 'gender', accessorKey: 'gender', header: 'الجنس' },
         {
             id: 'marital_status',
             accessorKey: 'marital_status',
-            header: 'Marital status',
+            header: 'الحالة الاجتماعية',
         },
         {
             id: 'actions',
-            header: 'Actions',
+            header: 'الإجراءات',
             cell: ({ row }) => {
                 const patient = row.original;
                 return (
@@ -155,13 +158,17 @@ export default function Index() {
         },
     ];
 
-    const getAgeFromBirthDate = (birthDate: string): number =>
-        new Date().getFullYear() - new Date(birthDate).getFullYear();
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'المرضى',
+            href: route('patients.index'),
+        },
+    ];
 
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="patients" />
+            <Head title="المرضى" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">المرضى</h1>
@@ -170,30 +177,16 @@ export default function Index() {
                             {flash?.success || flash?.error}
                         </div>
                     )}
-                    <div className="mb-4 flex items-center justify-between">
-                        <Link
-                            href={route('patients.create')}
-                            className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
-                        >
-                            <span className="flex items-center gap-1">
-                                <i className="material-icons text-lg">add</i>
-                                إضافة مريض
-                            </span>
-                        </Link>
-                        <div className="relative w-full max-w-md">
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search..."
-                                className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            />
-                            <span className="absolute top-2.5 left-3 text-gray-400">
-                                <i className="material-icons text-lg">search</i>
-                            </span>
-                        </div>
-                    </div>
-                    <section className="p-6">
+
+                    <SearchBar
+                        value={search}
+                        onChange={setSearch}
+                        showSearch={true}
+                        showButton={true}
+                        buttonLabel="إضافة مريض"
+                        buttonRoute="patients.create"
+                    />
+                    <section className="p-4">
                         <DynamicTable
                             data={[...patients.data]}
                             columns={columns}

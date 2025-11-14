@@ -1,10 +1,11 @@
 import { DynamicTable } from '@/components/DynamicTable';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem } from '@/types';
-import { Link as InertiaLink, router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -35,8 +36,8 @@ export default function Index() {
         auth.user.roles.includes(role),
     );
     const [showToast, setShowToast] = useState(false);
-    const [isLoading, setISLoading] = useState(false);
-    const columns: ColumnDef<any>[] = [
+    const [isLoading, setIsLoading] = useState(false);
+    const columns: ColumnDef<Procedure>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'patient_name', accessorKey: 'patient', header: 'اسم المريض' },
         { id: 'name', accessorKey: 'name', header: 'اسم المعالجة' },
@@ -48,9 +49,7 @@ export default function Index() {
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <span className="border px-2 py-1">
-                        {p.tooth_number}
-                    </span>
+                    <span className="border px-2 py-1">{p.tooth_number}</span>
                 );
             },
         },
@@ -76,6 +75,10 @@ export default function Index() {
             },
         },
     ];
+    const handleDelete = (id: number): void => {
+        router.delete(route('procedures.destroy', id));
+    };
+
     useEffect(() => {
         if (props.flash?.success) {
             setShowToast(true);
@@ -84,13 +87,9 @@ export default function Index() {
         }
     }, [props.flash]);
 
-    const handleDelete = (id: number): void => {
-        router.delete(route('procedures.destroy', id));
-    };
-
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Procedures',
+            title: 'المعالجات',
             href: route('procedures.index'),
         },
     ];
@@ -100,22 +99,21 @@ export default function Index() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
-                    <h1 className="mb-4 text-2xl font-bold">الإجراءات</h1>
+                    <h1 className="mb-4 text-2xl font-bold">المعالجات</h1>
                     {showToast && (
                         <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
                             {props.flash?.success || props.flash?.error}
                         </div>
                     )}
-                    <InertiaLink
-                        href={route('procedures.create')}
-                        className="mb-4 inline-block rounded bg-blue-500 px-4 py-2 text-white"
-                    >
-                        <span className="flex items-center gap-1">
-                            <i className="material-icons text-lg">add</i>
-                            إضافة إجراء
-                        </span>
-                    </InertiaLink>
-                    <section className="p-6">
+                    <SearchBar
+                        value={''}
+                        onChange={() => {}}
+                        showSearch={false}
+                        showButton={true}
+                        buttonLabel="إضافة معالجة"
+                        buttonRoute="procedures.create"
+                    />
+                    <section className="p-4">
                         <DynamicTable
                             data={[...procedures.data]}
                             columns={columns}

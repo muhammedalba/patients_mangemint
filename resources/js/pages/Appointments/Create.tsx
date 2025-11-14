@@ -1,13 +1,8 @@
+import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
+import { FormSelect } from '@/components/FormSelect';
 import LoadingPage from '@/components/LoadingPage';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { PageProps, Patient, Procedure, User } from '@/types';
 import { Link, useForm } from '@inertiajs/react';
@@ -54,7 +49,7 @@ export default function Create({
         status: 'scheduled',
     });
     const [isLoading, setIsLoading] = useState(false);
-console.log(procedures,'procedures');
+    console.log(procedures, 'procedures');
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedOptions = Array.from(e.target.selectedOptions).map(
@@ -83,202 +78,90 @@ console.log(procedures,'procedures');
                 </h1>
                 <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div>
-                            <Label
-                                htmlFor="patient_id"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                اسم المريض
-                            </Label>
-                            <Select
-                                onValueChange={(value) =>
-                                    setData('patient_id', value)
-                                }
-                                value={data.patient_id}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="اختر اسم المريض" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {patients.map((patient) => (
-                                        <SelectItem
-                                            key={patient.id}
-                                            value={String(patient.id)}
-                                        >
-                                            {patient.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.patient_id && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.patient_id}
-                                </p>
-                            )}
-                        </div>
+                        <FormSelect
+                            label="اسم المريض"
+                            name="patient_id"
+                            value={data.patient_id}
+                            onChange={(val: string) =>
+                                setData('patient_id', val)
+                            }
+                            options={patients.map((patient) => ({
+                                value: String(patient.id),
+                                label: patient.name,
+                            }))}
+                            error={errors.patient_id}
+                        />
+
+                        <FormSelect
+                            label="اسم الطبيب"
+                            name="user_id"
+                            value={data.user_id}
+                            onChange={(val: string) => setData('user_id', val)}
+                            options={doctors.map((doctor) => ({
+                                value: String(doctor.id),
+                                label: doctor.name,
+                            }))}
+                            error={errors.user_id}
+                        />
+
+                        <FormSelect
+                            label="اسم المعالجة"
+                            name="procedure_id"
+                            value={data.procedure_id}
+                            onChange={(val: string) =>
+                                setData('procedure_id', val)
+                            }
+                            options={procedures.map((procedure) => ({
+                                value: String(procedure.id),
+                                label: procedure.name,
+                            }))}
+                            error={errors.procedure_id}
+                        />
+
+                        <FormInput
+                            label="تاريخ الموعد"
+                            name="appointment_date"
+                            type="date"
+                            value={data.appointment_date}
+                            onChange={(e) =>
+                                setData('appointment_date', e.target.value)
+                            }
+                            error={errors.appointment_date}
+                        />
+
+                        <FormSelect
+                            label="توقيت الموعد"
+                            name="times"
+                            value={data.times}
+                            onChange={(val) => setData('times', val)}
+                            options={timeSlots.map((slot) => ({
+                                value: slot.value,
+                                label: slot.display,
+                            }))}
+                            error={errors.times}
+                            multiple
+                        />
+
+                        <FormSelect
+                            label="حالة الموعد"
+                            name="status"
+                            value={data.status}
+                            onChange={(val: string) => setData('status', val)}
+                            options={[
+                                { value: 'scheduled', label: 'Scheduled' },
+                                { value: 'completed', label: 'Completed' },
+                                { value: 'canceled', label: 'Canceled' },
+                            ]}
+                            error={errors.status}
+                        />
 
                         <div>
-                            <Label
-                                htmlFor="user_id"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                اسم الطبيب
-                            </Label>
-                            <Select
-                                onValueChange={(value) =>
-                                    setData('user_id', value)
-                                }
-                                value={data.user_id}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="اختر اسم الطبيب" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {doctors.map((doctor) => (
-                                        <SelectItem
-                                            key={doctor.id}
-                                            value={String(doctor.id)}
-                                        >
-                                            {doctor.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.user_id && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.user_id}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor="procedure_id"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                المعالجة
-                            </Label>
-                            <Select
-                                onValueChange={(value) =>
-                                    setData('procedure_id', value)
-                                }
-                                value={data.procedure_id}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a procedure" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {procedures.map((procedure) => (
-                                        <SelectItem
-                                            key={procedure.id}
-                                            value={String(procedure.id)}
-                                        >
-                                            {procedure.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.procedure_id && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.procedure_id}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="space-y-1">
                             <label
-                                htmlFor="appointment_date"
-                                className="block text-sm font-medium text-gray-800"
-                            >
-                                تاريخ الموعد
-                            </label>
-                            <input
-                                id="appointment_date"
-                                name="appointment_date"
-                                type="date"
-                                value={data.appointment_date}
-                                onChange={(e) =>
-                                    setData('appointment_date', e.target.value)
-                                }
-                                placeholder="Appointment date"
-                                className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            />
-                            {errors.appointment_date && (
-                                <p className="text-xs text-red-500">
-                                    {errors.appointment_date}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor="times"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                توقيت الموعد
-                            </Label>
-                            <select
-                                id="times"
-                                multiple
-                                value={data.times}
-                                onChange={handleTimeChange}
-                                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            >
-                                {timeSlots.map((slot) => (
-                                    <option key={slot.value} value={slot.value}>
-                                        {slot.display}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.times && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.times}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
-                                htmlFor="status"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                حالة الموعد
-                            </Label>
-                            <Select
-                                onValueChange={(value) =>
-                                    setData('status', value)
-                                }
-                                value={data.status}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="scheduled">
-                                        Scheduled
-                                    </SelectItem>
-                                    <SelectItem value="completed">
-                                        Completed
-                                    </SelectItem>
-                                    <SelectItem value="canceled">
-                                        Canceled
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            {errors.status && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.status}
-                                </p>
-                            )}
-                        </div>
-
-                        <div>
-                            <Label
                                 htmlFor="notes"
-                                className="mb-1 block text-sm font-medium text-gray-700"
+                                className="mb-2 block text-gray-700"
                             >
-                                ملاحظات
-                            </Label>
+                                الملاحظات
+                            </label>
                             <textarea
                                 name="notes"
                                 placeholder="ملاحظات"
@@ -297,33 +180,17 @@ console.log(procedures,'procedures');
                         </div>
 
                         <div className="flex items-center justify-end space-x-2">
-                            <Button
-                                variant="outline"
-                                asChild
-                                className={`rounded-lg px-6 py-2 font-semibold transition-all duration-200 ${
-                                    processing
-                                        ? 'cursor-not-allowed bg-white'
-                                        : 'bg-gray-200 hover:bg-gray-200'
-                                }`}
+                            <Link
+                                href={route('appointments.index')}
+                                className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
                             >
-                                <Link
-                                    href={route('appointments.index')}
-                                    className="text-gray-700"
-                                >
-                                    إنهاء
-                                </Link>
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={processing}
-                                className={`rounded-lg px-6 py-2 font-semibold text-white transition-all duration-200 ${
-                                    processing
-                                        ? 'cursor-not-allowed bg-blue-400'
-                                        : 'bg-blue-600 hover:bg-blue-700'
-                                }`}
-                            >
-                                {processing ? 'جارِ الحفظ ... ' : 'حفظ'}
-                            </Button>
+                                إنهاء
+                            </Link>
+                            <FormButton
+                                processing={processing}
+                                label="حفظ"
+                                loadingLabel="جارِ الحفظ ..."
+                            />
                         </div>
                     </div>
                 </form>
