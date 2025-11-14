@@ -31,16 +31,18 @@ export default function Index({
     auth: { user: { roles: string[] } };
 }>) {
     console.log(appointments, 'appointments.data');
+    console.log(auth, 'auth');
+
     const [isLoading, setIsLoading] = useState(false);
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
     const columns: ColumnDef<any>[] = [
-        { id: 'patient', accessorKey: 'patient', header: 'Patient' },
-        { id: 'doctor', accessorKey: 'doctor', header: 'Doctor' },
-        { id: 'procedure', accessorKey: 'procedure', header: 'Procedure' },
-        { id: 'date', accessorKey: 'date', header: 'Date' },
+        { id: 'patient', accessorKey: 'patient.name', header: 'Patient' },
+        { id: 'doctor', accessorKey: 'doctor.name', header: 'Doctor' },
+        { id: 'procedure', accessorKey: 'procedure.name', header: 'Procedure' },
+        { id: 'appointment_date', accessorKey: 'appointment_date', header: 'appointment_date' },
         { id: 'time', accessorKey: 'time', header: 'Time' },
         { id: 'status', accessorKey: 'status', header: 'Status' },
         {
@@ -96,7 +98,7 @@ export default function Index({
             <div className="overflow-x-auto">
                 <section className="p-6">
                     <DynamicTable
-                        data={[...appointments.data].reverse()}
+                        data={[...appointments.data]}
                         columns={columns}
                     />
                 </section>

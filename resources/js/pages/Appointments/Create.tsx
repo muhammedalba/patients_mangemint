@@ -54,7 +54,8 @@ export default function Create({
         status: 'scheduled',
     });
     const [isLoading, setIsLoading] = useState(false);
-console.log(procedures,'procedures');
+    console.log(procedures, 'procedures');
+    console.log(doctors, 'doctors');
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedOptions = Array.from(e.target.selectedOptions).map(
@@ -66,6 +67,8 @@ console.log(procedures,'procedures');
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        console.log(data,'data');
+
         try {
             post(route('appointments.store'));
         } catch (error) {

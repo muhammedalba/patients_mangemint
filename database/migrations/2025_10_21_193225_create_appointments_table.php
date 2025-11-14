@@ -12,7 +12,8 @@ return new class extends Migration {
             $table->foreignId('procedure_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->date('appointment_date');
-            $table->time('times')->nullable();
+            
+            $table->json('times')->nullable();
             $table->enum('status', ['scheduled', 'completed', 'canceled'])->default('scheduled');
             $table->text('notes')->nullable();
             $table->timestamps();
