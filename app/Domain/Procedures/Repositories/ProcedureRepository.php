@@ -47,7 +47,7 @@ class ProcedureRepository
                         ->orWhere('description', 'like', "%{$search}%")
                         ->orWhereHas('tooth.patient', fn($q) => $q->where('name', 'like', "%{$search}%"))
                 )
-                ->orderByDesc('updated_at')
+                ->latest('updated_at')
                 ->paginate($perPage)
                 ->withQueryString();
         });

@@ -25,7 +25,7 @@ class PaymentController extends Controller
     public function create()
     {
         // get all patients
-        $patients = Patient::select('id', 'name')->orderBy('name', 'asc')->get();
+        $patients = Patient::select('id', 'name')->latest('name')->get();
 
         return Inertia::render('Payments/Create',  ['patients' => $patients,]);
     }
@@ -43,7 +43,7 @@ class PaymentController extends Controller
         // get  patient by id
         $patients = Patient::where('id', $payment->patient_id)
             ->select('id', 'name')
-            ->orderBy('name', 'asc')
+            ->latest('name')
             ->get();
 
 

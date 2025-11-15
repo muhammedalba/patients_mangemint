@@ -44,8 +44,8 @@ class MedicalRecordController extends Controller
      */
     public function create(): Response
     {
-        $patients = Patient::select('id', 'name')->orderBy('name', 'asc')->get();
-        $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->select('id', 'name')->orderBy('name', 'asc')->get();
+        $patients = Patient::select('id', 'name')->latest('updated_at')->get();
+        $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->select('id', 'name')->latest('name')->get();
         return Inertia::render('MedicalRecords/Create', [
             'patients' => $patients,
             'doctors' => $doctors,

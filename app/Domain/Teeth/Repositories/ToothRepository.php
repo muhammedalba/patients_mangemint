@@ -41,7 +41,7 @@ class ToothRepository
                         ->orWhereHas('patient', fn($q) => $q->where('name', 'like', "%{$search}%"))
                     ;
                 })
-                ->orderByDesc('updated_at')
+                ->latest('updated_at')
                 ->paginate($perPage)
                 ->withQueryString();
             return $paginator;

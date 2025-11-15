@@ -18,9 +18,7 @@ use Inertia\Response;
 
 class AppointmentController extends Controller
 {
-    public function __construct(private AppointmentService $service)
-    {
-    }
+    public function __construct(private AppointmentService $service) {}
 
     /**
      * Display a listing of the resource.
@@ -39,13 +37,13 @@ class AppointmentController extends Controller
      */
     public function create(): Response
     {
-         $services_category = ServiceCategory::with('services:category_id,id,name')
-            ->select('id', 'name')->orderBy('name', 'asc')
+        $services_category = ServiceCategory::with('services:category_id,id,name')
+            ->select('id', 'name')->latest('name')
             ->get();
         return Inertia::render('Appointments/Create', [
             'patients' => Patient::all(['id', 'name']),
             'doctors' => User::role('doctor')->get(['id', 'name']), // Assuming you have a 'doctor' role
-            'procedures' => $services_category ,
+            'services' => $services_category,
         ]);
     }
 
@@ -76,11 +74,20 @@ class AppointmentController extends Controller
      */
     public function edit(Appointment $appointment): Response
     {
+        $services_category = ServiceCategory::with('services:category_id,id,name')
+            ->select('id', 'name')->latest('name')
+            ->get();
+            // get patients
+        $patients = Patient::select('id', 'name')
+                ->latest('name')
+                ->get();
+
+
         return Inertia::render('Appointments/Edit', [
             'appointment' => $appointment,
-            'patients' => Patient::all(['id', 'name']),
+            'patients' => $patients,
             'doctors' => User::role('doctor')->get(['id', 'name']), // Assuming you have a 'doctor' role
-            'procedures' => Procedure::all(['id', 'name', 'cost', 'duration_minutes']),
+            'services' => $services_category
         ]);
     }
 

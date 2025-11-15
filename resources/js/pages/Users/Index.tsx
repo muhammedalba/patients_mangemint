@@ -28,8 +28,8 @@ export default function Index({
     const { props } = usePage<{
         flash: { success?: string; error?: string };
     }>();
-    console.log(props.flash,'props');
-// console.log(users,'users');
+    console.log(props.flash, 'props');
+    console.log(users, 'users');
 
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +37,7 @@ export default function Index({
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'name', accessorKey: 'name', header: 'الاسم' },
         { id: 'email', accessorKey: 'email', header: 'البريد الإلكتروني' },
-        { id: 'role', accessorKey: 'role', header: 'الدور' },
+        { id: 'roles', accessorKey: 'roles', header: 'الدور' },
         { id: 'phone', accessorKey: 'phone', header: 'الهاتف' },
         {
             id: 'actions',

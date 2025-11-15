@@ -40,7 +40,7 @@ class ServiceCategoryRepository
                     fn($q) => $q->where('name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%")
                 )
-                ->orderByDesc('updated_at')
+                ->latest('updated_at')
                 ->paginate($perPage)
                 ->withQueryString();
         });

@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Appointment, BreadcrumbItem, PageProps, PaginatedData } from '@/types';
 import { Head, Link as InertiaLink, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 const StatusBadge = ({ status }: { status: Appointment['status'] }) => {
@@ -33,17 +33,39 @@ export default function Index({
     console.log(appointments, 'appointments.data');
     console.log(auth, 'auth');
 
+
+    const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setIsLoading(true);
+            router.get(
+                route('appointments.index'),
+                { search },
+                {
+                    preserveState: true,
+                    replace: true,
+                    onFinish: () => setIsLoading(false),
+                },
+            );
+        }, 300);
+
+        return () => clearTimeout(handler);
+    }, [search]);
     const columns: ColumnDef<any>[] = [
         { id: 'patient', accessorKey: 'patient.name', header: 'Patient' },
         { id: 'doctor', accessorKey: 'doctor.name', header: 'Doctor' },
-        { id: 'procedure', accessorKey: 'procedure.name', header: 'Procedure' },
-        { id: 'appointment_date', accessorKey: 'appointment_date', header: 'appointment_date' },
-        { id: 'time', accessorKey: 'time', header: 'Time' },
+        { id: 'service', accessorKey: 'service.name', header: 'service' },
+        {
+            id: 'appointment_date',
+            accessorKey: 'appointment_date',
+            header: 'appointment_date',
+        },
+        { id: 'times', accessorKey: 'times', header: 'Times' },
         { id: 'status', accessorKey: 'status', header: 'Status' },
         {
             id: 'actions',
@@ -59,7 +81,7 @@ export default function Index({
                         }}
                         showEdit={true}
                         showView={false}
-                        showDelete={userHasDeletePermission}
+                        showDelete={true}
                         confirmMessage="Are you sure you want to delete this appointment?"
                         onDelete={handleDelete}
                     />
@@ -85,6 +107,19 @@ export default function Index({
             <Head title="Appointment" />
             <div className="flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <h1 className="mb-4 text-2xl font-bold">المواعيد</h1>
+                <div className="relative w-full max-w-md">
+                    <input
+                        type="text"
+                        onFocus={(e) => e.target.select()}
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search..."
+                        className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                    <span className="absolute top-2.5 left-3 text-gray-400">
+                        <i className="material-icons text-lg">search</i>
+                    </span>
+                </div>
                 <InertiaLink
                     href={route('appointments.create')}
                     className="inline-block rounded bg-blue-500 px-4 py-2 text-white"

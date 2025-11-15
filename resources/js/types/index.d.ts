@@ -40,7 +40,7 @@ export type Appointment = {
     id: number;
     patient_id: number;
     user_id: number;
-    procedure_id: number;
+    service_id: number;
     appointment_date: string;
     notes?: string;
     status: 'scheduled' | 'completed' | 'canceled';

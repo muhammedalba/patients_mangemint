@@ -13,7 +13,7 @@ class ProcedureSeeder extends Seeder
     public function run(): void
     {
 
-        Procedure::factory()->count(30)->create();
+        Procedure::factory()->count(10)->create();
 
     }
 }

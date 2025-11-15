@@ -4,6 +4,8 @@ import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
+    SelectGroup,
+    SelectLabel,
     SelectItem,
     SelectTrigger,
     SelectValue,
@@ -38,23 +40,23 @@ const timeSlots = generateTimeSlots();
 export default function Create({
     patients,
     doctors,
-    procedures,
+    services,
 }: PageProps<{
     patients: Patient[];
     doctors: User[];
-    procedures: Procedure[];
+    services: Procedure[];
 }>) {
     const { data, setData, post, errors, processing } = useForm({
         patient_id: '',
         user_id: '',
-        procedure_id: '',
+        service_id: '',
         appointment_date: '',
         times: [],
         notes: '',
         status: 'scheduled',
     });
     const [isLoading, setIsLoading] = useState(false);
-    console.log(procedures, 'procedures');
+    console.log(services, 'services');
     console.log(doctors, 'doctors');
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -63,11 +65,12 @@ export default function Create({
         );
         setData('times', selectedOptions);
     };
+    console.log(data, 'data');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        console.log(data,'data');
+        console.log(data, 'data');
 
         try {
             post(route('appointments.store'));
@@ -78,6 +81,7 @@ export default function Create({
         }
     };
     if (isLoading) return <LoadingPage />;
+
     return (
         <AppLayout>
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
@@ -156,34 +160,39 @@ export default function Create({
 
                         <div>
                             <Label
-                                htmlFor="procedure_id"
+                                htmlFor="service_id"
                                 className="mb-1 block text-sm font-medium text-gray-700"
                             >
                                 المعالجة
                             </Label>
                             <Select
                                 onValueChange={(value) =>
-                                    setData('procedure_id', value)
+                                    setData('service_id', value)
                                 }
-                                value={data.procedure_id}
+                                value={data.service_id}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a procedure" />
+                                    <SelectValue placeholder="اختر المعالجة" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {procedures.map((procedure) => (
-                                        <SelectItem
-                                            key={procedure.id}
-                                            value={String(procedure.id)}
-                                        >
-                                            {procedure.name}
-                                        </SelectItem>
+                                    {services.map((category) => (
+                                        <SelectGroup key={category.id}>
+                                            <SelectLabel>{category.name}</SelectLabel>
+                                            {category.services?.map((service) => (
+                                                <SelectItem
+                                                    key={service.id}
+                                                    value={String(service.id)}
+                                                >
+                                                    {service.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {errors.procedure_id && (
+                            {errors.service_id && (
                                 <p className="mt-1 text-xs text-red-500">
-                                    {errors.procedure_id}
+                                    {errors.service_id}
                                 </p>
                             )}
                         </div>

@@ -7,7 +7,7 @@ class AppointmentData
     public function __construct(
         public int $patient_id,
         public ?int $user_id,
-        public int $procedure_id,
+        public int $service_id,
         public string $appointment_date,
         public array $times,
         public ?string $notes,
@@ -19,7 +19,7 @@ class AppointmentData
         return new self(
             patient_id: $validated['patient_id'],
             user_id: $validated['user_id'],
-            procedure_id: $validated['procedure_id'],
+            service_id: $validated['service_id'],
             appointment_date: $validated['appointment_date'],
             times: $validated['times'],
             notes: $validated['notes'] ?? null,
@@ -32,7 +32,7 @@ class AppointmentData
         return [
             'patient_id' => $this->patient_id,
             'user_id' => $this->user_id,
-            'procedure_id' => $this->procedure_id,
+            'service_id' => $this->service_id,
             'appointment_date' => $this->appointment_date,
             'times' => $this->times,
             'notes' => $this->notes,

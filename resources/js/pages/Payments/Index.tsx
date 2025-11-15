@@ -83,6 +83,8 @@ const Index: React.FC<IndexProps> = () => {
             return () => clearTimeout(timer);
         }
     }, [flash]);
+
+    
     useEffect(() => {
         const handler = setTimeout(() => {
             setIsLoading(true);
@@ -99,6 +101,8 @@ const Index: React.FC<IndexProps> = () => {
 
         return () => clearTimeout(handler);
     }, [search]);
+
+
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

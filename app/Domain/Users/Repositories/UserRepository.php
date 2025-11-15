@@ -34,13 +34,14 @@ class UserRepository
 
         return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($search, $perPage) {
             return User::query()
+                ->with('roles:name,id')
                 ->select(['id', 'name', 'email', 'phone'])
                 ->when(
                     $search,
                     fn($q) => $q->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
                 )
-                ->orderByDesc('updated_at')
+                ->latest('updated_at')
                 ->paginate($perPage)
                 ->withQueryString();
         });

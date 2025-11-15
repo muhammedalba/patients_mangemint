@@ -35,7 +35,7 @@ class PatientRepository
                 });
             }
 
-            return $query->orderByDesc('updated_at')->paginate(10)->withQueryString();
+            return $query->latest('updated_at')->paginate(10)->withQueryString();
         };
 
         if ($store instanceof TaggableStore) {

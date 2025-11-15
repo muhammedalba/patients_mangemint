@@ -43,13 +43,8 @@ class Procedure extends Model
     {
         return $this->hasMany(Payment::class);
     }
-    // علاقة مع المواعيد
-    public function appointments()
-    {
-        return $this->hasMany(Appointment::class);
-    }
 
-    // علاقة مع السجلات الطبية
+ // علاقة مع السجلات الطبية
     public function medicalRecord()
     {
         return $this->belongsTo(MedicalRecord::class);

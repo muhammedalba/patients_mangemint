@@ -55,6 +55,7 @@ export default function CreateProcedure({
     });
     const [isLoading, setIsLoading] = useState(false);
     const [filteredTeeth, setFilteredTeeth] = useState(teeth);
+console.log( patients,' $patients');
 
     const handleServiceSelect = (service: { name: string; price: number }) => {
         console.log('Selected Service:', service); // Debugging log

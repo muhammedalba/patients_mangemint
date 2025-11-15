@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectGroup,SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { route } from 'ziggy-js';
 import { useState } from 'react';
 import LoadingPage from '@/components/LoadingPage';
@@ -30,17 +30,19 @@ const generateTimeSlots = () => {
 
 const timeSlots = generateTimeSlots();
 
-export default function Edit({  appointment, patients, doctors, procedures }: PageProps<{ appointment: Appointment, patients: Patient[], doctors: User[], procedures: Procedure[] }>) {
+export default function Edit({  appointment, patients, doctors, services }: PageProps<{ appointment: Appointment, patients: Patient[], doctors: User[], services: Procedure[] }>) {
     const { data, setData, put, errors, processing } = useForm({
         patient_id: String(appointment.patient_id),
         user_id: String(appointment.user_id),
-        procedure_id: String(appointment.procedure_id),
+        service_id: String(appointment.service_id),
         appointment_date: appointment.appointment_date,
         times: appointment.times || [], // Initialize with existing times or an empty array
         notes: appointment.notes || '',
         status: appointment.status,
     });
 console.log(errors);
+console.log(patients,'patient');
+
     const [isLoading,setIsLoading] = useState(false);
     const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
@@ -100,19 +102,43 @@ console.log(errors);
                             {errors.user_id && <p className="text-red-500 text-xs mt-1">{errors.user_id}</p>}
                         </div>
 
-                        <div>
-                            <Label htmlFor="procedure_id">Procedure</Label>
-                            <Select onValueChange={(value) => setData('procedure_id', value)} value={data.procedure_id}>
+                       <div>
+                            <Label
+                                htmlFor="service_id"
+                                className="mb-1 block text-sm font-medium text-gray-700"
+                            >
+                                المعالجة
+                            </Label>
+                            <Select
+                                onValueChange={(value) =>
+                                    setData('service_id', value)
+                                }
+                                value={data.service_id}
+                            >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a procedure" />
+                                    <SelectValue placeholder="اختر المعالجة" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {procedures.map(procedure => (
-                                        <SelectItem key={procedure.id} value={String(procedure.id)}>{procedure.name}</SelectItem>
+                                    {services.map((category) => (
+                                        <SelectGroup key={category.id}>
+                                            <SelectLabel>{category.name}</SelectLabel>
+                                            {category.services?.map((service) => (
+                                                <SelectItem
+                                                    key={service.id}
+                                                    value={String(service.id)}
+                                                >
+                                                    {service.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {errors.procedure_id && <p className="text-red-500 text-xs mt-1">{errors.procedure_id}</p>}
+                            {errors.service_id && (
+                                <p className="mt-1 text-xs text-red-500">
+                                    {errors.service_id}
+                                </p>
+                            )}
                         </div>
 
                         <div>

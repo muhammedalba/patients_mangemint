@@ -24,7 +24,7 @@ class AppointmentStoreRequest extends FormRequest
         return [
             'patient_id' => 'required|exists:patients,id',
             'user_id' => 'required|exists:users,id',
-            'procedure_id' => 'required|exists:procedures,id',
+            'service_id' => 'required|exists:services,id',
             'appointment_date' => 'required|date',
             'times' => 'required|array',
             'times.*' => 'required|date_format:H:i',
