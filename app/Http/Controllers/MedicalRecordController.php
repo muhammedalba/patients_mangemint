@@ -9,6 +9,7 @@ use App\Models\Patient;
 use App\Models\User;
 use App\Domain\MedicalRecords\DTOs\MedicalRecordData;
 use App\Domain\MedicalRecords\Services\MedicalRecordService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -111,5 +112,12 @@ class MedicalRecordController extends Controller
         $this->service->delete($medicalRecord);
 
         return redirect()->route('medical-records.index')->with('success', 'Medical record deleted successfully.');
+    }
+
+    public function download(MedicalRecord $medicalRecord)
+    {
+        $medicalRecord->load('patient', 'doctor');
+        $pdf = Pdf::loadView('medical_records.pdf', ['medicalRecord' => $medicalRecord]);
+        return $pdf->download('medical-record-' . $medicalRecord->id . '.pdf');
     }
 }

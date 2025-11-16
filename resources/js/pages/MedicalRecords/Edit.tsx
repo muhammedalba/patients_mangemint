@@ -365,7 +365,17 @@ export default function Edit({
                         />
 
                         {/* --- Submit Button --- */}
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-4">
+                            <a
+                                href={route(
+                                    'medical-records.download',
+                                    medicalRecord.id,
+                                )}
+                                target="_blank"
+                                className="rounded-lg bg-green-600 px-6 py-2 text-white transition hover:bg-green-700"
+                            >
+                                تحميل PDF
+                            </a>
                             <button
                                 type="submit"
                                 disabled={processing}
@@ -379,7 +389,4 @@ export default function Edit({
             </section>
         </AppLayout>
     );
-}
-function post(arg0: string, arg1: { preserveScroll: boolean }) {
-    throw new Error('Function not implemented.');
 }

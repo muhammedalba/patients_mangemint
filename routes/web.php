@@ -99,6 +99,7 @@ Route::prefix('medical-records')->controller(MedicalRecordController::class)->gr
     Route::get('edit/{medicalRecord}', 'edit')->name('medical-records.edit');
     Route::post('update/{medicalRecord}', 'update')->name('medical-records.update');
     Route::delete('delete/{medicalRecord}', 'destroy')->name('medical-records.destroy');
+    Route::get('download/{medicalRecord}', 'download')->name('medical-records.download');
 });
 
 // Invoices
