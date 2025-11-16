@@ -3,6 +3,7 @@
 namespace App\Domain\Appointments\Repositories;
 
 use App\Models\Appointment;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Cache\TaggableStore;
@@ -14,33 +15,44 @@ class AppointmentRepository
      */
     public function query()
     {
-        return Appointment::with(['patient:id,name', 'doctor:id,name', 'service:id,name'])->select('id', 'patient_id', 'user_id', 'service_id', 'appointment_date', 'times', 'status');
+        return Appointment::with(['patient:id,name', 'doctor:id,name', 'service:id,name'])->select('id', 'patient_id', 'user_id', 'service_id', 'date', 'status', 'start_time', 'end_time', 'duration_slots');
     }
 
     public function create(array $data): Appointment
     {
         $appointment = Appointment::create($data);
 
-        $store = Cache::getStore();
-        if ($store instanceof TaggableStore) {
-            Cache::tags('appointments')->flush();
-        } else {
-            Cache::flush();
-        }
+        $this->clearCache();
 
         return $appointment;
     }
 
     public function update(Appointment $appointment, array $data): Appointment
     {
+        // حساب end_time فقط إذا تم تغيير start_time أو duration_slots
+        if (isset($data['start_time']) || isset($data['duration_slots'])|| isset($data['date']) ) {
+
+            $startTime = $data['start_time'] ?? $appointment->start_time;
+            $slots = $data['duration_slots'] ?? $appointment->duration_slots;
+
+            $data['end_time'] = $this->calculateEndTime($startTime, $slots);
+
+            //
+            $conflict=$this->isConflict(
+            $data['date'] ?? $appointment->date,
+            $data['start_time'] ?? $appointment->start_time,
+            $data['end_time'] ?? $appointment->end_time,
+            $data['user_id'] ?? $appointment->user_id
+        );
+        if ($conflict) {
+                throw new Exception('الفترة الزمنية المطلوبة غير متاحة (يوجد تداخل).');
+                
+            }
+        }
+
         $appointment->update($data);
 
-        $store = Cache::getStore();
-        if ($store instanceof TaggableStore) {
-            Cache::tags('appointments')->flush();
-        } else {
-            Cache::flush();
-        }
+        $this->clearCache();
 
         return $appointment;
     }
@@ -49,12 +61,7 @@ class AppointmentRepository
     {
         $appointment->delete();
 
-        $store = Cache::getStore();
-        if ($store instanceof TaggableStore) {
-            Cache::tags('appointments')->flush();
-        } else {
-            Cache::flush();
-        }
+        $this->clearCache();
     }
 
     public function list(?string $search = null, int $perPage = 10): LengthAwarePaginator
@@ -75,7 +82,7 @@ class AppointmentRepository
                         $q->where('name', 'like', "%{$search}%");
                     })->orWhereHas('service', function ($q) use ($search) {
                         $q->where('name', 'like', "%{$search}%");
-                    })->orWhere('appointment_date', 'like', "%{$search}%")
+                    })->orWhere('date', 'like', "%{$search}%")
                         ->orWhere('times', 'like', "%{$search}%")
                         ->orWhere('status', 'like', "%{$search}%");
                 });
@@ -89,5 +96,56 @@ class AppointmentRepository
         }
 
         return Cache::remember($cacheKey, now()->addMinutes(10), $build);
+    }
+    /**
+     * تحقق من وجود تداخل مع مواعيد موجودة لنفس التاريخ و (اختياريًا) لنفس الطبيب
+     *
+     * @param string $date YYYY-MM-DD
+     * @param string $start H:i:s or H:i
+     * @param string $end   H:i:s or H:i
+     * @param int|null $userId optional — لو تريد فحص تضارب فقط لطبيب محدد
+     * @return bool
+     */
+    public function isConflict(string $date, string $start, string $end, ?int $userId = null): bool
+    {
+        $query = Appointment::where('date', $date);
+
+
+        if ($userId !== null) {
+            $query->where('user_id', $userId);
+        }
+
+        // شروط التداخل: new_start < existing.end AND new_end > existing.start
+        $query->where(function ($q) use ($start, $end) {
+            $q->where('start_time', '<', $end)
+                ->where('end_time', '>', $start);
+        });
+        // @dd($query->get());
+
+        return $query->exists();
+    }
+
+    /**
+     * Clear cache using tags.
+     */
+    private function clearCache(): void
+    {
+        $store = Cache::getStore();
+
+        if ($store instanceof TaggableStore) {
+            Cache::tags('appointments')->flush();
+        } else {
+            Cache::flush();
+        }
+    }
+    /**
+     * حساب end time بناءً على start_time وعدد الـ slots
+     * كل Slot = 30 دقيقة
+     */
+    private function calculateEndTime(string $startTime, int $durationSlots): string
+    {
+        $minutes = $durationSlots * 30;
+
+        return date("H:i", strtotime($startTime . " + {$minutes} minutes"));
     }
 }

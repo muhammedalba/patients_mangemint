@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApointmentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PatientController;
@@ -7,8 +8,6 @@ use App\Http\Controllers\ProcedureController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Requests\ProcedureStoreRequest;
-use App\Http\Requests\ProcedureUpdateRequest;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ServiceCategoriesController;
 use App\Http\Controllers\ServicesController;
@@ -136,6 +135,14 @@ Route::resource('service-categories', ServiceCategoriesController::class)->names
     'destroy' => 'service-categories.destroy',
 ]);
 
+
+// Appointment custom routes
+// Route::get('available-slots', [ApointmentController::class, 'availableSlots']);
+// Route::post('book', [ApointmentController::class, 'book']);
+
+Route::prefix('available-slots')->controller(ApointmentController::class)->group(function () {
+    Route::get('/', 'availableSlots')->name('appointments.availableSlots');
+});
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

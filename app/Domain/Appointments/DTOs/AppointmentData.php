@@ -2,28 +2,30 @@
 
 namespace App\Domain\Appointments\DTOs;
 
-class AppointmentData
+final class AppointmentData
 {
     public function __construct(
         public int $patient_id,
-        public ?int $user_id,
+        public int $user_id,
         public int $service_id,
-        public string $appointment_date,
-        public array $times,
-        public ?string $notes,
-        public string $status
+        public string $date,           // 'YYYY-MM-DD'
+        public string $start_time,     // 'HH:MM' or 'HH:MM:SS'
+        public int $duration_slots,    // e.g. 1,2,3
+        public ?string $notes = null,
+        public string $status = 'scheduled'
     ) {}
 
     public static function fromValidated(array $validated): self
     {
         return new self(
-            patient_id: $validated['patient_id'],
-            user_id: $validated['user_id'],
-            service_id: $validated['service_id'],
-            appointment_date: $validated['appointment_date'],
-            times: $validated['times'],
+            patient_id: (int) $validated['patient_id'],
+            user_id: (int) $validated['user_id'],
+            service_id: (int) $validated['service_id'],
+            date: $validated['date'],
+            start_time: $validated['start_time'],
+            duration_slots: (int) ($validated['duration_slots'] ?? 1),
             notes: $validated['notes'] ?? null,
-            status: $validated['status']
+            status: $validated['status'] ?? 'scheduled'
         );
     }
 
@@ -33,8 +35,9 @@ class AppointmentData
             'patient_id' => $this->patient_id,
             'user_id' => $this->user_id,
             'service_id' => $this->service_id,
-            'appointment_date' => $this->appointment_date,
-            'times' => $this->times,
+            'date' => $this->date,
+            'start_time' => $this->start_time,
+            'duration_slots' => $this->duration_slots,
             'notes' => $this->notes,
             'status' => $this->status,
         ];

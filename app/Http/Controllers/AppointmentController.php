@@ -15,7 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-
+use Carbon\Carbon;
 class AppointmentController extends Controller
 {
     public function __construct(private AppointmentService $service) {}
@@ -52,11 +52,21 @@ class AppointmentController extends Controller
      */
     public function store(AppointmentStoreRequest $request): RedirectResponse
     {
-        $data = AppointmentData::fromValidated($request->validated());
-        $this->service->create($data);
+        try {
+            $data = AppointmentData::fromValidated($request->validated());
+            $this->service->create($data);
 
-        return redirect()->route('appointments.index')->with('success', 'Appointment created successfully.');
+            return redirect()
+                ->route('appointments.index')
+                ->with('success', 'Appointment booked successfully.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => $e->getMessage()])
+                ->withInput();
+        }
     }
+
 
     /**
      * Display the specified resource.
@@ -77,10 +87,10 @@ class AppointmentController extends Controller
         $services_category = ServiceCategory::with('services:category_id,id,name')
             ->select('id', 'name')->latest('name')
             ->get();
-            // get patients
+        // get patients
         $patients = Patient::select('id', 'name')
-                ->latest('name')
-                ->get();
+            ->latest('name')
+            ->get();
 
 
         return Inertia::render('Appointments/Edit', [

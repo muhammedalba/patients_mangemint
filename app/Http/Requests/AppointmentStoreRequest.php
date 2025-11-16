@@ -23,13 +23,13 @@ class AppointmentStoreRequest extends FormRequest
     {
         return [
             'patient_id' => 'required|exists:patients,id',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id', // الطبيب
             'service_id' => 'required|exists:services,id',
-            'appointment_date' => 'required|date',
-            'times' => 'required|array',
-            'times.*' => 'required|date_format:H:i',
-            'notes' => 'nullable|string',
-            'status' => 'required|in:scheduled,completed,canceled',
+            'date' => 'required|date_format:Y-m-d',
+            'start_time' => ['required', 'date_format:H:i'], // أو H:i:s إذا ترسل ثواني
+            'duration_slots' => 'required|integer|min:1',
+            'notes' => 'nullable|string|max:1000',
+            'status' => 'sometimes|string|in:scheduled,completed,canceled'
         ];
     }
 }

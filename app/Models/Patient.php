@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -7,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Patient extends Model
 {
     use HasFactory;
- protected $fillable = [
+    protected $fillable = [
         'name',
         'email',
         'phone',
@@ -25,11 +26,13 @@ class Patient extends Model
         'remember_token',
     ];
 
-    public function teeth() {
+    public function teeth()
+    {
         return $this->hasMany(Tooth::class);
     }
 
-    public function appointments() {
+    public function appointments()
+    {
         return $this->hasMany(Appointment::class);
     }
 
@@ -38,11 +41,17 @@ class Patient extends Model
         return $this->hasManyThrough(Procedure::class, Tooth::class);
     }
 
-    public function payment() {
+    public function payment()
+    {
         return $this->hasMany(Payment::class);
     }
 
-  public function medicalRecord() {
-    return $this->hasOne(MedicalRecord::class);
-}
+    public function medicalRecord()
+    {
+        return $this->hasOne(MedicalRecord::class);
+    }
+    public function apointments()
+    {
+        return $this->hasMany(Apointment::class);
+    }
 }

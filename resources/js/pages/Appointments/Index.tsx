@@ -61,11 +61,12 @@ export default function Index({
         { id: 'doctor', accessorKey: 'doctor.name', header: 'Doctor' },
         { id: 'service', accessorKey: 'service.name', header: 'service' },
         {
-            id: 'appointment_date',
-            accessorKey: 'appointment_date',
-            header: 'appointment_date',
+            id: 'date',
+            accessorKey: 'date',
+            header: 'date',
         },
-        { id: 'times', accessorKey: 'times', header: 'Times' },
+        { id: 'start_time', accessorKey: 'start_time', header: 'start_time' },
+        { id: 'end_time', accessorKey: 'end_time', header: 'end_time' },
         { id: 'status', accessorKey: 'status', header: 'Status' },
         {
             id: 'actions',

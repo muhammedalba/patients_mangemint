@@ -1,69 +1,105 @@
-import { useForm, Link } from '@inertiajs/react';
-import { PageProps, Patient, User, Procedure, Appointment } from '@/types';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import LoadingPage from '@/components/LoadingPage';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectGroup,SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { route } from 'ziggy-js';
+import axios from 'axios';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import AppLayout from '@/layouts/app-layout';
+import { Appointment, PageProps, Patient, Procedure, User } from '@/types';
+import { Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import LoadingPage from '@/components/LoadingPage';
+import { route } from 'ziggy-js';
 
-const generateTimeSlots = () => {
-    const slots = [];
-    for (let i = 9; i <= 21; i++) { // From 9 AM to 9 PM
-        for (let j = 0; j < 60; j += 30) {
-            const displayHour = i % 12 === 0 ? 12 : i % 12;
-            const ampm = i < 12 || i === 24 ? 'AM' : 'PM';
-            const minutes = j === 0 ? '00' : String(j);
-            const valueHour = i < 10 ? `0${i}` : String(i);
-            const valueMinutes = j === 0 ? '00' : String(j);
-            slots.push({
-                display: `${displayHour}:${minutes} ${ampm}`,
-                value: `${valueHour}:${valueMinutes}`,
-            });
-        }
-    }
-    return slots;
-};
-
-const timeSlots = generateTimeSlots();
-
-export default function Edit({  appointment, patients, doctors, services }: PageProps<{ appointment: Appointment, patients: Patient[], doctors: User[], services: Procedure[] }>) {
+export default function Edit({
+    appointment,
+    patients,
+    doctors,
+    services,
+}: PageProps<{
+    appointment: Appointment;
+    patients: Patient[];
+    doctors: User[];
+    services: Procedure[];
+}>) {
     const { data, setData, put, errors, processing } = useForm({
         patient_id: String(appointment.patient_id),
         user_id: String(appointment.user_id),
         service_id: String(appointment.service_id),
-        appointment_date: appointment.appointment_date,
-        times: appointment.times || [], // Initialize with existing times or an empty array
+        date: appointment.date,
+        start_time: appointment.start_time,
+        duration_slots: appointment.duration_slots,
         notes: appointment.notes || '',
         status: appointment.status,
     });
-console.log(errors);
-console.log(patients,'patient');
 
-    const [isLoading,setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [availableAppointments, setAvailableAppointments] = useState<any[]>(
+        [],
+    );
+
+    // جلب الأوقات المتاحة عند اختيار التاريخ أو تغيير duration_slots
+    const fetchAvailableSlots = async (
+        selectedDate: string,
+        durationSlots: number,
+    ) => {
+        if (!selectedDate) return;
+
+        setIsLoading(true);
+        try {
+            const response = await axios.get(
+                route('appointments.availableSlots'),
+                {
+                    params: {
+                        date: selectedDate,
+                        duration_slots: data.duration_slots,
+                    },
+                },
+            );
+            const slots = await response.data?.available_appointments;
+            setAvailableAppointments(slots);
+        } catch (error) {
+            console.error('Failed to fetch available slots', error);
+            setAvailableAppointments([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedDate = e.target.value;
+        setData('date', selectedDate);
+        fetchAvailableSlots(selectedDate, data.duration_slots);
+    };
+
+    const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const duration = Number(e.target.value);
+        setData('duration_slots', duration);
+        if (data.date) fetchAvailableSlots(data.date, duration);
+    };
+
     const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
-        setData('times', selectedOptions);
+        setData('start_time', e.target.value);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        try {
-            console.log(data,'data edit');
-
-        put(route('appointments.update', appointment.id));
-        }
-        catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
+        put(route('appointments.update', appointment.id), {
+            onFinish: () => setIsLoading(false),
+        });
     };
+
     if (isLoading) return <LoadingPage />;
+
     return (
         <AppLayout>
             <Card>
@@ -72,43 +108,67 @@ console.log(patients,'patient');
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Patient */}
                         <div>
                             <Label htmlFor="patient_id">Patient</Label>
-                            <Select onValueChange={(value) => setData('patient_id', value)} value={data.patient_id}>
+                            <Select
+                                onValueChange={(value) =>
+                                    setData('patient_id', value)
+                                }
+                                value={data.patient_id}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a patient" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {patients.map(patient => (
-                                        <SelectItem key={patient.id} value={String(patient.id)}>{patient.name}</SelectItem>
+                                    {patients.map((patient) => (
+                                        <SelectItem
+                                            key={patient.id}
+                                            value={String(patient.id)}
+                                        >
+                                            {patient.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {errors.patient_id && <p className="text-red-500 text-xs mt-1">{errors.patient_id}</p>}
+                            {errors.patient_id && (
+                                <p className="text-red-500">
+                                    {errors.patient_id}
+                                </p>
+                            )}
                         </div>
 
+                        {/* Doctor */}
                         <div>
                             <Label htmlFor="user_id">Doctor</Label>
-                            <Select onValueChange={(value) => setData('user_id', value)} value={data.user_id}>
+                            <Select
+                                onValueChange={(value) =>
+                                    setData('user_id', value)
+                                }
+                                value={data.user_id}
+                            >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a doctor" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {doctors.map(doctor => (
-                                        <SelectItem key={doctor.id} value={String(doctor.id)}>{doctor.name}</SelectItem>
+                                    {doctors.map((doctor) => (
+                                        <SelectItem
+                                            key={doctor.id}
+                                            value={String(doctor.id)}
+                                        >
+                                            {doctor.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
-                            {errors.user_id && <p className="text-red-500 text-xs mt-1">{errors.user_id}</p>}
+                            {errors.user_id && (
+                                <p className="text-red-500">{errors.user_id}</p>
+                            )}
                         </div>
 
-                       <div>
-                            <Label
-                                htmlFor="service_id"
-                                className="mb-1 block text-sm font-medium text-gray-700"
-                            >
-                                المعالجة
-                            </Label>
+                        {/* Service */}
+                        <div>
+                            <Label htmlFor="service_id">Service</Label>
                             <Select
                                 onValueChange={(value) =>
                                     setData('service_id', value)
@@ -116,95 +176,154 @@ console.log(patients,'patient');
                                 value={data.service_id}
                             >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="اختر المعالجة" />
+                                    <SelectValue placeholder="Select a service" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {services.map((category) => (
                                         <SelectGroup key={category.id}>
-                                            <SelectLabel>{category.name}</SelectLabel>
-                                            {category.services?.map((service) => (
-                                                <SelectItem
-                                                    key={service.id}
-                                                    value={String(service.id)}
-                                                >
-                                                    {service.name}
-                                                </SelectItem>
-                                            ))}
+                                            <SelectLabel>
+                                                {category.name}
+                                            </SelectLabel>
+                                            {category.services?.map(
+                                                (service) => (
+                                                    <SelectItem
+                                                        key={service.id}
+                                                        value={String(
+                                                            service.id,
+                                                        )}
+                                                    >
+                                                        {service.name}
+                                                    </SelectItem>
+                                                ),
+                                            )}
                                         </SelectGroup>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.service_id && (
-                                <p className="mt-1 text-xs text-red-500">
+                                <p className="text-red-500">
                                     {errors.service_id}
                                 </p>
                             )}
                         </div>
 
+                        {/* Date */}
                         <div>
-                            <Label htmlFor="appointment_date">Appointment Date</Label>
+                            <Label htmlFor="date">Appointment Date</Label>
                             <Input
-                                id="appointment_date"
                                 type="date"
-                                value={data.appointment_date}
-                                onChange={(e) => setData('appointment_date', e.target.value)}
+                                value={
+                                    data.date ? data.date.substring(0, 10) : ''
+                                }
+                                onChange={handleDateChange}
                             />
-                            {errors.appointment_date && <p className="text-red-500 text-xs mt-1">{errors.appointment_date}</p>}
+                            {errors.date && (
+                                <p className="text-red-500">{errors.date}</p>
+                            )}
                         </div>
 
+                        {/* Duration Slots */}
                         <div>
-                            <Label htmlFor="times">Appointment Times</Label>
-                            <select
-                            name='times'
-                                id="times"
-
-                                title='times'
-                                multiple
-                                value={data.times}
-                                onChange={handleTimeChange}
-                                className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                            >
-                                {timeSlots.map(slot => (
-                                    <option key={slot.value} value={slot.value}>
-                                        {slot.display}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.times && <p className="text-red-500 text-xs mt-1">{errors.times}</p>}
+                            <Label htmlFor="duration_slots">
+                                Duration Slots
+                            </Label>
+                            <input
+                                type="number"
+                                value={data.duration_slots}
+                                onChange={handleDurationChange}
+                                className="w-full rounded-md border px-3 py-2"
+                            />
+                            {errors.duration_slots && (
+                                <p className="text-red-500">
+                                    {errors.duration_slots}
+                                </p>
+                            )}
                         </div>
 
+                        {/* Available Start Times */}
+                        <div>
+                            <Label htmlFor="start_time">Start Time</Label>
+                            <select
+                                value={data.start_time}
+                                onChange={handleTimeChange}
+                                className="w-full rounded-md border px-3 py-2"
+                            >
+                                {availableAppointments.length > 0 ? (
+                                    availableAppointments.map((slot: any) => (
+                                        <option
+                                            key={slot.start}
+                                            value={slot.start}
+                                        >
+                                            {slot.start} - {slot.end}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option disabled>
+                                        Select a date first
+                                    </option>
+                                )}
+                            </select>
+                            {errors.start_time && (
+                                <p className="text-red-500">
+                                    {errors.start_time}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Status */}
                         <div>
                             <Label htmlFor="status">Status</Label>
-                            <Select onValueChange={(value) => setData('status', value as any)} value={data.status}>
+                            <Select
+                                value={data.status}
+                                onValueChange={(value) =>
+                                    setData('status', value as any)
+                                }
+                            >
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a status" />
+                                    <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="scheduled">Scheduled</SelectItem>
-                                    <SelectItem value="completed">Completed</SelectItem>
-                                    <SelectItem value="canceled">Canceled</SelectItem>
+                                    <SelectItem value="scheduled">
+                                        Scheduled
+                                    </SelectItem>
+                                    <SelectItem value="completed">
+                                        Completed
+                                    </SelectItem>
+                                    <SelectItem value="canceled">
+                                        Canceled
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
-                            {errors.status && <p className="text-red-500 text-xs mt-1">{errors.status}</p>}
+                            {errors.status && (
+                                <p className="text-red-500">{errors.status}</p>
+                            )}
                         </div>
 
+                        {/* Notes */}
                         <div>
                             <Label htmlFor="notes">Notes</Label>
                             <textarea
-                                id="notes"
-                                placeholder='notes'
                                 value={data.notes}
-                                onChange={(e) => setData('notes', e.target.value)}
-                                className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                onChange={(e) =>
+                                    setData('notes', e.target.value)
+                                }
+                                className="w-full rounded-md border px-3 py-2"
                             />
-                            {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes}</p>}
+                            {errors.notes && (
+                                <p className="text-red-500">{errors.notes}</p>
+                            )}
                         </div>
 
-                        <div className="flex items-center justify-end space-x-2">
+                        {/* Submit */}
+                        <div className="flex justify-end gap-2">
                             <Button variant="outline" asChild>
-                                <Link href={route('appointments.index')}>Cancel</Link>
+                                <Link href={route('appointments.index')}>
+                                    Cancel
+                                </Link>
                             </Button>
-                            <Button type="submit" disabled={processing}>Save Changes</Button>
+                            <Button type="submit" disabled={processing}>
+                                Save Changes
+                            </Button>
                         </div>
                     </form>
                 </CardContent>
