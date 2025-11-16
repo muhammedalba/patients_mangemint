@@ -2,6 +2,7 @@
 
 namespace App\Domain\Appointments\Repositories;
 
+use Carbon\Carbon;
 use App\Models\Appointment;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -30,7 +31,7 @@ class AppointmentRepository
     public function update(Appointment $appointment, array $data): Appointment
     {
         // حساب end_time فقط إذا تم تغيير start_time أو duration_slots
-        if (isset($data['start_time']) || isset($data['duration_slots'])|| isset($data['date']) ) {
+        if (isset($data['start_time']) || isset($data['duration_slots']) || isset($data['date'])) {
 
             $startTime = $data['start_time'] ?? $appointment->start_time;
             $slots = $data['duration_slots'] ?? $appointment->duration_slots;
@@ -38,15 +39,14 @@ class AppointmentRepository
             $data['end_time'] = $this->calculateEndTime($startTime, $slots);
 
             //
-            $conflict=$this->isConflict(
-            $data['date'] ?? $appointment->date,
-            $data['start_time'] ?? $appointment->start_time,
-            $data['end_time'] ?? $appointment->end_time,
-            $data['user_id'] ?? $appointment->user_id
-        );
-        if ($conflict) {
+            $conflict = $this->isConflict(
+                $data['date'] ?? $appointment->date,
+                $data['start_time'] ?? $appointment->start_time,
+                $data['end_time'] ?? $appointment->end_time,
+                $data['user_id'] ?? $appointment->user_id
+            );
+            if ($conflict) {
                 throw new Exception('الفترة الزمنية المطلوبة غير متاحة (يوجد تداخل).');
-                
             }
         }
 
@@ -147,5 +147,86 @@ class AppointmentRepository
         $minutes = $durationSlots * 30;
 
         return date("H:i", strtotime($startTime . " + {$minutes} minutes"));
+    }
+    // available_Slots
+    public function  availableSlots(int $slotMinutes, array $data)
+    {
+        $date = $data['date'];
+        $durationSlots = $data['duration_slots'] ?? 1;
+        $desiredMinutes = $durationSlots * $slotMinutes;
+
+        // توليد كل الـ slots خلال يوم العمل (يمكن جعل ساعات العمل من الإعدادات)
+        $allSlots = $this->generateTimeSlots('09:00', '17:00', $slotMinutes);
+
+        // جلب المواعيد الموجودة لهذا التاريخ
+        $booked = Appointment::where('date', $date)->get();
+
+
+        // نحول المواعيد إلى فترات Carbon لسهولة الحساب (بالأوقات الكاملة)
+        $bookedIntervals = $booked->map(function ($a) use ($date) {
+            $startTime = $a->start_time instanceof \Carbon\Carbon ? $a->start_time->format('H:i:s') : $a->start_time;
+            $endTime = $a->end_time instanceof \Carbon\Carbon ? $a->end_time->format('H:i:s') : $a->end_time;
+
+            return [
+                'start' => Carbon::createFromFormat('Y-m-d H:i:s', "$date $startTime"),
+                'end'   => Carbon::createFromFormat('Y-m-d H:i:s', "$date $endTime"),
+            ];
+        });
+
+
+
+        // للكل slot نتحقق إذا يمكن امتداده durationSlots * slotMinutes بدون تداخل
+        $available = array_filter($allSlots, function ($slot) use ($bookedIntervals, $date, $desiredMinutes) {
+            $slotStart = Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $slot['start']);
+            $slotEnd = $slotStart->copy()->addMinutes($desiredMinutes);
+
+            // يجب أن يتوافق نهاية الامتداد مع نهاية يوم العمل (لا نجعل slotEnd يتجاوز نهاية العمل)
+            // ملاحظة: generateTimeSlots ضمنت أن كل slot أولية مستقيمة ضمن فترة العمل، لكن الامتداد قد يتجاوزها.
+            $workEnd = Carbon::createFromFormat('Y-m-d H:i', $date . ' 17:00');
+            if ($slotEnd->gt($workEnd)) {
+                return false;
+            }
+
+            // التحقق من التداخل: إذا كان أي موعد موجود يتقاطع مع [slotStart, slotEnd) نرفض هذا الـ slot
+            foreach ($bookedIntervals as $interval) {
+                if ($slotStart->lt($interval['end']) && $slotEnd->gt($interval['start'])) {
+                    // يوجد تداخل
+                    return false;
+                }
+            }
+
+            // لا تداخل => slot متاح للامتداد المطلوب
+            return true;
+        });
+
+        // إعادة النتيجة مرتبة ومفصّلة
+        $available = array_values(array_map(function ($s) use ($desiredMinutes, $slotMinutes) {
+            return [
+                'start' => $s['start'],
+                'end' => Carbon::createFromFormat('H:i', $s['start'])->addMinutes($desiredMinutes)->format('H:i'),
+                'duration_minutes' => $desiredMinutes,
+                'slots' => $desiredMinutes / $slotMinutes
+            ];
+        }, $available));
+        return  $available;
+    }
+    // توليد قائمة الـ slots داخل فترة العمل (من startTime إلى endTime)
+    // يُرجع مصفوفة من عناصر: ['start' => '09:00', 'end' => '09:30']
+    private function generateTimeSlots(string $workStart = '09:00', string $workEnd = '17:00', $slotMinutes = 30): array
+    {
+        $slots = [];
+        $current = Carbon::createFromTimeString($workStart);
+        $end = Carbon::createFromTimeString($workEnd);
+        while ($current->lt($end)) {
+            $slotStart = $current->format('H:i');
+            $slotEnd = $current->copy()->addMinutes($slotMinutes)->format('H:i');
+            $slots[] = [
+                'start' => $slotStart,
+                'end' => $slotEnd,
+            ];
+            $current->addMinutes($slotMinutes);
+        }
+
+        return $slots;
     }
 }

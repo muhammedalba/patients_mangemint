@@ -4,18 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Domain\Appointments\DTOs\AppointmentData;
 use App\Domain\Appointments\Services\AppointmentService;
+use App\Http\Requests\AppointmentAvailableRequest;
 use App\Http\Requests\AppointmentStoreRequest;
 use App\Http\Requests\AppointmentUpdateRequest;
 use App\Models\Appointment;
 use App\Models\Patient;
-use App\Models\Procedure;
 use App\Models\ServiceCategory;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
+
 class AppointmentController extends Controller
 {
     public function __construct(private AppointmentService $service) {}
@@ -111,6 +111,22 @@ class AppointmentController extends Controller
 
         return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
     }
+
+    /**
+     * available Slots
+     *
+     *
+     */
+    public function availableSlots(AppointmentAvailableRequest $request)
+    {
+        $available_appointments = $this->service->availableSlots($request->validated()); // الآن ستعمل validated() بشكل صحيح
+
+        return response()->json([
+            'available_appointments' => $available_appointments
+        ]);
+    }
+
+
 
     /**
      * Remove the specified resource from storage.

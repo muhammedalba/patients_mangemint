@@ -13,9 +13,9 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { PageProps, Patient, Procedure, User } from '@/types';
 import { useForm } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
-import { route } from 'ziggy-js';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { route } from 'ziggy-js';
 
 export default function Create({
     patients,
@@ -44,15 +44,22 @@ export default function Create({
 
     // جلب المواعيد المتاحة عند تغيير التاريخ أو مدة الحجز
     const fetchAvailableAppointments = async () => {
-        if (!data.date) return;
+        // لا ترسل الطلب إذا لم يتم تحديد التاريخ
+        if (!data.date) {
+            setAvailableAppointments([]); // أفرغ القائمة إذا كان التاريخ فارغًا
+            return;
+        }
         setIsLoading(true);
         try {
-            const response = await axios.get(route('appointments.availableSlots'), {
-                params: {
-                    date: data.date,
-                    duration_slots: data.duration_slots,
+            const response = await axios.get(
+                route('appointments.availableSlots'),
+                {
+                    params: {
+                        date: data.date,
+                        duration_slots: data.duration_slots,
+                    },
                 },
-            });
+            );
             console.log(response.data);
 
             setAvailableAppointments(response.data?.available_appointments);
@@ -66,7 +73,12 @@ export default function Create({
 
     useEffect(() => {
         fetchAvailableAppointments();
-    }, [data.date, data.duration_slots]);
+        // عند تغيير التاريخ، قم بإلغاء تحديد الوقت الحالي
+        // لأن قائمة الأوقات ستتغير.
+        return () => {
+            setData('start_time', '');
+        };
+    }, [data.date, data.duration_slots, setData]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -88,7 +100,9 @@ export default function Create({
                         <div>
                             <Label htmlFor="patient_id">اسم المريض</Label>
                             <Select
-                                onValueChange={(value) => setData('patient_id', value)}
+                                onValueChange={(value) =>
+                                    setData('patient_id', value)
+                                }
                                 value={data.patient_id}
                             >
                                 <SelectTrigger>
@@ -96,14 +110,19 @@ export default function Create({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {patients.map((patient) => (
-                                        <SelectItem key={patient.id} value={String(patient.id)}>
+                                        <SelectItem
+                                            key={patient.id}
+                                            value={String(patient.id)}
+                                        >
                                             {patient.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.patient_id && (
-                                <p className="mt-1 text-xs text-red-500">{errors.patient_id}</p>
+                                <p className="mt-1 text-xs text-red-500">
+                                    {errors.patient_id}
+                                </p>
                             )}
                         </div>
 
@@ -111,7 +130,9 @@ export default function Create({
                         <div>
                             <Label htmlFor="user_id">اسم الطبيب</Label>
                             <Select
-                                onValueChange={(value) => setData('user_id', value)}
+                                onValueChange={(value) =>
+                                    setData('user_id', value)
+                                }
                                 value={data.user_id}
                             >
                                 <SelectTrigger>
@@ -119,14 +140,19 @@ export default function Create({
                                 </SelectTrigger>
                                 <SelectContent>
                                     {doctors.map((doctor) => (
-                                        <SelectItem key={doctor.id} value={String(doctor.id)}>
+                                        <SelectItem
+                                            key={doctor.id}
+                                            value={String(doctor.id)}
+                                        >
                                             {doctor.name}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.user_id && (
-                                <p className="mt-1 text-xs text-red-500">{errors.user_id}</p>
+                                <p className="mt-1 text-xs text-red-500">
+                                    {errors.user_id}
+                                </p>
                             )}
                         </div>
 
@@ -134,7 +160,9 @@ export default function Create({
                         <div>
                             <Label htmlFor="service_id">المعالجة</Label>
                             <Select
-                                onValueChange={(value) => setData('service_id', value)}
+                                onValueChange={(value) =>
+                                    setData('service_id', value)
+                                }
                                 value={data.service_id}
                             >
                                 <SelectTrigger>
@@ -143,18 +171,29 @@ export default function Create({
                                 <SelectContent>
                                     {services.map((category) => (
                                         <SelectGroup key={category.id}>
-                                            <SelectLabel>{category.name}</SelectLabel>
-                                            {category.services?.map((service) => (
-                                                <SelectItem key={service.id} value={String(service.id)}>
-                                                    {service.name}
-                                                </SelectItem>
-                                            ))}
+                                            <SelectLabel>
+                                                {category.name}
+                                            </SelectLabel>
+                                            {category.services?.map(
+                                                (service) => (
+                                                    <SelectItem
+                                                        key={service.id}
+                                                        value={String(
+                                                            service.id,
+                                                        )}
+                                                    >
+                                                        {service.name}
+                                                    </SelectItem>
+                                                ),
+                                            )}
                                         </SelectGroup>
                                     ))}
                                 </SelectContent>
                             </Select>
                             {errors.service_id && (
-                                <p className="mt-1 text-xs text-red-500">{errors.service_id}</p>
+                                <p className="mt-1 text-xs text-red-500">
+                                    {errors.service_id}
+                                </p>
                             )}
                         </div>
 
@@ -165,25 +204,40 @@ export default function Create({
                                 type="date"
                                 id="date"
                                 value={data.date}
-                                onChange={(e) => setData('date', e.target.value)}
+                                onChange={(e) =>
+                                    setData('date', e.target.value)
+                                }
                                 className="w-full rounded-md border px-3 py-2 text-sm"
                             />
-                            {errors.date && <p className="text-xs text-red-500">{errors.date}</p>}
+                            {errors.date && (
+                                <p className="text-xs text-red-500">
+                                    {errors.date}
+                                </p>
+                            )}
                         </div>
 
                         {/* مدة الموعد */}
                         <div>
-                            <Label htmlFor="duration_slots">مدة الموعد (عدد الـ slots)</Label>
+                            <Label htmlFor="duration_slots">
+                                مدة الموعد (عدد الـ slots)
+                            </Label>
                             <input
                                 type="number"
                                 id="duration_slots"
                                 min={1}
                                 value={data.duration_slots}
-                                onChange={(e) => setData('duration_slots', Number(e.target.value))}
+                                onChange={(e) =>
+                                    setData(
+                                        'duration_slots',
+                                        Number(e.target.value),
+                                    )
+                                }
                                 className="w-full rounded-md border px-3 py-2 text-sm"
                             />
                             {errors.duration_slots && (
-                                <p className="text-xs text-red-500">{errors.duration_slots}</p>
+                                <p className="text-xs text-red-500">
+                                    {errors.duration_slots}
+                                </p>
                             )}
                         </div>
 
@@ -193,7 +247,9 @@ export default function Create({
                             <select
                                 id="start_time"
                                 value={data.start_time}
-                                onChange={(e) => setData('start_time', e.target.value)}
+                                onChange={(e) =>
+                                    setData('start_time', e.target.value)
+                                }
                                 className="w-full rounded-md border px-3 py-2 text-sm"
                             >
                                 <option value="">اختر الوقت</option>
@@ -204,7 +260,9 @@ export default function Create({
                                 ))}
                             </select>
                             {errors.start_time && (
-                                <p className="mt-1 text-xs text-red-500">{errors.start_time}</p>
+                                <p className="mt-1 text-xs text-red-500">
+                                    {errors.start_time}
+                                </p>
                             )}
                         </div>
 
@@ -212,20 +270,30 @@ export default function Create({
                         <div>
                             <Label htmlFor="status">حالة الموعد</Label>
                             <Select
-                                onValueChange={(value) => setData('status', value)}
+                                onValueChange={(value) =>
+                                    setData('status', value)
+                                }
                                 value={data.status}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="اختر الحالة" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="scheduled">Scheduled</SelectItem>
-                                    <SelectItem value="completed">Completed</SelectItem>
-                                    <SelectItem value="canceled">Canceled</SelectItem>
+                                    <SelectItem value="scheduled">
+                                        Scheduled
+                                    </SelectItem>
+                                    <SelectItem value="completed">
+                                        Completed
+                                    </SelectItem>
+                                    <SelectItem value="canceled">
+                                        Canceled
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                             {errors.status && (
-                                <p className="mt-1 text-xs text-red-500">{errors.status}</p>
+                                <p className="mt-1 text-xs text-red-500">
+                                    {errors.status}
+                                </p>
                             )}
                         </div>
 
@@ -235,7 +303,9 @@ export default function Create({
                             <textarea
                                 id="notes"
                                 value={data.notes}
-                                onChange={(e) => setData('notes', e.target.value)}
+                                onChange={(e) =>
+                                    setData('notes', e.target.value)
+                                }
                                 className="w-full rounded-md border px-3 py-2 text-sm"
                             />
                         </div>
@@ -248,14 +318,17 @@ export default function Create({
                             asChild
                             className="rounded-lg px-6 py-2 font-semibold"
                         >
-                            <a href={route('appointments.index')} className="text-gray-700">
+                            <a
+                                href={route('appointments.index')}
+                                className="text-gray-700"
+                            >
                                 إنهاء
                             </a>
                         </Button>
                         <Button
                             type="submit"
                             disabled={processing}
-                            className="rounded-lg px-6 py-2 font-semibold text-white bg-blue-600 hover:bg-blue-700"
+                            className="rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700"
                         >
                             {processing ? 'جارِ الحفظ ...' : 'حفظ'}
                         </Button>

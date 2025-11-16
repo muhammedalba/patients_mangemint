@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import axios from 'axios';
 import {
     Select,
     SelectContent,
@@ -16,7 +15,8 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { Appointment, PageProps, Patient, Procedure, User } from '@/types';
 import { Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Edit({
@@ -46,63 +46,47 @@ export default function Edit({
         [],
     );
 
-    // جلب الأوقات المتاحة عند اختيار التاريخ أو تغيير duration_slots
-    const fetchAvailableSlots = async (
-        selectedDate: string,
-        durationSlots: number,
-    ) => {
-        if (!selectedDate) return;
-
+    // جلب الأوقات المتاحة عند تغيير التاريخ أو مدة الحجز
+    const fetchAvailableSlots = async () => {
+        // لا ترسل الطلب إذا لم يتم تحديد التاريخ
+        if (!data.date) {
+            setAvailableAppointments([]); // أفرغ القائمة إذا كان التاريخ فارغًا
+            return;
+        }
         setIsLoading(true);
         try {
             const response = await axios.get(
                 route('appointments.availableSlots'),
                 {
                     params: {
-                        date: selectedDate,
+                        date: data.date,
                         duration_slots: data.duration_slots,
                     },
                 },
             );
-            const slots = await response.data?.available_appointments;
-            setAvailableAppointments(slots);
-        } catch (error) {
-            console.error('Failed to fetch available slots', error);
+            setAvailableAppointments(response.data?.available_appointments);
+        } catch (err) {
+            console.error(err);
             setAvailableAppointments([]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedDate = e.target.value;
-        setData('date', selectedDate);
-        fetchAvailableSlots(selectedDate, data.duration_slots);
-    };
-
-    const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const duration = Number(e.target.value);
-        setData('duration_slots', duration);
-        if (data.date) fetchAvailableSlots(data.date, duration);
-    };
-
-    const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setData('start_time', e.target.value);
-    };
+    useEffect(() => {
+        fetchAvailableSlots();
+    }, [data.date, data.duration_slots]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
-        put(route('appointments.update', appointment.id), {
-            onFinish: () => setIsLoading(false),
-        });
+        put(route('appointments.update', appointment.id));
     };
 
-    if (isLoading) return <LoadingPage />;
+    if (isLoading || processing) return <LoadingPage />;
 
     return (
         <AppLayout>
-            <Card>
+            <Card className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
                 <CardHeader>
                     <CardTitle>Edit Appointment</CardTitle>
                 </CardHeader>
@@ -215,7 +199,13 @@ export default function Edit({
                                 value={
                                     data.date ? data.date.substring(0, 10) : ''
                                 }
-                                onChange={handleDateChange}
+                                onChange={(e) => {
+                                    setData({
+                                        ...data,
+                                        date: e.target.value,
+                                        start_time: '',
+                                    });
+                                }}
                             />
                             {errors.date && (
                                 <p className="text-red-500">{errors.date}</p>
@@ -230,7 +220,12 @@ export default function Edit({
                             <input
                                 type="number"
                                 value={data.duration_slots}
-                                onChange={handleDurationChange}
+                                onChange={(e) =>
+                                    setData(
+                                        'duration_slots',
+                                        Number(e.target.value),
+                                    )
+                                }
                                 className="w-full rounded-md border px-3 py-2"
                             />
                             {errors.duration_slots && (
@@ -245,23 +240,39 @@ export default function Edit({
                             <Label htmlFor="start_time">Start Time</Label>
                             <select
                                 value={data.start_time}
-                                onChange={handleTimeChange}
+                                onChange={(e) =>
+                                    setData('start_time', e.target.value)
+                                }
                                 className="w-full rounded-md border px-3 py-2"
                             >
-                                {availableAppointments.length > 0 ? (
-                                    availableAppointments.map((slot: any) => (
+                                {/* احتفظ بالوقت الحالي للموعد كخيار أول */}
+                                <option value={appointment.start_time}>
+                                    {appointment.start_time} (Current)
+                                </option>
+
+                                {availableAppointments?.map((slot: any) => {
+                                    // لا تعرض الوقت الحالي مرة أخرى إذا كان ضمن الأوقات المتاحة
+                                    if (slot.start === appointment.start_time)
+                                        return null;
+                                    return (
                                         <option
                                             key={slot.start}
                                             value={slot.start}
                                         >
                                             {slot.start} - {slot.end}
                                         </option>
-                                    ))
-                                ) : (
-                                    <option disabled>
-                                        Select a date first
-                                    </option>
+                                    );
+                                })}
+
+                                {availableAppointments?.length === 0 && (
+                                    <option disabled>No available slots</option>
                                 )}
+                                {availableAppointments === undefined &&
+                                    data.date && (
+                                        <option disabled>
+                                            Select a date first
+                                        </option>
+                                    )}
                             </select>
                             {errors.start_time && (
                                 <p className="text-red-500">

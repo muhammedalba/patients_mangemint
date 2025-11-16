@@ -1,11 +1,10 @@
 <?php
 
-use App\Http\Controllers\ApointmentController;
+use App\Http\Controllers\AppointmentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ProcedureController;
-use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MedicalRecordController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
@@ -78,7 +77,14 @@ Route::prefix('procedures')->controller(ProcedureController::class)->group(funct
 });
 
 // Appointments
+
 Route::resource('appointments', AppointmentController::class)->middleware(['auth', 'verified']);
+
+Route::prefix('available-slots')->controller(AppointmentController::class)->group(function () {
+    Route::get('/', 'availableSlots')->name('appointments.availableSlots');
+});
+
+
 
 // services
 Route::resource('services', ServicesController::class)->middleware(['auth', 'verified']);
@@ -136,13 +142,8 @@ Route::resource('service-categories', ServiceCategoriesController::class)->names
 ]);
 
 
-// Appointment custom routes
-// Route::get('available-slots', [ApointmentController::class, 'availableSlots']);
-// Route::post('book', [ApointmentController::class, 'book']);
 
-Route::prefix('available-slots')->controller(ApointmentController::class)->group(function () {
-    Route::get('/', 'availableSlots')->name('appointments.availableSlots');
-});
+
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

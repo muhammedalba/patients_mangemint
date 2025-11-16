@@ -21,9 +21,40 @@ class AppointmentService
         $this->slotMinutes = config('appointments.slot_minutes', 30);
     }
 
+    // available_Slots
+    public function availableSlots($data)
+    {
+
+        try {
+            return $this->repo->availableSlots($this->slotMinutes, $data);
+        } catch (\Throwable $e) {
+            Log::error('availableSlots  failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $data,
+            ]);
+            throw $e;
+        }
+    }
+
+
+
+
+
     public function listAppointments(?string $search = null, int $perPage = 10)
     {
-        return $this->repo->list($search, $perPage);
+
+        try {
+            return $this->repo->list($search, $perPage);
+        } catch (\Throwable $e) {
+            Log::error('Appointment list failed', [
+                'appointment_id' => $appointment->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $data->toArray(),
+            ]);
+            throw $e;
+        }
     }
 
 
