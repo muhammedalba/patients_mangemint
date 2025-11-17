@@ -116,7 +116,7 @@ class MedicalRecordController extends Controller
 
     public function download(MedicalRecord $medicalRecord)
     {
-        $medicalRecord->load('patient', 'doctor');
+        $medicalRecord->load('patient:id,name', 'doctor:id,name');
         $pdf = Pdf::loadView('medical_records.pdf', ['medicalRecord' => $medicalRecord]);
         return $pdf->download('medical-record-' . $medicalRecord->id . '.pdf');
     }

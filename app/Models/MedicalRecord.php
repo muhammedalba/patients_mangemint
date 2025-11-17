@@ -11,6 +11,7 @@ class MedicalRecord extends Model
         'patient_id',
         'doctor_id',
         'attachments',
+        'images',
         'chief_complaint',
         'present_illness_history',
         'past_dental_history',
@@ -33,6 +34,11 @@ class MedicalRecord extends Model
         'pregnancy_trimester',
         'clinical_notes',
     ];
+    protected $casts = [
+        'images' => 'array',
+        'attachments' => 'array',
+    ];
+
 public function patient() {
     return $this->belongsTo(Patient::class);
 }

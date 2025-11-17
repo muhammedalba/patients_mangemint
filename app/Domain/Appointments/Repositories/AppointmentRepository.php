@@ -2,6 +2,7 @@
 
 namespace App\Domain\Appointments\Repositories;
 
+use App\Domain\Appointments\Exceptions\AppointmentConflictException;
 use Carbon\Carbon;
 use App\Models\Appointment;
 use Exception;
@@ -30,23 +31,28 @@ class AppointmentRepository
 
     public function update(Appointment $appointment, array $data): Appointment
     {
-        // حساب end_time فقط إذا تم تغيير start_time أو duration_slots
-        if (isset($data['start_time']) || isset($data['duration_slots']) || isset($data['date'])) {
-
+        // حساب end_time والتحقق من التداخل فقط إذا تم تغيير وقت أو تاريخ الموعد
+        if (
+            (isset($data['date']) && $data['date'] != $appointment->date) ||
+            (isset($data['start_time']) && $data['start_time'] != $appointment->start_time) ||
+            (isset($data['duration_slots']) && $data['duration_slots'] != $appointment->duration_slots)
+        ) {
             $startTime = $data['start_time'] ?? $appointment->start_time;
             $slots = $data['duration_slots'] ?? $appointment->duration_slots;
 
             $data['end_time'] = $this->calculateEndTime($startTime, $slots);
 
-            //
+            // التحقق من وجود تداخل مع استثناء الموعد الحالي
             $conflict = $this->isConflict(
                 $data['date'] ?? $appointment->date,
                 $data['start_time'] ?? $appointment->start_time,
-                $data['end_time'] ?? $appointment->end_time,
-                $data['user_id'] ?? $appointment->user_id
+                $data['end_time'], // Always use the newly calculated end_time
+                $data['user_id'] ?? $appointment->user_id,
+                $appointment->id // Exclude current appointment from conflict check
             );
+
             if ($conflict) {
-                throw new Exception('الفترة الزمنية المطلوبة غير متاحة (يوجد تداخل).');
+                throw new AppointmentConflictException('الفترة الزمنية المطلوبة غير متاحة (يوجد تداخل).');
             }
         }
 
@@ -104,15 +110,20 @@ class AppointmentRepository
      * @param string $start H:i:s or H:i
      * @param string $end   H:i:s or H:i
      * @param int|null $userId optional — لو تريد فحص تضارب فقط لطبيب محدد
+     * @param int|null $exceptId optional — لتجاهل موعد محدد من الفحص (مفيد عند التحديث)
      * @return bool
      */
-    public function isConflict(string $date, string $start, string $end, ?int $userId = null): bool
+    public function isConflict(string $date, string $start, string $end, ?int $userId = null, ?int $exceptId = null): bool
     {
-        $query = Appointment::where('date', $date);
+        $query = Appointment::where('date', $date)->where('status', '!=', 'canceled');
 
 
         if ($userId !== null) {
             $query->where('user_id', $userId);
+        }
+
+        if ($exceptId !== null) {
+            $query->where('id', '!=', $exceptId);
         }
 
         // شروط التداخل: new_start < existing.end AND new_end > existing.start
@@ -159,7 +170,7 @@ class AppointmentRepository
         $allSlots = $this->generateTimeSlots('09:00', '17:00', $slotMinutes);
 
         // جلب المواعيد الموجودة لهذا التاريخ
-        $booked = Appointment::where('date', $date)->get();
+        $booked = Appointment::where('date', $date)->where('status', '!=', 'canceled')->get();
 
 
         // نحول المواعيد إلى فترات Carbon لسهولة الحساب (بالأوقات الكاملة)

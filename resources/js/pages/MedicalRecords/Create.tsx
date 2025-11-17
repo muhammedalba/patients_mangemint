@@ -25,6 +25,7 @@ export default function MedicalRecordForm({
         patient_id: initialData.patient_id || '',
         doctor_id: initialData.doctor_id || '',
         attachments: initialData.attachments || [],
+        images: initialData.images || [],
         chief_complaint: initialData.chief_complaint || '',
         present_illness_history: initialData.present_illness_history || '',
         past_dental_history: initialData.past_dental_history || '',
@@ -100,6 +101,10 @@ export default function MedicalRecordForm({
                 'pregnancy_trimester',
                 'clinical_notes',
             ],
+        },
+        {
+            name: 'Media',
+            keys: ['attachments', 'images'],
         },
     ];
 
@@ -215,8 +220,7 @@ export default function MedicalRecordForm({
                                                 <option value="II">II</option>
                                                 <option value="III">III</option>
                                             </select>
-                                        ) : key === 'attachments' ? (
-                                            <input
+                                                                                 ) : key === 'attachments' || key === 'images' ? (                                            <input
                                                 type="file"
                                                 multiple
                                                 onChange={(e) =>

@@ -45,6 +45,10 @@ class MedicalRecordStoreRequest extends FormRequest
             'is_pregnant' => 'boolean',
             'pregnancy_trimester' => 'nullable|in:I,II,III',
             'clinical_notes' => 'nullable|string',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file',
+            'images' => 'nullable|array',
+            'images.*' => 'file',
         ];
     }
 }

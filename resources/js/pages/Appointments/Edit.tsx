@@ -45,6 +45,7 @@ export default function Edit({
     const [availableAppointments, setAvailableAppointments] = useState<any[]>(
         [],
     );
+console.log(errors,'errors');
 
     // جلب الأوقات المتاحة عند تغيير التاريخ أو مدة الحجز
     const fetchAvailableSlots = async () => {

@@ -34,6 +34,7 @@ export default function Edit({
         patient_id: medicalRecord.patient_id || '',
         doctor_id: medicalRecord.doctor_id || '',
         attachments: medicalRecord.attachments || [],
+        images: medicalRecord.images || [],
         chief_complaint: medicalRecord.chief_complaint || '',
         present_illness_history: medicalRecord.present_illness_history || '',
         past_dental_history: medicalRecord.past_dental_history || '',
@@ -60,6 +61,7 @@ export default function Edit({
         pregnancy_trimester: medicalRecord.pregnancy_trimester || '',
         clinical_notes: medicalRecord.clinical_notes || '',
     });
+    console.log(errors, 'errors');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -363,6 +365,40 @@ export default function Edit({
                             className="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800"
                             rows={3}
                         />
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Attachments
+                            </label>
+                            <input
+                                type="file"
+                                multiple
+                                onChange={(e) =>
+                                    setData(
+                                        'attachments',
+                                        Array.from(e.target.files || []),
+                                    )
+                                }
+                                className="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Images
+                            </label>
+                            <input
+                                type="file"
+                                multiple
+                                onChange={(e) =>
+                                    setData(
+                                        'images',
+                                        Array.from(e.target.files || []),
+                                    )
+                                }
+                                className="w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+                            />
+                        </div>
 
                         {/* --- Submit Button --- */}
                         <div className="flex justify-end gap-4">
