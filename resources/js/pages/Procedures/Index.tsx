@@ -20,22 +20,25 @@ interface ProcedureResponse {
     data: Procedure[];
 }
 
-export default function Index() {
+export default function Index(filters: { search?: string }) {
     const { procedures, auth } = usePage<{
         procedures: PaginatedData<ProcedureResponse>;
         auth: { user: { roles: string[] } };
+        filters: { search?: string };
     }>().props;
     const { props } = usePage<{
         flash: { success?: string; error?: string };
+        filters: { search?: string };
     }>();
     console.log(procedures, 'procedures');
-
+    const [search, setSearch] = useState(filters.search || '');
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
+    const [isLoading, setIsLoading] = useState(true);
     const [showToast, setShowToast] = useState(false);
-    const [isLoading, setISLoading] = useState(false);
+
     const columns: ColumnDef<any>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'patient_name', accessorKey: 'patient', header: 'اسم المريض' },
@@ -48,9 +51,7 @@ export default function Index() {
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <span className="border px-2 py-1">
-                        {p.tooth_number}
-                    </span>
+                    <span className="border px-2 py-1">{p.tooth_number}</span>
                 );
             },
         },
@@ -76,6 +77,23 @@ export default function Index() {
             },
         },
     ];
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setIsLoading(true);
+
+            router.get(
+                route('procedures.index'),
+                { search },
+                {
+                    preserveState: true,
+                    replace: true,
+                    onFinish: () => setIsLoading(false),
+                },
+            );
+        }, 300);
+
+        return () => clearTimeout(handler);
+    }, [search]);
     useEffect(() => {
         if (props.flash?.success) {
             setShowToast(true);
@@ -115,6 +133,18 @@ export default function Index() {
                             إضافة إجراء
                         </span>
                     </InertiaLink>
+                    <div className="relative w-full max-w-md">
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search..."
+                            className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        />
+                        <span className="absolute top-2.5 left-3 text-gray-400">
+                            <i className="material-icons text-lg">search</i>
+                        </span>
+                    </div>
                     <section className="p-6">
                         <DynamicTable
                             data={[...procedures.data]}

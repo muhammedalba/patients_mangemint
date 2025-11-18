@@ -2,32 +2,33 @@
 
     use Illuminate\Support\Facades\Route;
     use Inertia\Inertia;
+
+
+
     // Controllers
-    use App\Http\Controllers\UserController;
-    use App\Http\Controllers\PatientController;
-    use App\Http\Controllers\ProcedureController;
-    use App\Http\Controllers\AppointmentController;
-    use App\Http\Controllers\MedicalRecordController;
-    use App\Http\Controllers\PaymentController;
-    use App\Http\Controllers\ServicesController;
-    use App\Http\Controllers\ServiceCategoriesController;
-    use App\Http\Controllers\ToothController;
+    use App\Http\Controllers\{
+        UserController,
+        PatientController,
+        ProcedureController,
+        AppointmentController,
+        DashboardController,
+        MedicalRecordController,
+        PaymentController,
+        ServicesController,
+        ServiceCategoriesController,
+        ToothController
+    };
 
 
-
-
-
-    // Shared middleware
-    $protected = ['auth', 'verified', 'role.redirect:doctor|admin'];
 
 
     Route::get('/', fn() => Inertia::render('welcome'))->name('home');
 
-    Route::middleware(['auth', 'verified'])->get(
-        'dashboard',
-        fn() =>
-        Inertia::render('dashboard')
-    )->name('dashboard');
+    // Shared middleware
+    $protected = ['auth', 'verified', 'role.redirect:doctor|admin'];
+
+    Route::middleware($protected)
+        ->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     /*
 |--------------------------------------------------------------------------
 | Users
