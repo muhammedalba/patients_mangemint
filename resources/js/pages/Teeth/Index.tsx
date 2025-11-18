@@ -35,7 +35,7 @@ console.log(teeth.data);
     useEffect(() => {
         const handler = setTimeout(() => {
             router.get(
-                route('tooth.index'),
+                route('teeth.index'),
                 { search },
                 { preserveState: true, replace: true },
             );
@@ -68,8 +68,8 @@ console.log(teeth.data);
                     <TableActions
                         item={teeth}
                         routes={{
-                            edit: 'tooth.edit',
-                            delete: 'tooth.destroy',
+                            edit: 'teeth.edit',
+                            delete: 'teeth.destroy',
                         }}
                         showEdit={true}
                         showView={false}
@@ -91,13 +91,13 @@ console.log(teeth.data);
     }, [props.flash]);
 
     const handleDelete = (id: number): void => {
-        router.delete(route('tooth.destroy', id));
+        router.delete(route('teeth.destroy', id));
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Teeth',
-            href: route('tooth.index'),
+            href: route('teeth.index'),
         },
     ];
 
@@ -114,7 +114,7 @@ console.log(teeth.data);
                     )}
                     <div className="mb-4 flex items-center justify-between">
                         <InertiaLink
-                            href={route('tooth.create')}
+                            href={route('teeth.create')}
                             className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
                         >
                             <span className="flex items-center gap-1">

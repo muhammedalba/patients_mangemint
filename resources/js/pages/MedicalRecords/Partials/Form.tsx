@@ -43,6 +43,7 @@ export default function MedicalRecordForm({ medicalRecord, patients, doctors, su
         pregnancy_trimester: medicalRecord?.pregnancy_trimester || '',
         clinical_notes: medicalRecord?.clinical_notes || '',
     });
+console.log(errors,'errors');
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -121,6 +122,7 @@ export default function MedicalRecordForm({ medicalRecord, patients, doctors, su
                             checked={data.has_cardiovascular_disease}
                             onCheckedChange={(checked) => setData('has_cardiovascular_disease', !!checked)}
                         />
+                         <InputError message={errors.has_cardiovascular_disease}/>
                         <Label htmlFor="has_cardiovascular_disease">Has Cardiovascular Disease</Label>
                     </div>
 

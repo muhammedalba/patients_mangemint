@@ -46,9 +46,9 @@ class MedicalRecordStoreRequest extends FormRequest
             'pregnancy_trimester' => 'nullable|in:I,II,III',
             'clinical_notes' => 'nullable|string',
             'attachments' => 'nullable|array',
-            'attachments.*' => 'file',
-            'images' => 'nullable|array',
-            'images.*' => 'file',
+            'attachments.*' => 'file|max:2048|mimes:pdf,doc,docx,',
+            'images' => 'nullable|array|',
+            'images.*' => 'file|max:4096|mimes:png,jpg,jpeg,webp',
         ];
     }
 }

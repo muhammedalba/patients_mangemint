@@ -25,14 +25,15 @@ interface EditProps extends PageProps {
 }
 
 const Edit: React.FC<EditProps> = ({ auth, payment, patients }) => {
-    const { data, setData, post, errors, processing } = useForm({
+    const { data, setData, put, errors, processing } = useForm({
         ...payment,
+
         patient_id: String(payment.patient_id),
     });
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        post(route('payments.update', payment.id));
+        put(route('payments.update', payment.id));
     }
 const breadcrumbs: BreadcrumbItem[] = [
         {

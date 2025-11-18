@@ -35,7 +35,7 @@ export default function Show({
 
     const handleDeleteTooth = (id: number) => {
         if (confirm('هل تريد حذف السن؟')) {
-            router.delete(route('tooth.destroy', id), {
+            router.delete(route('teeth.destroy', id), {
                 preserveScroll: true,
             });
         }
@@ -305,7 +305,7 @@ export default function Show({
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-2xl font-bold">الأسنان</h2>
                     <Link
-                        href={route('tooth.create', { patient_id: patient.id })}
+                        href={route('teeth.create', { patient_id: patient.id })}
                         className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
                     >
                         إضافة سن
@@ -343,7 +343,7 @@ export default function Show({
                                 </td>
                                 <td className="border px-2 py-1">
                                     <Link
-                                        href={route('tooth.edit', tooth.id)}
+                                        href={route('teeth.edit', tooth.id)}
                                         className="mr-2 rounded bg-green-500 px-2 py-1 text-white"
                                     >
                                         تعديل

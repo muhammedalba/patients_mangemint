@@ -19,7 +19,7 @@ class RedirectIfNoRole
 
         if (!$user || !$user->hasRole(explode('|', $roles))) {
             // إعادة توجيه إلى الصفحة الرئيسية
-            return redirect()->route('home')->with('error', 'ليس لديك الصلاحية للدخول');
+            return redirect()->route('register')->with('error', 'ليس لديك الصلاحية للدخول');
         }
 
         return $next($request);

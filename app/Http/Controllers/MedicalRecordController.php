@@ -84,10 +84,13 @@ class MedicalRecordController extends Controller
         // get medical record with patient and doctor relationships
         $medicalRecord->load('patient:id,name', 'doctor:id,name');
         $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->get();
+        $patients = Patient::select('id', 'name')->latest('updated_at')->get();
+
 
         return Inertia::render('MedicalRecords/Edit', [
             'medicalRecord' => $medicalRecord,
             'doctors' => $doctors,
+            'patients' => $patients,
         ]);
     }
 
@@ -96,8 +99,7 @@ class MedicalRecordController extends Controller
      */
     public function update(MedicalRecordUpdateRequest $request, MedicalRecord $medicalRecord): RedirectResponse
     {
-        // dd($request->getContent());
-        // dd($request->json()->all());
+
         $data = MedicalRecordData::fromValidated($request->validated());
         $this->service->update($medicalRecord, $data);
 

@@ -27,7 +27,7 @@ export default function EditProcedure({
     }>();
     console.log(props, 'props');
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         name: procedure.name || '',
         description: procedure.description || '',
         cost: procedure.cost || 0,
@@ -47,7 +47,7 @@ export default function EditProcedure({
 
         setIsLoading(true);
         try {
-            post(route('procedures.update', procedure.id), {
+            put(route('procedures.update', procedure.id), {
                 preserveScroll: true,
                 onSuccess: () => {
                     setSubmitted(true);

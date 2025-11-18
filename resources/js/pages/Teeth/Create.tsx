@@ -27,7 +27,7 @@ export default function CreateTeeth({
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('tooth.store'), {
+        post(route('teeth.store'), {
             onSuccess: () => reset(),
         });
     };

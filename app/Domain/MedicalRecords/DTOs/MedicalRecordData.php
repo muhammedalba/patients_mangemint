@@ -1,33 +1,5 @@
 <?php
 
-// namespace App\Domain\MedicalRecords\DTOs;
-
-// final class MedicalRecordData
-// {
-    /**
-     * Store validated attributes as a simple array.
-     * We intentionally keep this generic so it accepts any validated fields
-     * provided by the Form Request objects.
-     *
-     * @var array
-     */
-    // public array $attributes;
-
-    // private function __construct(array $attributes)
-    // {
-    //     $this->attributes = $attributes;
-    // }
-
-    // public static function fromValidated(array $validated): self
-    // {
-    //     return new self($validated);
-    // }
-
-    // public function toArray(): array
-    // {
-    //     return $this->attributes;
-    // }
-// }
 
 namespace App\Domain\MedicalRecords\DTOs;
 
@@ -38,6 +10,8 @@ final class MedicalRecordData
         public ?int $doctor_id = null,
         public ?array $attachments = null,
         public ?array $images = null,
+        public ?array $deleted_attachments = null,
+        public ?array $deleted_images = null,
         public ?string $chief_complaint = null,
         public ?string $present_illness_history = null,
         public ?string $past_dental_history = null,
@@ -68,6 +42,8 @@ final class MedicalRecordData
             doctor_id: isset($validated['doctor_id']) ? (int) $validated['doctor_id'] : null,
             attachments: $validated['attachments'] ?? null,
             images: $validated['images'] ?? null,
+            deleted_attachments: $validated['deleted_attachments'] ?? null,
+            deleted_images: $validated['deleted_images'] ?? null,
             chief_complaint: $validated['chief_complaint'] ?? null,
             present_illness_history: $validated['present_illness_history'] ?? null,
             past_dental_history: $validated['past_dental_history'] ?? null,

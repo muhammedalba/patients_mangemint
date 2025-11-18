@@ -36,6 +36,14 @@ class MedicalRecordUpdateRequest extends FormRequest
                 }
             }
         }
+
+        if ($this->has('deleted_attachments') && empty($this->input('deleted_attachments'))) {
+            $this->request->remove('deleted_attachments');
+        }
+
+        if ($this->has('deleted_images') && empty($this->input('deleted_images'))) {
+            $this->request->remove('deleted_images');
+        }
     }
 
     /**
@@ -74,9 +82,13 @@ class MedicalRecordUpdateRequest extends FormRequest
             'pregnancy_trimester' => 'nullable|in:I,II,III',
             'clinical_notes' => 'nullable|string',
             'attachments' => 'nullable|array',
-            'attachments.*' => 'file',
+            'attachments.*' => 'file|max:2048|mimes:pdf,doc,docx,',
             'images' => 'nullable|array',
-            'images.*' => 'file',
+            'images.*' => 'file|max:4096|mimes:png,jpg,jpeg,webp',
+            'deleted_attachments' => 'nullable|array',
+            'deleted_attachments.*' => 'string',
+            'deleted_images' => 'nullable|array',
+            'deleted_images.*' => 'string',
         ];
     }
 }
