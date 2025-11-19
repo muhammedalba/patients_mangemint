@@ -130,7 +130,7 @@ export default function Index({
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة سجل طبي"
-                        buttonRoute="services.create"
+                        buttonRoute="medical-records.create"
                     />
 
                     <section className="p-4">

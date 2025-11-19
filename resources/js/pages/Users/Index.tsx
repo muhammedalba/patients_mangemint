@@ -31,8 +31,8 @@ export default function Index({
     const { props } = usePage<{
         flash: { success?: string; error?: string };
     }>();
-    console.log(props.flash,'props');
-// console.log(users,'users');
+    console.log(props.flash, 'props');
+    // console.log(users,'users');
 
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
@@ -51,8 +51,8 @@ export default function Index({
             accessorKey: 'roles',
             header: 'الأدوار',
             cell: ({ row }) => {
-                const roles: string[] = row.original.roles;
-                return <span>{roles.join(', ')}</span>;
+                const roles = row.original.roles as string[] | undefined;
+                return <span>{roles?.join(', ') ?? ''}</span>;
             },
         },
         {
