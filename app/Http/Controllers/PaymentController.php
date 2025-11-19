@@ -25,7 +25,7 @@ class PaymentController extends Controller
     public function create()
     {
         // get all patients
-        $patients = Patient::select('id', 'name')->latest('name')->get();
+        $patients = Patient::select('id', 'name')->latest('updated_at')->get();
 
         return Inertia::render('Payments/Create',  ['patients' => $patients,]);
     }

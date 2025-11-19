@@ -59,6 +59,8 @@
             'patients/details/{patient}/{tooth?}',
             [PatientController::class, 'details']
         )->name('patients.details');
+        // get Tooth Procedures
+        Route::get('/patients/{patient}/tooth/{tooth}/procedures', [PatientController::class, 'getToothProcedures'])->name('patients.tooth.procedures');
     });
 
     /*

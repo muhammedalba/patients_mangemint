@@ -125,7 +125,7 @@ class ProcedureController extends Controller
 
     public function getTeeth(Patient $patient)
     {
-        $teeth = Tooth::where('patient_id', $patient->id)->select('id', 'tooth_number')->get();
+        $teeth = $patient->teeth()->select('id', 'tooth_number', 'status')->get();
 
         return response()->json(['teeth' => $teeth]);
     }

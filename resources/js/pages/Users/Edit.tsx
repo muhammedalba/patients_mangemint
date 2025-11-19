@@ -40,7 +40,6 @@ export default function EditUser({ user }: { user: User }) {
         { key: 'admin', label: 'مدير' },
         { key: 'doctor', label: 'طبيب' },
         { key: 'receptionist', label: 'استقبال' },
-        { key: 'patient', label: 'مريض' },
     ];
 
     // التبديل بين إضافة/إزالة الدور

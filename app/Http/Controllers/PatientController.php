@@ -129,14 +129,30 @@ class PatientController extends Controller
         return Inertia::render('Patients/Details', $patientDetails);
     }
 
-    public function getTeeth(Patient $patient)
+
+    // public function getTeeth(Patient $patient)
+    // {
+    //     $teeth = $patient->teeth()->select('id', 'tooth_number', 'status')->get();
+
+    //     return response()->json(['teeth' => $teeth]);
+    // }
+
+    // Get Tooth Procedures
+    public function getToothProcedures(Patient $patient, $toothId)
     {
-        $teeth = $patient->teeth()->select('id', 'tooth_number', 'status')->get();
-
-        return response()->json(['teeth' => $teeth]);
+        try {
+            $toothProcedures = $this->service->getToothProcedures($patient, $toothId);
+            return response()->json(['tooth_procedures' => $toothProcedures]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to get tooth procedures', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'patient_id' => $patient->id,
+                'tooth_id' => $toothId,
+            ]);
+            return response()->json(['error' => 'Something went wrong while fetching tooth procedures.'], 500);
+        }
     }
-
-
 
 
 

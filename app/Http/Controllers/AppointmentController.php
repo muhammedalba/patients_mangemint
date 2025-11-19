@@ -41,7 +41,10 @@ class AppointmentController extends Controller
             ->select('id', 'name')->latest('name')
             ->get();
         return Inertia::render('Appointments/Create', [
-            'patients' => Patient::all(['id', 'name']),
+            'patients' => Patient::select('id', 'name')
+                ->latest('updated_at')
+                ->get(),
+
             'doctors' => User::role('doctor')->get(['id', 'name']), // Assuming you have a 'doctor' role
             'services' => $services_category,
         ]);

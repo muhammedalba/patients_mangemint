@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Domain\MedicalRecords\Repositories;
 
 use App\Models\MedicalRecord;
@@ -9,24 +8,25 @@ use Illuminate\Cache\TaggableStore;
 
 class MedicalRecordRepository
 {
-    /**
-     * Base query with relationships.
-     */
+    private function getCacheStore()
+    {
+        return Cache::getStore();
+    }
+
     public function query()
     {
-        return MedicalRecord::with('patient:id,name', 'doctor:id,name')->select('id', 'patient_id', 'doctor_id', 'chief_complaint', 'created_at', 'updated_at');
+        return MedicalRecord::with('patient:id,name', 'doctor:id,name')
+            ->select('id', 'patient_id', 'doctor_id', 'chief_complaint', 'created_at', 'updated_at');
     }
 
     public function list(?string $search, int $perPage = 10): LengthAwarePaginator
     {
         $page = request('page', 1);
         $cacheKey = "medical_records.page.{$page}.search.{$search}";
-
-        $store = Cache::getStore();
+        $store = $this->getCacheStore();
 
         $build = function () use ($search, $perPage) {
             $q = $this->query();
-
             if ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('chief_complaint', 'like', "%{$search}%")
@@ -34,7 +34,6 @@ class MedicalRecordRepository
                         ->orWhereHas('doctor', fn($q3) => $q3->where('name', 'like', "%{$search}%"));
                 });
             }
-
             return $q->latest('updated_at')->paginate($perPage)->withQueryString();
         };
 
@@ -48,36 +47,26 @@ class MedicalRecordRepository
     public function create(array $data): MedicalRecord
     {
         $record = MedicalRecord::create($data);
-
-        $store = Cache::getStore();
-        if ($store instanceof TaggableStore) {
-            Cache::tags('medical_records')->flush();
-        } else {
-            Cache::flush();
-        }
-
+        $this->clearCache();
         return $record;
     }
 
-    public function update(MedicalRecord $medicalRecord, array $data): MedicalRecord
+    public function update(MedicalRecord $record, array $data): MedicalRecord
     {
-        $medicalRecord->update($data);
-
-        $store = Cache::getStore();
-        if ($store instanceof TaggableStore) {
-            Cache::tags('medical_records')->flush();
-        } else {
-            Cache::flush();
-        }
-
-        return $medicalRecord;
+        $record->update($data);
+        $this->clearCache();
+        return $record;
     }
 
-    public function delete(MedicalRecord $medicalRecord): void
+    public function delete(MedicalRecord $record): void
     {
-        $medicalRecord->delete();
+        $record->delete();
+        $this->clearCache();
+    }
 
-        $store = Cache::getStore();
+    private function clearCache(): void
+    {
+        $store = $this->getCacheStore();
         if ($store instanceof TaggableStore) {
             Cache::tags('medical_records')->flush();
         } else {
@@ -85,3 +74,4 @@ class MedicalRecordRepository
         }
     }
 }
+

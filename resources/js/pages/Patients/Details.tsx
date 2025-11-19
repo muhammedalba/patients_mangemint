@@ -322,7 +322,7 @@ export default function Show({
                         </tr>
                     </thead>
                     <tbody>
-                        {patient.teeth.map((tooth, i) => (
+                        {patient?.teeth?.map((tooth, i) => (
                             <tr
                                 key={tooth.id}
                                 className={

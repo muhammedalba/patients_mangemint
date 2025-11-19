@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class MedicalRecord extends Model
 {
     use HasFactory;
@@ -39,16 +40,15 @@ class MedicalRecord extends Model
         'attachments' => 'array',
     ];
 
-public function patient() {
-    return $this->belongsTo(Patient::class);
-}
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
 
-public function procedures() {
-    return $this->hasMany(Procedure::class);
-}
 
-    public function doctor() {
+
+    public function doctor()
+    {
         return $this->belongsTo(User::class, 'doctor_id');
     }
 }
-

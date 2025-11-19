@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Domain\Users\Repositories;
 
 use App\Models\User;
@@ -9,46 +8,64 @@ use Illuminate\Cache\TaggableStore;
 
 class UserRepository
 {
+    private function getCacheStore()
+    {
+        return Cache::getStore();
+    }
+
     public function create(array $data): User
     {
-        Cache::flush();
-        return User::create($data);
+        $user = User::create($data);
+        $this->clearCache();
+        return $user;
     }
 
     public function update(User $user, array $data): User
     {
-        Cache::flush();
         $user->update($data);
+        $this->clearCache();
         return $user;
     }
 
     public function delete(User $user): void
     {
-        Cache::flush();
         $user->delete();
+        $this->clearCache();
     }
 
     public function list(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         $page = request('page', 1);
         $cacheKey = "users.page.{$page}.search." . ($filters['search'] ?? '');
-        $store = Cache::getStore();
-        $build = function () use ($filters) {
+        $store = $this->getCacheStore();
+
+        $build = function () use ($filters, $perPage) {
             $query = User::query()->with('roles:name,id')
                 ->select(['id', 'name', 'email', 'phone']);
+
             if (!empty($filters['search'])) {
                 $query->where(function ($q) use ($filters) {
                     $q->where('name', 'like', "%{$filters['search']}%")
-                        ->orWhere('email', 'like', "%{$filters['search']}%");
+                      ->orWhere('email', 'like', "%{$filters['search']}%");
                 });
             }
 
-            return $query->latest('updated_at')->paginate(10)->withQueryString();
+            return $query->latest('updated_at')->paginate($perPage)->withQueryString();
         };
+
         if ($store instanceof TaggableStore) {
             return Cache::tags('users')->remember($cacheKey, now()->addMinutes(10), $build);
         }
-
         return Cache::remember($cacheKey, now()->addMinutes(10), $build);
+    }
+
+    private function clearCache(): void
+    {
+        $store = $this->getCacheStore();
+        if ($store instanceof TaggableStore) {
+            Cache::tags('users')->flush();
+        } else {
+            Cache::flush();
+        }
     }
 }
