@@ -18,10 +18,12 @@ return new class extends Migration
             // tooth number
             $table->string('tooth_number');
             // status
-            $table->string('status')->nullable();
+            $table->string('status')->nullable()->index();
             // notes
             $table->text('notes')->nullable();
+
             $table->timestamps();
+            $table->unique(['patient_id', 'tooth_number']);
         });
     }
 

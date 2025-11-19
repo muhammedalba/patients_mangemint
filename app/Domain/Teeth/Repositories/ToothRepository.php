@@ -45,7 +45,6 @@ class ToothRepository
                 ->when($search, function ($query) use ($search) {
                     $query->where('tooth_number', 'like', "%{$search}%")
                         ->orWhere('status', 'like', "%{$search}%")
-                        ->orWhere('notes', 'like', "%{$search}%")
                         ->orWhereHas('patient', fn($q) => $q->where('name', 'like', "%{$search}%"));
                 })
                 ->latest('updated_at')

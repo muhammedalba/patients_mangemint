@@ -89,7 +89,8 @@ class AppointmentRepository
                     })->orWhereHas('service', function ($q) use ($search) {
                         $q->where('name', 'like', "%{$search}%");
                     })->orWhere('date', 'like', "%{$search}%")
-                        ->orWhere('times', 'like', "%{$search}%")
+                        ->orWhere('start_time', 'like', "%{$search}%")
+                        ->orWhere('end_time', 'like', "%{$search}%")
                         ->orWhere('status', 'like', "%{$search}%");
                 });
             }

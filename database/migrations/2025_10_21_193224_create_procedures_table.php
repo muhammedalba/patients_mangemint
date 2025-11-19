@@ -5,21 +5,23 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    public function up(): void {
+    public function up(): void
+    {
         Schema::create('procedures', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->index();
             $table->text('description')->nullable();
             $table->decimal('cost', 10, 2)->default(0);
             $table->integer('duration_minutes')->nullable();
             $table->integer('follow_up_days')->nullable();
             $table->foreignId('tooth_id')->constrained('teeth')->onDelete('cascade');
-
+            $table->fullText('description');
             $table->timestamps();
         });
     }
 
-    public function down(): void {
+    public function down(): void
+    {
         Schema::dropIfExists('procedures');
     }
 };

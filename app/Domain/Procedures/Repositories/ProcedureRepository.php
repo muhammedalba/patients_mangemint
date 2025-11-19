@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Domain\Procedures\Repositories;
 
 use App\Models\Procedure;
@@ -47,13 +48,20 @@ class ProcedureRepository
         $build = function () use ($search, $perPage) {
             return Procedure::with(['tooth:id,tooth_number,patient_id', 'tooth.patient:id,name'])
                 ->select(['id', 'name', 'description', 'cost', 'tooth_id'])
-                ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhereHas('tooth.patient', fn($q2) => $q2->where('name', 'like', "%{$search}%")))
+                ->when($search, function ($q) use ($search) {
+                    $q->where(function ($q) use ($search) {
+                        $q->where('procedures.name', 'like', "%{$search}%")
+                            ->orWhere('procedures.description', 'like', "%{$search}%")
+                            ->orWhereHas('tooth.patient', function ($q2) use ($search) {
+                                $q2->where('patients.name', 'like', "%{$search}%");
+                            });
+                    });
+                })
                 ->latest('updated_at')
                 ->paginate($perPage)
                 ->withQueryString();
         };
+
 
         if ($store instanceof TaggableStore) {
             return Cache::tags('procedures')->remember($cacheKey, now()->addMinutes(10), $build);

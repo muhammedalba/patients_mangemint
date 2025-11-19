@@ -48,10 +48,8 @@ class AppointmentService
             return $this->repo->list($search, $perPage);
         } catch (\Throwable $e) {
             Log::error('Appointment list failed', [
-                'appointment_id' => $appointment->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'data' => $data->toArray(),
             ]);
             throw $e;
         }

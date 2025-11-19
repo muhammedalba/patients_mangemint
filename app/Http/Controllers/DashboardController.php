@@ -23,16 +23,20 @@ class DashboardController extends Controller
             $today = Carbon::today();
             $startOfMonth = Carbon::now()->startOfMonth();
 
-            // المرضى
+            // get Patient
             $patientsToday = Patient::whereDate('created_at', $today)->count();
             $patientsMonth = Patient::whereDate('created_at', '>=', $startOfMonth)->count();
             $totalPatients = Patient::count();
 
-            // المواعيد حسب الحالة
+
+            // get Appointment
             $appointments = Appointment::select('status', DB::raw('count(*) as total'))
                 ->groupBy('status')
                 ->get();
-
+            $appointmentsToday = Appointment::with(['patient:id,name', 'doctor:id,name', 'service:id,name'])
+                ->whereDate('date', $today)
+                ->orderBy('start_time')
+                ->get();
             // أكثر الإجراءات طلبًا (حسب عدد المرضى الذين لديهم إجراء)
             $topProcedures = Procedure::select('procedures.name', DB::raw('count(procedures.id) as total'))
                 ->join('teeth', 'procedures.tooth_id', '=', 'teeth.id')
@@ -43,14 +47,13 @@ class DashboardController extends Controller
                 ->get();
 
 
-            // الإيرادات
+            // Payment
             $revenueMonth = Payment::whereDate('payment_date', '>=', $startOfMonth)->sum('amount');
             $revenueTotal = Payment::sum('amount');
-
-            // المستخدمين حسب الدور
+            // get users
             $usersByRole = Role::withCount('users')->get();
 
-            // الأطباء
+            // doctor
             $doctorsCount = User::role('doctor')->count();
 
             return [
@@ -63,9 +66,9 @@ class DashboardController extends Controller
                 'revenue_total' => $revenueTotal,
                 'users_by_role' => $usersByRole,
                 'doctors_count' => $doctorsCount,
+                'appointmentsToday'=>$appointmentsToday
             ];
         });
-// @dd($stats);
         return Inertia::render('dashboard', [
             'stats' => $stats
         ]);
