@@ -54,7 +54,7 @@ export default function TableActions({
 
             {showDelete && routes.delete && onDelete && (
                 <ConfirmDialog
-                    message={confirmMessage}
+                    message={confirmMessage.toString()}
                     onConfirm={() => onDelete(item.id)}
                     trigger={
                         <button className="cursor-pointer text-xs font-bold text-red-500">

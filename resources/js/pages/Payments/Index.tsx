@@ -1,4 +1,3 @@
-import { AppShell } from '@/components/app-shell';
 import { BreadcrumbItem, PageProps } from '@/types';
 import { Inertia } from '@inertiajs/inertia';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -8,6 +7,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import { DynamicTable } from '@/components/DynamicTable';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { Payment } from '@/types/payment';
@@ -28,8 +28,7 @@ const Index: React.FC<IndexProps> = () => {
     }>().props;
     console.log(payments, 'payments');
     console.log(filters, 'filters');
-    console.log(flash,'flash');
-
+    console.log(flash, 'flash');
 
     const columns: ColumnDef<Payment>[] = [
         {
@@ -72,7 +71,7 @@ const Index: React.FC<IndexProps> = () => {
     const [isLoading, setIsLoading] = useState(true);
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Payments',
+            title: 'الدفعات',
             href: route('payments.index'),
         },
     ];
@@ -83,6 +82,7 @@ const Index: React.FC<IndexProps> = () => {
             return () => clearTimeout(timer);
         }
     }, [flash]);
+
     useEffect(() => {
         const handler = setTimeout(() => {
             setIsLoading(true);
@@ -99,39 +99,42 @@ const Index: React.FC<IndexProps> = () => {
 
         return () => clearTimeout(handler);
     }, [search]);
+
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="الدفعات" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <div>
+
             {showToast && (
                 <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
                     {flash?.success || flash?.error}
                 </div>
             )}
-            <AppShell>
-                <Head title="Payments" />
-                <div className="relative w-full max-w-md">
-                    <input
-                        type="text"
+
+                    <h1 className="mb-4 text-2xl font-bold">الدفعات</h1>
+                    {showToast && (
+                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
+                            {flash?.success || flash?.error}
+                        </div>
+                    )}
+
+                    <SearchBar
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search..."
-                        className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        onChange={setSearch}
+                        showSearch={true}
+                        showButton={true}
+                        buttonLabel="إضافة دفعة"
+                        buttonRoute="payments.create"
                     />
-                    <span className="absolute top-2.5 left-3 text-gray-400">
-                        <i className="material-icons text-lg">search</i>
-                    </span>
+
+                    <section className="p-4">
+                        <DynamicTable data={payments?.data} columns={columns} />
+                    </section>
                 </div>
-                <div className="p-4">
-                    <div className="mb-4 flex items-center justify-between">
-                        <h1>All Payments</h1>
-                        <Link href={route('payments.create')}>
-                            <Button>Add Payment</Button>
-                        </Link>
-                    </div>
-                    <DynamicTable data={payments?.data} columns={columns} />
-                </div>
-            </AppShell>
-            <Pagination links={payments?.links} />
+                <Pagination links={payments?.links} />
+            </div>
         </AppLayout>
     );
 };

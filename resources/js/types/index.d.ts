@@ -7,6 +7,7 @@ export type User = {
 
 export type Tooth = {
     id: number;
+    name: string;
     tooth_number: string;
     status: string;
     notes: string;
@@ -38,7 +39,7 @@ export type Appointment = {
     id: number;
     patient_id: number;
     user_id: number;
-    procedure_id: number;
+    service_id: number;
     appointment_date: string;
     notes?: string;
     status: 'scheduled' | 'completed' | 'canceled';
@@ -112,4 +113,10 @@ export type Service = {
     description?: string;
     price: number;
     category: string;
+};
+
+export type ServiceCategory = {
+    id: number;
+    name: string;
+    services: Service[];
 };

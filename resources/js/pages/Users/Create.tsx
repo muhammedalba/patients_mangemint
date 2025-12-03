@@ -3,7 +3,7 @@ import { FormInput } from '@/components/FormInput';
 import { FormRoles } from '@/components/FormRoles';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
@@ -48,12 +48,13 @@ export default function CreateUser() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Create User', href: '/CreateUser' },
+        { title: 'المستخدمون', href: route('users.index')},
+        { title: 'إضافة مستخدم', href: route('users.create')},
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="users" />
+            <Head title="إضافة مستخدم" />
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     إضافة مستخدم
@@ -111,11 +112,17 @@ export default function CreateUser() {
                         />
                     </div>
 
-                    <div className="mt-4 flex items-center justify-center">
+                    <div className="flex items-center justify-end space-x-2">
+                        <Link
+                            href={route('users.index')}
+                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                        >
+                            إنهاء
+                        </Link>
                         <FormButton
                             processing={processing}
                             label="حفظ"
-                            loadingLabel="جارِ الحفظ..."
+                            loadingLabel="جارِ الحفظ ..."
                         />
                     </div>
                 </form>

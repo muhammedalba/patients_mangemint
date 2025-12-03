@@ -24,6 +24,7 @@ export default function EditUser({ user }: { user: User }) {
     console.log(props, 'user-edit');
     console.log(user, 'user-user');
     const { data, setData, post, processing, errors } = useForm({
+        _method: 'put',
         name: user.name || '',
         email: user.email || '',
         password: '',
@@ -57,24 +58,23 @@ export default function EditUser({ user }: { user: User }) {
         setIsLoading(true);
         try {
             post(route('users.update', user.id), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setSubmitted(true);
-                setTimeout(() => setSubmitted(false), 2500);
-            },
-        });
-        }
-        catch (error) {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSubmitted(true);
+                    setTimeout(() => setSubmitted(false), 2500);
+                },
+            });
+        } catch (error) {
             console.error(error);
         } finally {
             setIsLoading(false);
         }
-
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-             title: `Update: ${user.name}`, href: route('patients.edit', user.id),
+            title: `Update: ${user.name}`,
+            href: route('patients.edit', user.id),
         },
     ];
     if (isLoading) return <LoadingPage />;

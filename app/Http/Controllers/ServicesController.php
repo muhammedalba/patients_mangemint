@@ -46,7 +46,7 @@ class ServicesController extends Controller
 
 
         // get all services categories to show in select input
-        $categories = ServiceCategory::select('id', 'name')->orderBy('name', 'asc')->get();
+        $categories = ServiceCategory::select('id', 'name')->latest('name')->get();
 
         return Inertia::render('Services/Create', [
             'categories' => $categories,
@@ -86,7 +86,7 @@ class ServicesController extends Controller
     public function edit(Service $service)
     {
         // get all services categories to show in select input
-        $categories = ServiceCategory::select('id', 'name')->orderBy('name', 'asc')->get();
+        $categories = ServiceCategory::select('id', 'name')->latest('name')->get();
 
         return Inertia::render('Services/Edit', [
             'service' => $service,

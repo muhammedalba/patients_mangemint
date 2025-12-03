@@ -27,7 +27,7 @@ class ServiceCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => Str::limit(fake()->unique()->name(), 50),
+            'name' => Str::limit(fake()->unique()->name(), 25),
             'description' => Str::random(10),
 
 

@@ -15,6 +15,37 @@ class MedicalRecordUpdateRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        if ($this->has('attachments')) {
+            $attachments = $this->input('attachments');
+            if (is_array($attachments)) {
+                $allStrings = collect($attachments)->every(fn($item) => is_string($item));
+                if ($allStrings) {
+                    $this->request->remove('attachments');
+                }
+            }
+        }
+
+        if ($this->has('images')) {
+            $images = $this->input('images');
+            if (is_array($images)) {
+                $allStrings = collect($images)->every(fn($item) => is_string($item));
+                if ($allStrings) {
+                    $this->request->remove('images');
+                }
+            }
+        }
+
+        if ($this->has('deleted_attachments') && empty($this->input('deleted_attachments'))) {
+            $this->request->remove('deleted_attachments');
+        }
+
+        if ($this->has('deleted_images') && empty($this->input('deleted_images'))) {
+            $this->request->remove('deleted_images');
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -50,6 +81,14 @@ class MedicalRecordUpdateRequest extends FormRequest
             'is_pregnant' => 'boolean',
             'pregnancy_trimester' => 'nullable|in:I,II,III',
             'clinical_notes' => 'nullable|string',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'file|max:2048|mimes:pdf,doc,docx,',
+            'images' => 'nullable|array',
+            'images.*' => 'file|max:4096|mimes:png,jpg,jpeg,webp',
+            'deleted_attachments' => 'nullable|array',
+            'deleted_attachments.*' => 'string',
+            'deleted_images' => 'nullable|array',
+            'deleted_images.*' => 'string',
         ];
     }
 }

@@ -2,34 +2,12 @@ import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, Patient, Service, ServiceCategory, Tooth } from '@/types';
 import { Head, router, useForm, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
-interface Tooth {
-    id: number;
-    name: string;
-    tooth_number: string;
-}
-
-interface Patient {
-    id: number;
-    name: string;
-}
-
-interface Service {
-    id: number;
-    name: string;
-    price: number;
-}
-
-interface ServiceCategory {
-    id: number;
-    name: string;
-    services: Service[];
-}
 
 export default function CreateProcedure({
     teeth,
@@ -63,6 +41,7 @@ export default function CreateProcedure({
     );
     const [isLoading, setIsLoading] = useState(false);
     const [filteredTeeth, setFilteredTeeth] = useState(teeth);
+console.log( patients,' $patients');
 
     const handleServiceSelect = (service: { name: string; price: number }) => {
         setData('name', service.name);
@@ -106,7 +85,7 @@ export default function CreateProcedure({
     ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Procedure" />
+            <Head title=" إضافة إجراء" />
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     إضافة إجراء جديد
@@ -140,7 +119,8 @@ export default function CreateProcedure({
                         ))}
                     </div>
 
-                    <FormInput
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <FormInput
                         label=" اسم الإجراء"
                         name="name"
                         value={data.name}
@@ -166,6 +146,8 @@ export default function CreateProcedure({
                         onChange={(e) => setData('cost', e.target.value)}
                         placeholder="كلفة الإجراء"
                     />
+                    </div>
+
 
                     <div>
                         <label

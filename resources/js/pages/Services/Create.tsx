@@ -1,6 +1,9 @@
+import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
+import { FormSelect } from '@/components/FormSelect';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
@@ -36,129 +39,83 @@ export default function CreateService() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Services', href: route('services.index') },
-        { title: 'Add new service', href: route('services.create') },
+        { title: 'الخدمات الطبية', href: route('services.index') },
+        { title: 'إضافة خدمة طبية', href: route('services.create') },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Add new service" />
-            <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+            <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
-                    Add new service
+                    إضافة خدمة طبية
                 </h1>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* select category */}
-                    <div>
-                        <label
-                            htmlFor="category_id"
-                            className="mb-2 block text-gray-700"
-                        >
-                            Category
-                        </label>
-                        <select
-                            id="category_id"
-                            name="category_id"
-                            value={data.category_id}
-                            onChange={(e) =>
-                                setData('category_id', e.target.value)
-                            }
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        >
-                            <option value="">Select a category</option>
-                            {categories.map((category: any) => (
-                                <option key={category.id} value={category.id}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
+                <form
+                    onSubmit={handleSubmit} className="space-y-4"
+                >
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <FormSelect
+                        label="الفئة"
+                        name="category_id"
+                        value={data.category_id}
+                        onChange={(val: string) => setData('category_id', val)}
+                        options={[
+                            { value: '', label: 'Select a category' },
+                            ...(categories.map((category: any) => ({
+                                value: String(category.id),
+                                label: category.name,
+                            })) ?? []),
+                        ]}
+                        error={errors.category_id}
+                    />
+
+                    <FormInput
+                        label="اسم الخدمة"
+                        type="text"
+                        name="name"
+                        value={data.name}
+                        onChange={(val: string) => setData('name', val)}
+                        placeholder="اسم الخدمة "
+                        error={errors.name}
+                    />
+
+                    <FormInput
+                        label="التكلفة"
+                        type="number"
+                        name="price"
+                        value={data.price}
+                        onChange={(val: string) =>
+                            setData('price', parseFloat(val))
+                        }
+                        placeholder="تكلفة الخدمة"
+                        error={errors.price}
+                    />
+
+                    <FormInput
+                        label="الوصف"
+                        type="textarea"
+                        name="description"
+                        value={data.description}
+                        onChange={(val: string) => setData('description', val)}
+                        placeholder="وصف الخدمة"
+                        error={errors.description}
+                    />
                     </div>
-                    <div>
-                        <label
-                            htmlFor="name"
-                            className="mb-2 block text-gray-700"
+
+                    <div className="flex items-center justify-end space-x-2">
+                        <Link
+                            href={route('services.index')}
+                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
                         >
-                            Name
-                        </label>
-                        <input
-                            id="name"
-                            type="text"
-                            name="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            placeholder="Service name"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            إنهاء
+                        </Link>
+
+                        <FormButton
+                            processing={processing}
+                            label="حفظ"
+                            loadingLabel="جارِ الحفظ ..."
                         />
-                        {errors.name && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.name}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label
-                            htmlFor="price"
-                            className="mb-2 block text-gray-700"
-                        >
-                            Price
-                        </label>
-                        <input
-                            id="price"
-                            type="number"
-                            name="price"
-                            value={data.price}
-                            onChange={(e) =>
-                                setData('price', parseFloat(e.target.value))
-                            }
-                            placeholder="Service price"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                        {errors.price && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.price}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label
-                            htmlFor="description"
-                            className="mb-2 block text-gray-700"
-                        >
-                            Description
-                        </label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            value={data.description}
-                            onChange={(e) =>
-                                setData('description', e.target.value)
-                            }
-                            placeholder="Service description"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                            rows={3}
-                        ></textarea>
-                        {errors.description && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.description}
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="mt-4 text-center">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className={`rounded-lg px-6 py-2 font-semibold text-white transition-all duration-200 ${
-                                processing
-                                    ? 'cursor-not-allowed bg-blue-400'
-                                    : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
-                        >
-                            {processing ? 'Saving ...' : 'Save Service'}
-                        </button>
                     </div>
                 </form>
             </div>

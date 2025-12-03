@@ -36,7 +36,7 @@ console.log(teeth.data);
     useEffect(() => {
         const handler = setTimeout(() => {
             router.get(
-                route('tooth.index'),
+                route('teeth.index'),
                 { search },
                 { preserveState: true, replace: true },
             );
@@ -59,10 +59,6 @@ console.log(teeth.data);
         }
     }, [props.flash]);
 
-    const handleDelete = (id: number): void => {
-        router.delete(route('tooth.destroy', id));
-    };
-
     const columns: ColumnDef<Teeth>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'patient.name', accessorKey: 'patient.name', header: 'الاسم' },
@@ -82,8 +78,8 @@ console.log(teeth.data);
                     <TableActions
                         item={teeth}
                         routes={{
-                            edit: 'tooth.edit',
-                            delete: 'tooth.destroy',
+                            edit: 'teeth.edit',
+                            delete: 'teeth.destroy',
                         }}
                         showEdit={true}
                         showView={false}
@@ -96,12 +92,24 @@ console.log(teeth.data);
         },
     ];
 
+    useEffect(() => {
+        if (props.flash?.success) {
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [props.flash]);
+
+    const handleDelete = (id: number): void => {
+        router.delete(route('teeth.destroy', id));
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'الأسنان',
-            href: route('tooth.index'),
+            href: route('teeth.index'),
         },
-    ];
+    ]
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -114,13 +122,14 @@ console.log(teeth.data);
                             {props.flash?.success || props.flash?.error}
                         </div>
                     )}
+
                     <SearchBar
                         value={search}
                         onChange={setSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة سن"
-                        buttonRoute="tooth.create"
+                        buttonRoute="teeth.create"
                     />
 
                     <section className="p-4">

@@ -20,12 +20,12 @@ class UserController extends Controller
 
     public function index()
     {
-        $search = request('search');
-        $users = $this->userService->listUsers($search);
+         $filters = request()->only('search');
+        $users = $this->userService->listUsers($filters);
 
         return Inertia::render('Users/Index', [
             'users'   => $users,
-            'filters' => compact('search'),
+            'filters' => $filters,
         ]);
     }
 

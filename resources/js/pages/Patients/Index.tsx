@@ -67,7 +67,7 @@ export default function Index() {
         { id: 'name', accessorKey: 'name', header: 'الاسم الكامل' },
         {
             id: 'age',
-            header: 'Age',
+            header: 'العمر',
             cell: ({ row }) => {
                 const p = row.original;
                 return (
@@ -76,6 +76,12 @@ export default function Index() {
                     </td>
                 );
             },
+        },
+        { id: 'gender', accessorKey: 'gender', header: 'الجنس' },
+        {
+            id: 'marital_status',
+            accessorKey: 'marital_status',
+            header: 'الحالة الاجتماعية',
         },
         {
             id: 'contact',
@@ -127,12 +133,6 @@ export default function Index() {
                     </td>
                 );
             },
-        },
-        { id: 'gender', accessorKey: 'gender', header: 'الجنس' },
-        {
-            id: 'marital_status',
-            accessorKey: 'marital_status',
-            header: 'الحالة الاجتماعية',
         },
         {
             id: 'actions',

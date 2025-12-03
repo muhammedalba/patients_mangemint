@@ -9,6 +9,7 @@ use App\Models\Patient;
 use App\Models\User;
 use App\Domain\MedicalRecords\DTOs\MedicalRecordData;
 use App\Domain\MedicalRecords\Services\MedicalRecordService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -44,8 +45,8 @@ class MedicalRecordController extends Controller
      */
     public function create(): Response
     {
-        $patients = Patient::select('id', 'name')->orderBy('name', 'asc')->get();
-        $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->select('id', 'name')->orderBy('name', 'asc')->get();
+        $patients = Patient::select('id', 'name')->latest('updated_at')->get();
+        $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->select('id', 'name')->latest('name')->get();
         return Inertia::render('MedicalRecords/Create', [
             'patients' => $patients,
             'doctors' => $doctors,
@@ -83,10 +84,13 @@ class MedicalRecordController extends Controller
         // get medical record with patient and doctor relationships
         $medicalRecord->load('patient:id,name', 'doctor:id,name');
         $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->get();
+        $patients = Patient::select('id', 'name')->latest('updated_at')->get();
+
 
         return Inertia::render('MedicalRecords/Edit', [
             'medicalRecord' => $medicalRecord,
             'doctors' => $doctors,
+            'patients' => $patients,
         ]);
     }
 
@@ -95,8 +99,7 @@ class MedicalRecordController extends Controller
      */
     public function update(MedicalRecordUpdateRequest $request, MedicalRecord $medicalRecord): RedirectResponse
     {
-        // dd($request->getContent());
-        // dd($request->json()->all());
+
         $data = MedicalRecordData::fromValidated($request->validated());
         $this->service->update($medicalRecord, $data);
 
@@ -111,5 +114,12 @@ class MedicalRecordController extends Controller
         $this->service->delete($medicalRecord);
 
         return redirect()->route('medical-records.index')->with('success', 'Medical record deleted successfully.');
+    }
+
+    public function download(MedicalRecord $medicalRecord)
+    {
+        $medicalRecord->load('patient:id,name', 'doctor:id,name');
+        $pdf = Pdf::loadView('medical_records.pdf', ['medicalRecord' => $medicalRecord]);
+        return $pdf->download('medical-record-' . $medicalRecord->id . '.pdf');
     }
 }

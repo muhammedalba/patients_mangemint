@@ -14,8 +14,8 @@ interface PatientFormData {
   address?: string;
   notes?: string;
   birth_date: string;
-  gender: 'ذكر' | 'أنثى' | '';
-  marital_status: 'عازب' | 'متزوج' | 'مطلق' | 'أرمل' | '';
+  gender: 'male' | 'female' | '';
+  marital_status: 'single' | 'married' | 'divorced' | 'widow' | '';
 }
 
 export default function CreatePatient() {
@@ -96,8 +96,8 @@ export default function CreatePatient() {
               value={data.gender}
               onChange={(val) => setData('gender', val)}
               options={[
-                { value: 'ذكر', label: 'ذكر' },
-                { value: 'أنثى', label: 'أنثى' },
+                { value: 'male', label: 'ذكر' },
+                { value: 'female', label: 'أنثى' },
               ]}
               error={errors.gender}
             />
@@ -108,10 +108,10 @@ export default function CreatePatient() {
               value={data.marital_status}
               onChange={(val) => setData('marital_status', val)}
               options={[
-                { value: 'عازب', label: 'عازب' },
-                { value: 'متزوج', label: 'متزوج' },
-                { value: 'مطلق', label: 'مطلق' },
-                { value: 'أرمل', label: 'أرمل' },
+                { value: 'singlw', label: 'عازب' },
+                { value: 'married', label: 'متزوج' },
+                { value: 'divorced', label: 'مطلق' },
+                { value: 'widow', label: 'أرمل' },
               ]}
               error={errors.marital_status}
             />

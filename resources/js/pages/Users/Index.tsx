@@ -1,5 +1,4 @@
 import { DynamicTable } from '@/components/DynamicTable';
-import { IconTooltip } from '@/components/IconToolTip';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
@@ -32,7 +31,7 @@ export default function Index({
         flash: { success?: string; error?: string };
     }>();
     console.log(props.flash, 'props');
-    // console.log(users,'users');
+    console.log(users, 'users');
 
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
@@ -47,40 +46,21 @@ export default function Index({
         { id: 'name', accessorKey: 'name', header: 'الاسم' },
         { id: 'email', accessorKey: 'email', header: 'البريد الإلكتروني' },
         {
-            id: 'roles',
-            accessorKey: 'roles',
-            header: 'الأدوار',
-            cell: ({ row }) => {
-                const roles = row.original.roles as string[] | undefined;
-                return <span>{roles?.join(', ') ?? ''}</span>;
-            },
-        },
-        {
-            id: 'phone',
-            header: 'الهاتف',
-            cell: ({ row }) => {
-                const p = row.original;
-                return (
-                    <td className="justify-between gap-1 border px-1 py-1 text-center">
-                        {p.phone && (
-                            <>
-                                <a
-                                    href={`tel:${p.phone}`}
-                                    className="inline-block"
-                                    title="Call"
-                                >
-                                    <IconTooltip label={`${p.phone}`}>
-                                        <i className="material-icons text-xs leading-none font-bold text-green-500">
-                                            phone_enabled
-                                        </i>
-                                    </IconTooltip>
-                                </a>
-                            </>
-                        )}
-                    </td>
-                );
-            },
-        },
+  id: 'roles',
+  accessorKey: 'roles',
+  header: 'الدور',
+  cell: ({ row }) => (
+    <div className="flex gap-2">
+      {row.original.roles.map((role: any) => (
+        <span key={role.id} className="badge">
+          {role.name}
+        </span>
+      ))}
+    </div>
+  ),
+},
+
+        { id: 'phone', accessorKey: 'phone', header: 'الهاتف' },
         {
             id: 'actions',
             header: 'الإجراءات',
@@ -145,7 +125,7 @@ export default function Index({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="users" />
+            <Head title="المستخدمون" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 text-right">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">المستخدمون</h1>

@@ -49,7 +49,6 @@ class DatabaseSeeder extends Seeder
             'view dashboard',
         ]);
 
-        Role::firstOrCreate(['name' => 'patient']);
 
         $user = User::firstOrCreate(
             ['email' => 'codeProps@gmail.com'],

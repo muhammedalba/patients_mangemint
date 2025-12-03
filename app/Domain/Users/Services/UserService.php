@@ -13,9 +13,9 @@ class UserService
 {
     public function __construct(private UserRepository $repo) {}
 
-    public function listUsers(?string $search)
+    public function listUsers(array $filters = [])
     {
-        return $this->repo->list($search);
+        return $this->repo->list($filters);
     }
 
     public function createUser(UserData $data): User

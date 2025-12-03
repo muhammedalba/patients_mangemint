@@ -36,7 +36,9 @@ class ServiceRepository
             $paginator = Service::with('category')
                 ->select(['id', 'name', 'description', 'price', 'category_id'])
                 ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
-                ->orderByDesc('updated_at')
+                
+                ->orWhereHas('category', fn($q) => $q->where('name', 'like', "%{$search}%"))
+                ->latest('updated_at')
                 ->paginate($perPage)
                 ->withQueryString();
 

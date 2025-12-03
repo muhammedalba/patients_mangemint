@@ -13,6 +13,6 @@ class ToothSeeder extends Seeder
     public function run(): void
     {
 
-        Tooth::factory()->count(30)->create();
+        Tooth::factory()->count(10)->create();
     }
 }

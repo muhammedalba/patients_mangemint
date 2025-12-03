@@ -8,7 +8,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Appointment, BreadcrumbItem, PageProps, PaginatedData } from '@/types';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 const StatusBadge = ({ status }: { status: Appointment['status'] }) => {
@@ -32,17 +32,42 @@ export default function Index({
     auth: { user: { roles: string[] } };
 }>) {
     console.log(appointments, 'appointments.data');
+    console.log(auth, 'auth');
+
+
+    const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setIsLoading(true);
+            router.get(
+                route('appointments.index'),
+                { search },
+                {
+                    preserveState: true,
+                    replace: true,
+                    onFinish: () => setIsLoading(false),
+                },
+            );
+        }, 300);
+
+        return () => clearTimeout(handler);
+    }, [search]);
     const columns: ColumnDef<any>[] = [
-        { id: 'patient', accessorKey: 'patient', header: 'Patient' },
-        { id: 'doctor', accessorKey: 'doctor', header: 'Doctor' },
-        { id: 'procedure', accessorKey: 'procedure', header: 'Procedure' },
-        { id: 'date', accessorKey: 'date', header: 'Date' },
-        { id: 'time', accessorKey: 'time', header: 'Time' },
+        { id: 'patient', accessorKey: 'patient.name', header: 'Patient' },
+        { id: 'doctor', accessorKey: 'doctor.name', header: 'Doctor' },
+        { id: 'service', accessorKey: 'service.name', header: 'service' },
+        {
+            id: 'date',
+            accessorKey: 'date',
+            header: 'date',
+        },
+        { id: 'start_time', accessorKey: 'start_time', header: 'start_time' },
+        { id: 'end_time', accessorKey: 'end_time', header: 'end_time' },
         { id: 'status', accessorKey: 'status', header: 'Status' },
         {
             id: 'actions',
@@ -58,7 +83,7 @@ export default function Index({
                         }}
                         showEdit={true}
                         showView={false}
-                        showDelete={userHasDeletePermission}
+                        showDelete={true}
                         confirmMessage="Are you sure you want to delete this appointment?"
                         onDelete={handleDelete}
                     />
@@ -73,7 +98,7 @@ export default function Index({
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Appointments',
+            title: 'المواعيد',
             href: route('appointments.index'),
         },
     ];
@@ -81,7 +106,7 @@ export default function Index({
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Appointment" />
+            <Head title="المواعيد" />
             <div className="flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <h1 className="mb-4 text-2xl font-bold">المواعيد</h1>
 

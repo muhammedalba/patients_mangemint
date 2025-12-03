@@ -27,7 +27,7 @@ export default function EditProcedure({
     }>();
     console.log(props, 'props');
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         name: procedure.name || '',
         description: procedure.description || '',
         cost: procedure.cost || 0,
@@ -47,7 +47,7 @@ export default function EditProcedure({
 
         setIsLoading(true);
         try {
-            post(route('procedures.update', procedure.id), {
+            put(route('procedures.update', procedure.id), {
                 preserveScroll: true,
                 onSuccess: () => {
                     setSubmitted(true);
@@ -63,11 +63,11 @@ export default function EditProcedure({
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Procedures',
+            title: 'الإجراءات',
             href: route('procedures.index'),
         },
         {
-            title: 'Edit Procedure',
+            title: 'تعديل الإجراء',
             href: route('procedures.edit', procedure.id),
         },
     ];
@@ -75,7 +75,7 @@ export default function EditProcedure({
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Edit Procedure" />
+            <Head title="تعديل الإجراء" />
             <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     تعديل الإجراء

@@ -1,81 +1,99 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
-import LoadingPage from '@/components/LoadingPage';
-import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { PageProps, Patient, Procedure, User } from '@/types';
-import { Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-
-const generateTimeSlots = () => {
-    const slots = [];
-    for (let i = 9; i <= 21; i++) {
-        // From 9 AM to 9 PM
-        for (let j = 0; j < 60; j += 30) {
-            const displayHour = i % 12 === 0 ? 12 : i % 12;
-            const ampm = i < 12 || i === 24 ? 'AM' : 'PM';
-            const minutes = j === 0 ? '00' : String(j);
-            const valueHour = i < 10 ? `0${i}` : String(i);
-            const valueMinutes = j === 0 ? '00' : String(j);
-            slots.push({
-                display: `${displayHour}:${minutes} ${ampm}`,
-                value: `${valueHour}:${valueMinutes}`,
-            });
-        }
-    }
-    return slots;
-};
-
-const timeSlots = generateTimeSlots();
 
 export default function Create({
     patients,
     doctors,
-    procedures,
+    services,
 }: PageProps<{
     patients: Patient[];
     doctors: User[];
-    procedures: Procedure[];
+    services: Procedure[];
 }>) {
     const { data, setData, post, errors, processing } = useForm({
         patient_id: '',
         user_id: '',
-        procedure_id: '',
-        appointment_date: '',
-        times: [],
+        service_id: '',
+        date: '',
+        start_time: '',
         notes: '',
+        duration_slots: 1,
         status: 'scheduled',
     });
+
+    const [availableAppointments, setAvailableAppointments] = useState<
+        { start: string; end: string }[]
+    >([]);
     const [isLoading, setIsLoading] = useState(false);
-    console.log(procedures, 'procedures');
 
-    const handleTimeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOptions = Array.from(e.target.selectedOptions).map(
-            (option) => option.value,
-        );
-        setData('times', selectedOptions);
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    // جلب المواعيد المتاحة عند تغيير التاريخ أو مدة الحجز
+    const fetchAvailableAppointments = async () => {
+        // لا ترسل الطلب إذا لم يتم تحديد التاريخ
+        if (!data.date) {
+            setAvailableAppointments([]); // أفرغ القائمة إذا كان التاريخ فارغًا
+            return;
+        }
         setIsLoading(true);
         try {
-            post(route('appointments.store'));
-        } catch (error) {
-            console.error(error);
+            const response = await axios.get(
+                route('appointments.availableSlots'),
+                {
+                    params: {
+                        date: data.date,
+                        duration_slots: data.duration_slots,
+                    },
+                },
+            );
+            console.log(response.data);
+
+            setAvailableAppointments(response.data?.available_appointments);
+        } catch (err) {
+            console.error(err);
+            setAvailableAppointments([]);
         } finally {
             setIsLoading(false);
         }
     };
-    if (isLoading) return <LoadingPage />;
+
+    useEffect(() => {
+        fetchAvailableAppointments();
+        // عند تغيير التاريخ، قم بإلغاء تحديد الوقت الحالي
+        // لأن قائمة الأوقات ستتغير.
+        return () => {
+            setData('start_time', '');
+        };
+    }, [data.date, data.duration_slots, setData]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(route('appointments.store'));
+    };
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'المواعيد',
+            href: route('appointments.index'),
+        },
+        {
+            title: 'إضافة موعد',
+            href: route('appointments.create'),
+        },
+    ];
+
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="إضافة موعد " />
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
                 <h1 className="mt-2 text-center text-xl font-bold text-gray-700">
                     إضافة موعد جديد
                 </h1>
+
                 <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <FormSelect
@@ -106,40 +124,42 @@ export default function Create({
 
                         <FormSelect
                             label="اسم المعالجة"
-                            name="procedure_id"
-                            value={data.procedure_id}
+                            name="service_id"
+                            value={data.service_id}
                             onChange={(val: string) =>
-                                setData('procedure_id', val)
+                                setData('service_id', val)
                             }
-                            options={procedures.map((procedure) => ({
-                                value: String(procedure.id),
-                                label: procedure.name,
+                            options={services.map((service) => ({
+                                value: String(service.id),
+                                label: service.name,
                             }))}
-                            error={errors.procedure_id}
+                            error={errors.service_id}
                         />
 
                         <FormInput
                             label="تاريخ الموعد"
-                            name="appointment_date"
+                            name="date"
                             type="date"
-                            value={data.appointment_date}
-                            onChange={(e) =>
-                                setData('appointment_date', e.target.value)
-                            }
-                            error={errors.appointment_date}
+                            value={data.date}
+                            onChange={(e) => setData('date', e.target.value)}
+                            error={errors.date}
                         />
 
                         <FormSelect
                             label="توقيت الموعد"
-                            name="times"
-                            value={data.times}
-                            onChange={(val) => setData('times', val)}
-                            options={timeSlots.map((slot) => ({
-                                value: slot.value,
-                                label: slot.display,
-                            }))}
-                            error={errors.times}
-                            multiple
+                            name="start_time"
+                            value={data.start_time}
+                            onChange={(val: string) =>
+                                setData('start_time', val)
+                            }
+                            options={[
+                                { value: '', label: 'اختر الوقت' },
+                                ...(availableAppointments?.map((slot) => ({
+                                    value: slot.start,
+                                    label: `${slot.start} - ${slot.end}`,
+                                })) ?? []),
+                            ]}
+                            error={errors.start_time}
                         />
 
                         <FormSelect
@@ -155,43 +175,41 @@ export default function Create({
                             error={errors.status}
                         />
 
-                        <div>
-                            <label
-                                htmlFor="notes"
-                                className="mb-2 block text-gray-700"
-                            >
-                                الملاحظات
-                            </label>
-                            <textarea
-                                name="notes"
-                                placeholder="ملاحظات"
-                                id="notes"
-                                value={data.notes}
-                                onChange={(e) =>
-                                    setData('notes', e.target.value)
-                                }
-                                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            />
-                            {errors.notes && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.notes}
-                                </p>
-                            )}
-                        </div>
+                        <FormInput
+                            label="مدة الموعد (عدد الـ slots)"
+                            type="number"
+                            name="duration_slots"
+                            min={1}
+                            value={String(data.duration_slots)}
+                            onChange={(val: string) =>
+                                setData('duration_slots', Number(val))
+                            }
+                            error={errors.duration_slots}
+                        />
 
-                        <div className="flex items-center justify-end space-x-2">
-                            <Link
-                                href={route('appointments.index')}
-                                className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
-                            >
-                                إنهاء
-                            </Link>
-                            <FormButton
-                                processing={processing}
-                                label="حفظ"
-                                loadingLabel="جارِ الحفظ ..."
-                            />
-                        </div>
+                        <FormInput
+                            label="الملاحظات"
+                            name="notes"
+                            type="text"
+                            value={data.notes}
+                            onChange={(e) => setData('notes', e.target.value)}
+                            placeholder="الملاحظات"
+                            error={errors.notes}
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-end space-x-2">
+                        <Link
+                            href={route('appointments.index')}
+                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                        >
+                            إنهاء
+                        </Link>
+                        <FormButton
+                            processing={processing}
+                            label="حفظ"
+                            loadingLabel="جارِ الحفظ ..."
+                        />
                     </div>
                 </form>
             </div>

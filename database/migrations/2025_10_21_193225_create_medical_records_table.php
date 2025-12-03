@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->foreignId('doctor_id')->nullable()->constrained('users')->onDelete('set null');
 
             $table->json('attachments')->nullable();
+            $table->json('images')->nullable();
 
             // التاريخ السني والطبي
             $table->text('chief_complaint')->nullable();

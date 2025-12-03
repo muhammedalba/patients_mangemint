@@ -19,7 +19,7 @@ export default function Welcome() {
         console.log(props.flash,'flash-welcome');
 
     const links = [
-        { name: 'users', href: '/users' },
+        { name: 'المستخدمون', href: '/users' },
         { name: 'المرضى', href: '/patients' },
         { name: 'الأطباء', href: '/doctors' },
         { name: 'المواعيد', href: '/appointments' },

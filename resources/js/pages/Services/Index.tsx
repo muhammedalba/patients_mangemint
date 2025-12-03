@@ -107,7 +107,7 @@ export default function Index() {
                     />
                     <section className="p-4">
                         <DynamicTable
-                            data={[...services.data].reverse()}
+                            data={[...services.data]}
                             columns={columns}
                         />
                     </section>

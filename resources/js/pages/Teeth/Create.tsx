@@ -1,6 +1,9 @@
+import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
+import { FormSelect } from '@/components/FormSelect';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
@@ -27,111 +30,89 @@ export default function CreateTeeth({
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('tooth.store'), {
+        post(route('teeth.store'), {
             onSuccess: () => reset(),
         });
     };
     const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'Create Teeth',
-            href: '/CreateTeeth',
-        },
+        { title: 'الأسنان', href: route('teeth.index') },
+        { title: 'إضافة سن ', href: route('teeth.create') },
     ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Teeth" />
-            <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
+            <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
+                <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     إضافة سن جديد
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <select
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <FormSelect
+                            label="اسم المريض"
                             name="patient_id"
                             value={data.patient_id}
-                            onChange={(e) =>
-                                setData('patient_id', e.target.value)
+                            onChange={(val: string) =>
+                                setData('patient_id', val)
                             }
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            options={[
+                                { value: '', label: 'اختر المريض' },
+                                ...(patients.length > 0
+                                    ? patients.map((patient) => ({
+                                          value: patient.id.toString(),
+                                          label: patient.name,
+                                      }))
+                                    : [{ value: '', label: 'لا يوجد مرضى' }]),
+                            ]}
+                            error={errors.patient_id}
                             disabled={!!patient_id}
-                        >
-                            <option value="">اختر المريض</option>
-                            {patients.map((patient) => (
-                                <option key={patient.id} value={patient.id}>
-                                    {patient.name}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.patient_id && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.patient_id}
-                            </p>
-                        )}
-                    </div>
+                        />
 
-                    <div>
-                        <input
-                            type="text"
+                        <FormInput
+                            label="رقم السن"
                             name="tooth_number"
                             value={data.tooth_number}
-                            onChange={(e) =>
-                                setData('tooth_number', e.target.value)
+                            onChange={(val: string) =>
+                                setData('tooth_number', val)
                             }
                             placeholder="رقم السن"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            error={errors.tooth_number}
                         />
-                        {errors.tooth_number && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.tooth_number}
-                            </p>
-                        )}
-                    </div>
 
-                    <div>
-                        <input
-                            type="text"
+                        <FormInput
+                            label="الحالة"
                             name="status"
                             value={data.status}
-                            onChange={(e) => setData('status', e.target.value)}
+                            onChange={(val: string) => setData('status', val)}
                             placeholder="الحالة"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            error={errors.status}
                         />
-                        {errors.status && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.status}
-                            </p>
-                        )}
-                    </div>
 
-                    <div>
-                        <textarea
+                        <FormInput
+                            label="ملاحظات"
                             name="notes"
                             value={data.notes}
-                            onChange={(e) => setData('notes', e.target.value)}
+                            onChange={(val: string) => setData('notes', val)}
                             placeholder="ملاحظات"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            error={errors.notes}
                         />
-                        {errors.notes && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.notes}
-                            </p>
-                        )}
-                    </div>
+                        </div>
 
-                    <div className="mt-4 text-center">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className={`rounded-lg px-6 py-2 font-semibold text-white transition-all duration-200 ${
-                                processing
-                                    ? 'cursor-not-allowed bg-blue-400'
-                                    : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
-                        >
-                            {processing ? 'جارٍ الحفظ...' : 'حفظ'}
-                        </button>
-                    </div>
+                        <div className="flex items-center justify-end space-x-2">
+                            <Link
+                                href={route('procedures.index')}
+                                className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                            >
+                                إنهاء
+                            </Link>
+
+                            <FormButton
+                                processing={processing}
+                                label="حفظ"
+                                loadingLabel="جارِ الحفظ ..."
+                            />
+                        </div>
+
                 </form>
             </div>
         </AppLayout>

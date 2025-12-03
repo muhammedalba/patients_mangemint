@@ -43,6 +43,42 @@ export default function Show({
                             <h3 className="font-semibold">Clinical Notes:</h3>
                             <p>{medicalRecord.clinical_notes}</p>
                         </div>
+                        {medicalRecord.images && medicalRecord.images.length > 0 && (
+                            <div>
+                                <h3 className="font-semibold">Images:</h3>
+                                <div className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                                    {medicalRecord.images.map((image, index) => (
+                                        <div key={index} className="overflow-hidden rounded-lg">
+                                            <img
+                                                src={`/storage/${image}`}
+                                                alt={`Image ${index + 1}`}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {medicalRecord.attachments && medicalRecord.attachments.length > 0 && (
+                            <div>
+                                <h3 className="font-semibold">Attachments:</h3>
+                                <ul className="mt-2 list-disc space-y-1 pl-5">
+                                    {medicalRecord.attachments.map((attachment, index) => (
+                                        <li key={index}>
+                                            <a
+                                                href={`/storage/${attachment}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:underline"
+                                            >
+                                                Attachment {index + 1}
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                         {/* Add other fields as needed */}
                     </CardContent>
                 </Card>

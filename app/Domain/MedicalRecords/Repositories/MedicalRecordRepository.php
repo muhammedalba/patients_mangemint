@@ -35,7 +35,7 @@ class MedicalRecordRepository
                 });
             }
 
-            return $q->latest()->orderByDesc('updated_at')->paginate($perPage)->withQueryString();
+            return $q->latest('updated_at')->paginate($perPage)->withQueryString();
         };
 
         if ($store instanceof TaggableStore) {

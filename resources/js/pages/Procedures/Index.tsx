@@ -5,7 +5,7 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem } from '@/types';
-import { router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -21,23 +21,26 @@ interface ProcedureResponse {
     data: Procedure[];
 }
 
-export default function Index() {
+export default function Index(filters: { search?: string }) {
     const { procedures, auth } = usePage<{
         procedures: PaginatedData<ProcedureResponse>;
         auth: { user: { roles: string[] } };
+        filters: { search?: string };
     }>().props;
     const { props } = usePage<{
         flash: { success?: string; error?: string };
+        filters: { search?: string };
     }>();
     console.log(procedures, 'procedures');
-
+    const [search, setSearch] = useState(filters.search || '');
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
+    const [isLoading, setIsLoading] = useState(true);
     const [showToast, setShowToast] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const columns: ColumnDef<Procedure>[] = [
+
+    const columns: ColumnDef<any>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'patient_name', accessorKey: 'patient', header: 'اسم المريض' },
         { id: 'name', accessorKey: 'name', header: 'اسم المعالجة' },
@@ -80,6 +83,23 @@ export default function Index() {
     };
 
     useEffect(() => {
+        const handler = setTimeout(() => {
+            setIsLoading(true);
+
+            router.get(
+                route('procedures.index'),
+                { search },
+                {
+                    preserveState: true,
+                    replace: true,
+                    onFinish: () => setIsLoading(false),
+                },
+            );
+        }, 300);
+
+        return () => clearTimeout(handler);
+    }, [search]);
+    useEffect(() => {
         if (props.flash?.success) {
             setShowToast(true);
             const timer = setTimeout(() => setShowToast(false), 3000);
@@ -89,7 +109,7 @@ export default function Index() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'المعالجات',
+            title: 'الإجراءات',
             href: route('procedures.index'),
         },
     ];
@@ -97,20 +117,22 @@ export default function Index() {
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <Head title="الإجراءات" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 text-right">
                 <div>
-                    <h1 className="mb-4 text-2xl font-bold">المعالجات</h1>
+                    <h1 className="mb-4 text-2xl font-bold">الإجراء</h1>
                     {showToast && (
                         <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
                             {props.flash?.success || props.flash?.error}
                         </div>
                     )}
+
                     <SearchBar
-                        value={''}
-                        onChange={() => {}}
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
                         showSearch={false}
                         showButton={true}
-                        buttonLabel="إضافة معالجة"
+                        buttonLabel="إضافة إجراء"
                         buttonRoute="procedures.create"
                     />
                     <section className="p-4">

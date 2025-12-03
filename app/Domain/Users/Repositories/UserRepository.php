@@ -5,6 +5,7 @@ namespace App\Domain\Users\Repositories;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Cache\TaggableStore;
 
 class UserRepository
 {
@@ -27,22 +28,27 @@ class UserRepository
         $user->delete();
     }
 
-    public function list(?string $search = null, int $perPage = 10): LengthAwarePaginator
+    public function list(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         $page = request('page', 1);
-        $cacheKey = "users.page.{$page}.search.{$search}";
+        $cacheKey = "users.page.{$page}.search." . ($filters['search'] ?? '');
+        $store = Cache::getStore();
+        $build = function () use ($filters) {
+            $query = User::query()->with('roles:name,id')
+                ->select(['id', 'name', 'email', 'phone']);
+            if (!empty($filters['search'])) {
+                $query->where(function ($q) use ($filters) {
+                    $q->where('name', 'like', "%{$filters['search']}%")
+                        ->orWhere('email', 'like', "%{$filters['search']}%");
+                });
+            }
 
-        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($search, $perPage) {
-            return User::query()
-                ->select(['id', 'name', 'email', 'phone'])
-                ->when(
-                    $search,
-                    fn($q) => $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                )
-                ->orderByDesc('updated_at')
-                ->paginate($perPage)
-                ->withQueryString();
-        });
+            return $query->latest('updated_at')->paginate(10)->withQueryString();
+        };
+        if ($store instanceof TaggableStore) {
+            return Cache::tags('users')->remember($cacheKey, now()->addMinutes(10), $build);
+        }
+
+        return Cache::remember($cacheKey, now()->addMinutes(10), $build);
     }
 }

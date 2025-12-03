@@ -24,7 +24,7 @@ export default function EditTooth({ tooth }: { tooth: tooth }) {
     console.log(props);
     console.log(tooth);
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         patient_id: tooth.patient_id || '',
         tooth_number: tooth.tooth_number || '',
         status: tooth.status || '',
@@ -35,7 +35,7 @@ export default function EditTooth({ tooth }: { tooth: tooth }) {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('tooth.update', tooth.id), {
+        put(route('teeth.update', tooth.id), {
             preserveScroll: true,
             onSuccess: () => {
                 setSubmitted(true);
