@@ -52,18 +52,18 @@ export default function TableActions({
                 </IconTooltip>
             )}
 
-            {showDelete && routes.delete && onDelete && (
+            {showDelete && routes.delete && (
                 <ConfirmDialog
-                    message={confirmMessage.toString()}
+                    title="تأكيد الحذف"
+                    description={confirmMessage}
                     onConfirm={() => onDelete(item.id)}
-                    trigger={
-                        <button className="cursor-pointer text-xs font-bold text-red-500">
-                            <IconTooltip label="حذف">
-                                <i className="material-icons">delete</i>
-                            </IconTooltip>
-                        </button>
-                    }
-                />
+                >
+                    <button className="cursor-pointer text-xs font-bold text-red-500">
+                        <IconTooltip label="حذف">
+                            <i className="material-icons">delete</i>
+                        </IconTooltip>
+                    </button>
+                </ConfirmDialog>
             )}
         </div>
     );

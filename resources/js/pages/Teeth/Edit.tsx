@@ -54,7 +54,7 @@ export default function EditTooth({ tooth }: { tooth: tooth }) {
     }
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="tooth" />
+            <Head title="تعديل السن" />
             <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-8 text-center text-3xl font-bold text-gray-800">
                     تعديل السن

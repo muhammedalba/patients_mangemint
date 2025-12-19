@@ -45,7 +45,7 @@ export default function CreateService() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Add new service" />
+            <Head title="إضافة خدمة طبية" />
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     إضافة خدمة طبية
@@ -74,7 +74,7 @@ export default function CreateService() {
                         label="اسم الخدمة"
                         type="text"
                         name="name"
-                        value={data.name}
+                        value={data.name ?? ""}
                         onChange={(val: string) => setData('name', val)}
                         placeholder="اسم الخدمة "
                         error={errors.name}

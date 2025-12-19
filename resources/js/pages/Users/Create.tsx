@@ -66,7 +66,7 @@ export default function CreateUser() {
                             label="الاسم الكامل"
                             name="name"
                             value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
+                            onChange={(val) => setData('name', val)}
                             placeholder="الاسم الكامل"
                             error={errors.name}
                         />
@@ -76,7 +76,7 @@ export default function CreateUser() {
                             name="email"
                             type="email"
                             value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
+                            onChange={(val) => setData('email', val)}
                             placeholder="البريد الإلكتروني"
                             error={errors.email}
                         />
@@ -86,8 +86,8 @@ export default function CreateUser() {
                             name="password"
                             type="password"
                             value={data.password}
-                            onChange={(e) =>
-                                setData('password', e.target.value)
+                            onChange={(val) =>
+                                setData('password', val)
                             }
                             placeholder="كلمة المرور"
                             error={errors.password}
@@ -98,7 +98,7 @@ export default function CreateUser() {
                             name="phone"
                             type="text"
                             value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
+                            onChange={(val) => setData('phone', val)}
                             placeholder="رقم الهاتف"
                             error={errors.phone}
                         />

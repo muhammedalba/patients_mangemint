@@ -1,13 +1,18 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
+import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Patient, Service, ServiceCategory, Tooth } from '@/types';
-import { Head, router, useForm, Link } from '@inertiajs/react';
-import axios from 'axios';
+import {
+    BreadcrumbItem,
+    Patient,
+    Service,
+    ServiceCategory,
+    Tooth,
+} from '@/types';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
-
 
 export default function CreateProcedure({
     teeth,
@@ -20,6 +25,7 @@ export default function CreateProcedure({
     patients: Patient[];
     services_category: ServiceCategory[];
 }) {
+    console.log(services_category, 'ServiceCategories');
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         description: string;
@@ -39,35 +45,18 @@ export default function CreateProcedure({
     const [selectedTreatment, setSelectedTreatment] = useState<Service | null>(
         null,
     );
+    const [selectedPatientName, setSelectedPatientName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [filteredTeeth, setFilteredTeeth] = useState(teeth);
-console.log( patients,' $patients');
+    console.log(patients, ' $patients');
 
     const handleServiceSelect = (service: { name: string; price: number }) => {
         setData('name', service.name);
         setData('cost', service.price.toString());
     };
 
-    const handlePatientSelect = async (patientId: string) => {
-        setData('patient_id', patientId);
-        try {
-            const response = await axios.get(
-                route('procedures.getTeeth', { patient: patientId }),
-            );
-            if (response.data.teeth && Array.isArray(response.data.teeth)) {
-                setFilteredTeeth(response.data.teeth);
-                setData(
-                    'tooth_id',
-                    response.data.teeth[0]?.id?.toString() || '',
-                );
-            } else {
-                setFilteredTeeth([]);
-                setData('tooth_id', '');
-            }
-        } catch {
-            setFilteredTeeth([]);
-            setData('tooth_id', '');
-        }
+    const handlePatientSelect = (patient: Patient) => {
+        setData('patient_id', patient.id.toString());
     };
 
     const handleSubmit = (e: FormEvent) => {
@@ -91,12 +80,46 @@ console.log( patients,' $patients');
                     إضافة إجراء جديد
                 </h1>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                        <SearchInput
+                            label="اسم المريض"
+                            name="patient_id"
+                            value={selectedPatientName}
+                            onChange={(val) => setSelectedPatientName(val)}
+                            options={patients}
+                            onSelect={handlePatientSelect}
+                            placeholder="ابحث باسم المريض..."
+                            error={errors.patient_id}
+                        />
+
+                        <FormSelect
+                            label=" رقم السن"
+                            name="tooth_id"
+                            value={data.tooth_id}
+                            onChange={(val) => setData('tooth_id', val)}
+                            options={
+                                filteredTeeth && filteredTeeth.length > 0
+                                    ? filteredTeeth.map((tooth) => ({
+                                          value: tooth.id.toString(),
+                                          label: tooth.tooth_number,
+                                      }))
+                                    : [
+                                          {
+                                              value: '',
+                                              label: 'لا توجد أسنان متاحة',
+                                          },
+                                      ]
+                            }
+                            error={errors.tooth_id}
+                        />
+
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 md:grid-cols-6">
                         {services_category.map((category) => (
                             <FormSelect
                                 key={category.id}
-                                label={`اختر خدمة من ${category.name}`}
+                                label={`${category.name}`}
                                 name={`service_${category.id}`}
                                 value={data.category}
                                 onChange={(val) => {
@@ -119,92 +142,43 @@ console.log( patients,' $patients');
                         ))}
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <FormInput
-                        label=" اسم الإجراء"
-                        name="name"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        placeholder="الاسم الإجراء"
-                        error={errors.name}
-                    />
-
-                    {selectedTreatment && (
-                        <FormInput
-                            label=" المعالجة المختارة"
-                            name="treatment_name"
-                            value={selectedTreatment.name}
+                            label=" نوع الإجراء"
+                            name="name"
+                            value={data.name}
                             onChange={(e) => setData('name', e.target.value)}
-                            placeholder="المعالجة المختارة"
+                            placeholder="نوع الإجراء"
+                            error={errors.name}
                         />
-                    )}
 
-                    <FormInput
-                        label=" كلفة الإجراء"
-                        name="cost"
-                        value={data.cost}
-                        onChange={(e) => setData('cost', e.target.value)}
-                        placeholder="كلفة الإجراء"
-                    />
-                    </div>
-
-
-                    <div>
-                        <label
-                            htmlFor="description"
-                            className="mt-4 block text-right text-gray-700"
-                        >
-                            الوصف
-                        </label>
-                        <textarea
-                            name="description"
-                            title="وصف الإجراء"
-                            value={data.description}
-                            onChange={(e) =>
-                                setData('description', e.target.value)
-                            }
-                            placeholder="وصف الإجراء"
-                            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                        {errors.description && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.description}
-                            </p>
+                        {selectedTreatment && (
+                            <FormInput
+                                label=" المعالجة المختارة"
+                                name="treatment_name"
+                                value={selectedTreatment.name}
+                                onChange={(e) =>
+                                    setData('name', e.target.value)
+                                }
+                                placeholder="المعالجة المختارة"
+                            />
                         )}
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormSelect
-                        label=" اسم المريض"
-                        name="patient_id"
-                        value={data.patient_id}
-                        onChange={(val) => handlePatientSelect(val)}
-                        options={
-                            patients.length > 0
-                                ? patients.map((p) => ({
-                                      value: p.id.toString(),
-                                      label: p.name,
-                                  }))
-                                : [{ value: '', label: 'لا يوجد مرضى' }]
-                        }
-                        error={errors.patient_id}
-                    />
-
-                    <FormSelect
-                        label=" اسم السن"
-                        name="tooth_id"
-                        value={data.tooth_id}
-                        onChange={(val) => setData('tooth_id', val)}
-                        options={
-                            filteredTeeth && filteredTeeth.length > 0
-                                ? filteredTeeth.map((tooth) => ({
-                                      value: tooth.id.toString(),
-                                      label: tooth.tooth_number,
-                                  }))
-                                : [{ value: '', label: 'لا توجد أسنان متاحة' }]
-                        }
-                        error={errors.tooth_id}
-                    />
+                        <FormInput
+                            label=" كلفة الإجراء"
+                            name="cost"
+                            value={data.cost}
+                            onChange={(e) => setData('cost', e.target.value)}
+                            placeholder="كلفة الإجراء"
+                        />
+                        <FormInput
+                            label="الوصف"
+                            name="description"
+                            value={data.description}
+                            onChange={(val) => setData('description', val)}
+                            placeholder="الوصف"
+                            error={errors.description}
+                        />
                     </div>
 
                     <div className="flex items-center justify-end space-x-2">

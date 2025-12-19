@@ -39,7 +39,7 @@ export function FormSelect<T extends string>({
         }}
         className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
       >
-        {!multiple && <option value="">اختر {label}</option>}
+        {!multiple && <option value="">{label}</option>}
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
             {opt.label}

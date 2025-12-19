@@ -4,7 +4,7 @@ interface FormInputProps {
   label: string;
   name: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (val: string) => void;
   placeholder?: string;
   error?: string;
   type?: string;
@@ -29,7 +29,7 @@ export function FormInput({
         type={type}
         name={name}
         value={value}
-        onChange={onChange}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
       />

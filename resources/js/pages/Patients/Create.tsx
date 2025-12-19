@@ -56,7 +56,7 @@ export default function CreatePatient() {
               label="الاسم الكامل"
               name="name"
               value={data.name}
-              onChange={(e) => setData('name', e.target.value)}
+              onChange={(val) => setData('name', val)}
               placeholder="الاسم الكامل"
               error={errors.name}
             />
@@ -66,7 +66,7 @@ export default function CreatePatient() {
               name="email"
               type="email"
               value={data.email}
-              onChange={(e) => setData('email', e.target.value)}
+              onChange={(val) => setData('email', val)}
               placeholder="البريد الإلكتروني"
               error={errors.email}
             />
@@ -76,7 +76,7 @@ export default function CreatePatient() {
               name="phone"
               type="text"
               value={data.phone}
-              onChange={(e) => setData('phone', e.target.value)}
+              onChange={(val) => setData('phone', val)}
               placeholder="رقم الهاتف"
               error={errors.phone}
             />
@@ -86,7 +86,7 @@ export default function CreatePatient() {
               name="birth_date"
               type="date"
               value={data.birth_date}
-              onChange={(e) => setData('birth_date', e.target.value)}
+              onChange={(val) => setData('birth_date', val)}
               error={errors.birth_date}
             />
 
@@ -108,7 +108,7 @@ export default function CreatePatient() {
               value={data.marital_status}
               onChange={(val) => setData('marital_status', val)}
               options={[
-                { value: 'singlw', label: 'عازب' },
+                { value: 'single', label: 'عازب' },
                 { value: 'married', label: 'متزوج' },
                 { value: 'divorced', label: 'مطلق' },
                 { value: 'widow', label: 'أرمل' },
@@ -124,7 +124,7 @@ export default function CreatePatient() {
                 id="notes"
                 name="notes"
                 value={data.notes}
-                onChange={(e) => setData('notes', e.target.value)}
+                onChange={(val) => setData('notes', val)}
                 placeholder="Notes"
                 className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 rows={3}
