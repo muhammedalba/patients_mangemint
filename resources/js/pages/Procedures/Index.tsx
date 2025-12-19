@@ -1,10 +1,11 @@
 import { DynamicTable } from '@/components/DynamicTable';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem } from '@/types';
-import { Link as InertiaLink, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -77,6 +78,10 @@ export default function Index(filters: { search?: string }) {
             },
         },
     ];
+    const handleDelete = (id: number): void => {
+        router.delete(route('procedures.destroy', id));
+    };
+
     useEffect(() => {
         const handler = setTimeout(() => {
             setIsLoading(true);
@@ -102,13 +107,9 @@ export default function Index(filters: { search?: string }) {
         }
     }, [props.flash]);
 
-    const handleDelete = (id: number): void => {
-        router.delete(route('procedures.destroy', id));
-    };
-
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Procedures',
+            title: 'الإجراءات',
             href: route('procedures.index'),
         },
     ];
@@ -116,36 +117,25 @@ export default function Index(filters: { search?: string }) {
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <Head title="الإجراءات" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 text-right">
                 <div>
-                    <h1 className="mb-4 text-2xl font-bold">الإجراءات</h1>
+                    <h1 className="mb-4 text-2xl font-bold">الإجراء</h1>
                     {showToast && (
                         <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
                             {props.flash?.success || props.flash?.error}
                         </div>
                     )}
-                    <InertiaLink
-                        href={route('procedures.create')}
-                        className="mb-4 inline-block rounded bg-blue-500 px-4 py-2 text-white"
-                    >
-                        <span className="flex items-center gap-1">
-                            <i className="material-icons text-lg">add</i>
-                            إضافة إجراء
-                        </span>
-                    </InertiaLink>
-                    <div className="relative w-full max-w-md">
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search..."
-                            className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                        />
-                        <span className="absolute top-2.5 left-3 text-gray-400">
-                            <i className="material-icons text-lg">search</i>
-                        </span>
-                    </div>
-                    <section className="p-6">
+
+                    <SearchBar
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        showSearch={false}
+                        showButton={true}
+                        buttonLabel="إضافة إجراء"
+                        buttonRoute="procedures.create"
+                    />
+                    <section className="p-4">
                         <DynamicTable
                             data={[...procedures.data]}
                             columns={columns}

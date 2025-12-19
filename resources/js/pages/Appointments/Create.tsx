@@ -1,18 +1,9 @@
-import LoadingPage from '@/components/LoadingPage';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
+import { FormSelect } from '@/components/FormSelect';
 import AppLayout from '@/layouts/app-layout';
 import { PageProps, Patient, Procedure, User } from '@/types';
-import { useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -84,11 +75,20 @@ export default function Create({
         e.preventDefault();
         post(route('appointments.store'));
     };
-
-    if (isLoading) return <LoadingPage />;
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'المواعيد',
+            href: route('appointments.index'),
+        },
+        {
+            title: 'إضافة موعد',
+            href: route('appointments.create'),
+        },
+    ];
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="إضافة موعد " />
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
                 <h1 className="mt-2 text-center text-xl font-bold text-gray-700">
                     إضافة موعد جديد
@@ -96,242 +96,120 @@ export default function Create({
 
                 <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {/* المريض */}
-                        <div>
-                            <Label htmlFor="patient_id">اسم المريض</Label>
-                            <Select
-                                onValueChange={(value) =>
-                                    setData('patient_id', value)
-                                }
-                                value={data.patient_id}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="اختر اسم المريض" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {patients.map((patient) => (
-                                        <SelectItem
-                                            key={patient.id}
-                                            value={String(patient.id)}
-                                        >
-                                            {patient.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.patient_id && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.patient_id}
-                                </p>
-                            )}
-                        </div>
+                        <FormSelect
+                            label="اسم المريض"
+                            name="patient_id"
+                            value={data.patient_id}
+                            onChange={(val: string) =>
+                                setData('patient_id', val)
+                            }
+                            options={patients.map((patient) => ({
+                                value: String(patient.id),
+                                label: patient.name,
+                            }))}
+                            error={errors.patient_id}
+                        />
 
-                        {/* الطبيب */}
-                        <div>
-                            <Label htmlFor="user_id">اسم الطبيب</Label>
-                            <Select
-                                onValueChange={(value) =>
-                                    setData('user_id', value)
-                                }
-                                value={data.user_id}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="اختر اسم الطبيب" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {doctors.map((doctor) => (
-                                        <SelectItem
-                                            key={doctor.id}
-                                            value={String(doctor.id)}
-                                        >
-                                            {doctor.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.user_id && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.user_id}
-                                </p>
-                            )}
-                        </div>
+                        <FormSelect
+                            label="اسم الطبيب"
+                            name="user_id"
+                            value={data.user_id}
+                            onChange={(val: string) => setData('user_id', val)}
+                            options={doctors.map((doctor) => ({
+                                value: String(doctor.id),
+                                label: doctor.name,
+                            }))}
+                            error={errors.user_id}
+                        />
 
-                        {/* الخدمة */}
-                        <div>
-                            <Label htmlFor="service_id">المعالجة</Label>
-                            <Select
-                                onValueChange={(value) =>
-                                    setData('service_id', value)
-                                }
-                                value={data.service_id}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="اختر المعالجة" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {services.map((category) => (
-                                        <SelectGroup key={category.id}>
-                                            <SelectLabel>
-                                                {category.name}
-                                            </SelectLabel>
-                                            {category.services?.map(
-                                                (service) => (
-                                                    <SelectItem
-                                                        key={service.id}
-                                                        value={String(
-                                                            service.id,
-                                                        )}
-                                                    >
-                                                        {service.name}
-                                                    </SelectItem>
-                                                ),
-                                            )}
-                                        </SelectGroup>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.service_id && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.service_id}
-                                </p>
-                            )}
-                        </div>
+                        <FormSelect
+                            label="اسم المعالجة"
+                            name="service_id"
+                            value={data.service_id}
+                            onChange={(val: string) =>
+                                setData('service_id', val)
+                            }
+                            options={services.map((service) => ({
+                                value: String(service.id),
+                                label: service.name,
+                            }))}
+                            error={errors.service_id}
+                        />
 
-                        {/* التاريخ */}
-                        <div>
-                            <Label htmlFor="date">تاريخ الموعد</Label>
-                            <input
-                                type="date"
-                                id="date"
-                                value={data.date}
-                                onChange={(e) =>
-                                    setData('date', e.target.value)
-                                }
-                                className="w-full rounded-md border px-3 py-2 text-sm"
-                            />
-                            {errors.date && (
-                                <p className="text-xs text-red-500">
-                                    {errors.date}
-                                </p>
-                            )}
-                        </div>
+                        <FormInput
+                            label="تاريخ الموعد"
+                            name="date"
+                            type="date"
+                            value={data.date}
+                            onChange={(e) => setData('date', e.target.value)}
+                            error={errors.date}
+                        />
 
-                        {/* مدة الموعد */}
-                        <div>
-                            <Label htmlFor="duration_slots">
-                                مدة الموعد (عدد الـ slots)
-                            </Label>
-                            <input
-                                type="number"
-                                id="duration_slots"
-                                min={1}
-                                value={data.duration_slots}
-                                onChange={(e) =>
-                                    setData(
-                                        'duration_slots',
-                                        Number(e.target.value),
-                                    )
-                                }
-                                className="w-full rounded-md border px-3 py-2 text-sm"
-                            />
-                            {errors.duration_slots && (
-                                <p className="text-xs text-red-500">
-                                    {errors.duration_slots}
-                                </p>
-                            )}
-                        </div>
+                        <FormSelect
+                            label="توقيت الموعد"
+                            name="start_time"
+                            value={data.start_time}
+                            onChange={(val: string) =>
+                                setData('start_time', val)
+                            }
+                            options={[
+                                { value: '', label: 'اختر الوقت' },
+                                ...(availableAppointments?.map((slot) => ({
+                                    value: slot.start,
+                                    label: `${slot.start} - ${slot.end}`,
+                                })) ?? []),
+                            ]}
+                            error={errors.start_time}
+                        />
 
-                        {/* اختيار الوقت */}
-                        <div>
-                            <Label htmlFor="start_time">توقيت الموعد</Label>
-                            <select
-                                id="start_time"
-                                value={data.start_time}
-                                onChange={(e) =>
-                                    setData('start_time', e.target.value)
-                                }
-                                className="w-full rounded-md border px-3 py-2 text-sm"
-                            >
-                                <option value="">اختر الوقت</option>
-                                {availableAppointments?.map((slot) => (
-                                    <option key={slot.start} value={slot.start}>
-                                        {slot.start} - {slot.end}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.start_time && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.start_time}
-                                </p>
-                            )}
-                        </div>
+                        <FormSelect
+                            label="حالة الموعد"
+                            name="status"
+                            value={data.status}
+                            onChange={(val: string) => setData('status', val)}
+                            options={[
+                                { value: 'scheduled', label: 'Scheduled' },
+                                { value: 'completed', label: 'Completed' },
+                                { value: 'canceled', label: 'Canceled' },
+                            ]}
+                            error={errors.status}
+                        />
 
-                        {/* الحالة */}
-                        <div>
-                            <Label htmlFor="status">حالة الموعد</Label>
-                            <Select
-                                onValueChange={(value) =>
-                                    setData('status', value)
-                                }
-                                value={data.status}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="اختر الحالة" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="scheduled">
-                                        Scheduled
-                                    </SelectItem>
-                                    <SelectItem value="completed">
-                                        Completed
-                                    </SelectItem>
-                                    <SelectItem value="canceled">
-                                        Canceled
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            {errors.status && (
-                                <p className="mt-1 text-xs text-red-500">
-                                    {errors.status}
-                                </p>
-                            )}
-                        </div>
+                        <FormInput
+                            label="مدة الموعد (عدد الـ slots)"
+                            type="number"
+                            name="duration_slots"
+                            min={1}
+                            value={String(data.duration_slots)}
+                            onChange={(val: string) =>
+                                setData('duration_slots', Number(val))
+                            }
+                            error={errors.duration_slots}
+                        />
 
-                        {/* الملاحظات */}
-                        <div className="md:col-span-2">
-                            <Label htmlFor="notes">ملاحظات</Label>
-                            <textarea
-                                id="notes"
-                                value={data.notes}
-                                onChange={(e) =>
-                                    setData('notes', e.target.value)
-                                }
-                                className="w-full rounded-md border px-3 py-2 text-sm"
-                            />
-                        </div>
+                        <FormInput
+                            label="الملاحظات"
+                            name="notes"
+                            type="text"
+                            value={data.notes}
+                            onChange={(e) => setData('notes', e.target.value)}
+                            placeholder="الملاحظات"
+                            error={errors.notes}
+                        />
                     </div>
 
-                    {/* الأزرار */}
                     <div className="flex items-center justify-end space-x-2">
-                        <Button
-                            variant="outline"
-                            asChild
-                            className="rounded-lg px-6 py-2 font-semibold"
+                        <Link
+                            href={route('appointments.index')}
+                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
                         >
-                            <a
-                                href={route('appointments.index')}
-                                className="text-gray-700"
-                            >
-                                إنهاء
-                            </a>
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={processing}
-                            className="rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700"
-                        >
-                            {processing ? 'جارِ الحفظ ...' : 'حفظ'}
-                        </Button>
+                            إنهاء
+                        </Link>
+                        <FormButton
+                            processing={processing}
+                            label="حفظ"
+                            loadingLabel="جارِ الحفظ ..."
+                        />
                     </div>
                 </form>
             </div>

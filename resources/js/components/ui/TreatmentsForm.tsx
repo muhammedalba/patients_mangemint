@@ -1,38 +1,52 @@
-import { TreatmentCategories } from '@/types/treatments';
+import { Service } from '@/types';
 import React, { useState } from 'react';
 
 interface Props {
-  onSelect?: (treatment: { name: string; cost: number }) => void;
+  services: Service[];
+  onSelect?: (treatment: Service) => void;
 }
 
-const TreatmentsForm: React.FC<Props> = ({ onSelect }) => {
-  const [selected, setSelected] = useState<{ name: string; cost: number } | null>(null);
+const TreatmentsForm: React.FC<Props> = ({ services, onSelect }) => {
+  const [selected, setSelected] = useState<Service | null>(null);
 
-  const handleSelect = (categoryIndex: number, treatmentName: string) => {
-    const treatment = TreatmentCategories[categoryIndex].treatments.find(t => t.name === treatmentName);
+  if (!services || !Array.isArray(services) || services.length === 0) {
+    return <p className="text-gray-500">لا توجد بيانات للمعالجات.</p>;
+  }
+
+  const categories = Array.from(new Set(services.map(s => s.category)));
+
+  const handleSelect = (category: string, treatmentName: string) => {
+    const treatment = services.find(
+      t => t.name === treatmentName && t.category === category
+    );
     if (treatment) {
       setSelected(treatment);
-      onSelect?.(treatment); // send selected treatment to parent
+      onSelect?.(treatment);
     }
   };
 
   return (
     <div className="mt-8">
-      <div className="flex flex-row gap-2">
-        {TreatmentCategories.map((category, index) => (
-          <div key={index}>
-            <label className="block text-gray-700 text-right text-right">{category.name}</label>
+      <div className="flex flex-row gap-4 flex-wrap">
+        {categories.map((category, index) => (
+          <div key={index} className="min-w-[220px]">
+            <label className="block text-gray-700 text-right mb-1">{category}</label>
+
             <select
-              className="border px-2 py-1 rounded"
-              onChange={(e) => handleSelect(index, e.target.value)}
-            >
-              <option value="">اختر معالجة</option>
-              {category.treatments.map((treatment, i) => (
-                <option key={i} value={treatment.name}>
-                  {treatment.name}
-                </option>
-              ))}
-            </select>
+  className="border px-2 py-1 rounded w-full"
+  value={selected && selected.category === category ? selected.name : ''}
+  onChange={(e) => handleSelect(category, e.target.value)}
+>
+  <option value="">اختر معالجة</option>
+  {services
+    .filter(t => t.category === category)
+    .map(t => (
+      <option key={t.id} value={t.name}>
+        {t.name}
+      </option>
+    ))}
+</select>
+
           </div>
         ))}
       </div>

@@ -1,10 +1,11 @@
 import { DynamicTable } from '@/components/DynamicTable';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, PageProps, PaginatedData } from '@/types';
-import { Head, Link as InertiaLink, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -31,48 +32,12 @@ export default function Index({
     console.log(medicalRecords,'medicalRecords');
 
     const [search, setSearch] = useState(filters.search || '');
+    const [showToast, setShowToast] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    const columns: ColumnDef<MedicalRecord>[] = [
-        { id: 'id', accessorKey: 'id', header: 'ID' },
-        {
-            id: 'patient',
-            accessorKey: 'patient.name',
-            header: 'Patient',
-        },
-        {
-            id: 'doctor',
-            accessorKey: 'doctor.name',
-            header: 'Doctor',
-        },
-        {
-            id: 'chief_complaint',
-            accessorKey: 'chief_complaint',
-            header: 'Chief Complaint',
-        },
-        {
-            id: 'actions',
-            header: 'Actions',
-            cell: ({ row }) => {
-                const record = row.original;
-                return (
-                    <TableActions
-                        item={record}
-                        routes={{
-                            edit: 'medical-records.edit',
-                            delete: 'medical-records.destroy',
-                            show: 'medical-records.edit',
-                        }}
-                        showEdit={true}
-                        showView={true}
-                        showDelete={true}
-                        confirmMessage="Are you sure you want to delete this medical record?"
-                        onDelete={handleDelete}
-                    />
-                );
-            },
-        },
-    ];
+    const handleDelete = (id: number): void => {
+        router.delete(route('medical-records.destroy', id));
+    };
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -91,8 +56,6 @@ export default function Index({
         return () => clearTimeout(handler);
     }, [search]);
 
-    const [showToast, setShowToast] = useState(false);
-
     useEffect(() => {
         if (props.flash?.success) {
             setShowToast(true);
@@ -101,54 +64,76 @@ export default function Index({
         }
     }, [props.flash]);
 
-    const handleDelete = (id: number): void => {
-        router.delete(route('medical-records.destroy', id));
-    };
+    const columns: ColumnDef<MedicalRecord>[] = [
+        { id: 'id', accessorKey: 'id', header: 'ID' },
+        {
+            id: 'patient',
+            accessorKey: 'patient.name',
+            header: 'اسم المريض',
+        },
+        {
+            id: 'doctor',
+            accessorKey: 'doctor.name',
+            header: 'اسم الطبيب',
+        },
+        {
+            id: 'chief_complaint',
+            accessorKey: 'chief_complaint',
+            header: 'المشكلة الصحية',
+        },
+        {
+            id: 'actions',
+            header: 'الإجراءات',
+            cell: ({ row }) => {
+                const record = row.original;
+                return (
+                    <TableActions
+                        item={record}
+                        routes={{
+                            edit: 'medical-records.edit',
+                            delete: 'medical-records.destroy',
+                            show: 'medical-records.show',
+                        }}
+                        showEdit={true}
+                        showView={true}
+                        showDelete={true}
+                        confirmMessage="هل أنت متأكد من حذف هذا السجل الطبي؟"
+                        onDelete={handleDelete}
+                    />
+                );
+            },
+        },
+    ];
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Medical Records',
+            title: 'السجلات الطبية',
             href: route('medical-records.index'),
         },
     ];
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Medical Records" />
+            <Head title="السجلات الطبية" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
-                    <h1 className="mb-4 text-2xl font-bold">Medical Records</h1>
+                    <h1 className="mb-4 text-2xl font-bold">السجلات الطبية</h1>
                     {showToast && (
                         <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
                             {props.flash?.success || props.flash?.error}
                         </div>
                     )}
-                    <div className="mb-4 flex items-center justify-between">
-                        <InertiaLink
-                            href={route('medical-records.create')}
-                            className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
-                        >
-                            <span className="flex items-center gap-1">
-                                <i className="material-icons text-lg">add</i>
-                                Create Medical Record
-                            </span>
-                        </InertiaLink>
 
-                        <div className="relative w-full max-w-md">
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search..."
-                                className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            />
-                            <span className="absolute top-2.5 left-3 text-gray-400">
-                                <i className="material-icons text-lg">search</i>
-                            </span>
-                        </div>
-                    </div>
+                    <SearchBar
+                        value={search}
+                        onChange={setSearch}
+                        showSearch={true}
+                        showButton={true}
+                        buttonLabel="إضافة سجل طبي"
+                        buttonRoute="medical-records.create"
+                    />
 
-                    <section className="p-6">
+                    <section className="p-4">
                         <DynamicTable
                             data={medicalRecords.data}
                             columns={columns}

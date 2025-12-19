@@ -1,21 +1,11 @@
 import { AppShell } from '@/components/app-shell';
 import { BreadcrumbItem, PageProps, Patient } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import React from 'react';
 import { route } from 'ziggy-js';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
-import Heading from '@/components/heading';
-import InputError from '@/components/input-error';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
 import AppLayout from '@/layouts/app-layout';
 
 interface CreateProps extends PageProps {
@@ -34,122 +24,94 @@ const Create: React.FC<CreateProps> = ({ auth, patients }) => {
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        console.log(data , 'data ');
+        console.log(data, 'data ');
 
         post(route('payments.store'));
     }
- const breadcrumbs: BreadcrumbItem[] = [
+    const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Payments',
+            title: 'الدفعات',
             href: route('payments.index'),
         },
         {
-            title: 'Add Payment',
+            title: 'إضافة دفعة',
             href: route('payments.create'),
-        }
+        },
     ];
     return (
-         <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs}>
+                <Head title="إضافة دفعة " />
+                <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+                    <h1 className="mb-4 text-center text-xl font-bold text-gray-700">
+                        إضافة دفعة
+                    </h1>
 
-            <AppShell user={auth.user}>
-            <Head title="Add Payment" />
-            <div className="p-4">
-
-                <Heading title="Add Payment" />
-
-                <form
+                    <form
                     onSubmit={handleSubmit}
-                    className="mt-6 max-w-xl space-y-4"
+                    className="space-y-6"
                 >
-                    <div>
-                        <Label htmlFor="patient_id">Patient</Label>
-                        <Select
-                            onValueChange={(value) =>
-                                setData('patient_id', value)
+                    <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                        <FormInput
+                            label="اسم المريض"
+                            name="patient_id"
+                            value={data.patient_id}
+                            onChange={(e) =>
+                                setData('patient_id', e.target.value)
                             }
-                            defaultValue={data.patient_id}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a patient" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {patients.map((patient) => (
-                                    <SelectItem
-                                        key={patient.id}
-                                        value={String(patient.id)}
-                                    >
-                                        {patient.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <InputError
-                            message={errors.patient_id}
-                            className="mt-2"
+                            placeholder="Enter patient ID"
+                            error={errors.patient_id}
                         />
-                    </div>
 
-                    <div>
-                        <Label htmlFor="amount">Amount</Label>
-                        <Input
-                            id="amount"
-                            type="number"
+                        <FormInput
+                            label="الدفعة"
+                            name="amount"
                             value={data.amount}
                             onChange={(e) => setData('amount', e.target.value)}
-                            className="mt-1 block w-full"
+                            placeholder="ادخل قيمة الدفعة"
+                            error={errors.amount}
                         />
-                        <InputError message={errors.amount} className="mt-2" />
-                    </div>
 
-                    <div>
-                        <Label htmlFor="payment_date">Payment Date</Label>
-                        <Input
-                            id="payment_date"
+                        <FormInput
+                            label="تاريخ الدفعة"
+                            name="payment_date"
                             type="date"
                             value={data.payment_date}
                             onChange={(e) =>
                                 setData('payment_date', e.target.value)
                             }
-                            className="mt-1 block w-full"
+                            placeholder="ادخل تاريخ الدفعة"
+                            error={errors.payment_date}
                         />
-                        <InputError
-                            message={errors.payment_date}
-                            className="mt-2"
-                        />
-                    </div>
 
-                    {/* <div>
-                        <Label htmlFor="paid_at">Paid At</Label>
-                        <Input
-                            id="paid_at"
-                            type="date"
-                            value={data.paid_at}
-                            onChange={(e) => setData('paid_at', e.target.value)}
-                            className="mt-1 block w-full"
-                        />
-                        <InputError message={errors.paid_at} className="mt-2" />
-                    </div> */}
-
-                    <div>
-                        <Label htmlFor="notes">Notes</Label>
-                        <Input
-                            id="notes"
+                        <FormInput
+                            label="الملاحظات"
+                            name="notes"
                             type="text"
                             value={data.notes}
                             onChange={(e) => setData('notes', e.target.value)}
-                            className="mt-1 block w-full"
+                            placeholder="الملاحظات"
+                            error={errors.notes}
                         />
-                        <InputError message={errors.notes} className="mt-2" />
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <Button disabled={processing}>Add Payment</Button>
+                    <div className="flex items-center justify-end space-x-2">
+                        <Link
+                            href={route('patients.index')}
+                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                        >
+                            إنهاء
+                        </Link>
+
+                        <FormButton
+                            processing={processing}
+                            label="حفظ"
+                            loadingLabel="جارِ الحفظ ..."
+                        />
                     </div>
                 </form>
-            </div>
-        </AppShell>
-         </AppLayout>
+                </div>
 
+            </AppLayout>
     );
 };
 

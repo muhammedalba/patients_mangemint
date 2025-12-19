@@ -59,7 +59,7 @@ const table = useReactTable({
           {table.getHeaderGroups().map(headerGroup => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map(header => (
-                <TableHead key={header.id}>
+                <TableHead key={header.id} className="text-right">
                   {flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               ))}
@@ -70,7 +70,7 @@ const table = useReactTable({
           {table.getRowModel().rows.map(row => (
             <TableRow key={row.id}>
               {row.getVisibleCells().map(cell => (
-                <TableCell key={cell.id}>
+                <TableCell key={cell.id} className="text-right">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               ))}

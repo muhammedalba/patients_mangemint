@@ -63,11 +63,11 @@ export default function EditProcedure({
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Procedures',
+            title: 'الإجراءات',
             href: route('procedures.index'),
         },
         {
-            title: 'Edit Procedure',
+            title: 'تعديل الإجراء',
             href: route('procedures.edit', procedure.id),
         },
     ];
@@ -75,7 +75,7 @@ export default function EditProcedure({
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Edit Procedure" />
+            <Head title="تعديل الإجراء" />
             <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     تعديل الإجراء

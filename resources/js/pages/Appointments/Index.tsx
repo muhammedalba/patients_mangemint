@@ -1,11 +1,12 @@
 import { DynamicTable } from '@/components/DynamicTable';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { Appointment, BreadcrumbItem, PageProps, PaginatedData } from '@/types';
-import { Head, Link as InertiaLink, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -97,7 +98,7 @@ export default function Index({
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Appointments',
+            title: 'المواعيد',
             href: route('appointments.index'),
         },
     ];
@@ -105,40 +106,27 @@ export default function Index({
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Appointment" />
+            <Head title="المواعيد" />
             <div className="flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <h1 className="mb-4 text-2xl font-bold">المواعيد</h1>
-                <div className="relative w-full max-w-md">
-                    <input
-                        type="text"
-                        onFocus={(e) => e.target.select()}
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search..."
-                        className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                    />
-                    <span className="absolute top-2.5 left-3 text-gray-400">
-                        <i className="material-icons text-lg">search</i>
-                    </span>
-                </div>
-                <InertiaLink
-                    href={route('appointments.create')}
-                    className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
-                >
-                    <span className="flex items-center gap-1">
-                        <i className="material-icons text-lg">add</i>
-                        إضافة موعد
-                    </span>
-                </InertiaLink>
+
+                <SearchBar
+                    value={''}
+                    onChange={() => {}}
+                    showSearch={true}
+                    showButton={true}
+                    buttonLabel="إضافة موعد"
+                    buttonRoute="appointments.create"
+                />
             </div>
-            <div className="overflow-x-auto">
-                <section className="p-6">
-                    <DynamicTable
-                        data={[...appointments.data]}
-                        columns={columns}
-                    />
-                </section>
-            </div>
+
+            <section className="p-4">
+                <DynamicTable
+                    data={[...appointments.data].reverse()}
+                    columns={columns}
+                />
+            </section>
+
             <Pagination links={appointments.links} />
         </AppLayout>
     );

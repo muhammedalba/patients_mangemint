@@ -1,6 +1,7 @@
 import { Link as InertiaLink } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import ConfirmDialog from './ConfirmDialog';
+import { IconTooltip } from './IconToolTip';
 
 interface TableActionsProps {
     item: {
@@ -30,30 +31,36 @@ export default function TableActions({
     return (
         <div className="flex gap-2 px-2 py-1 text-center">
             {showEdit && routes.edit && (
-                <InertiaLink
-                    href={route(routes.edit, item.id)}
-                    className="text-xs font-bold text-gray-700"
-                >
-                    <i className="material-icons">edit</i>
-                </InertiaLink>
+                <IconTooltip label="تعديل">
+                    <InertiaLink
+                        href={route(routes.edit, item.id)}
+                        className="text-xs font-bold text-gray-700"
+                    >
+                        <i className="material-icons">edit</i>
+                    </InertiaLink>
+                </IconTooltip>
             )}
 
             {showView && routes.view && (
-                <InertiaLink
-                    href={route(routes.view, item.id)}
-                    className="text-xs font-bold text-blue-500"
-                >
-                    <i className="material-icons">visibility</i>
-                </InertiaLink>
+                <IconTooltip label="عرض">
+                    <InertiaLink
+                        href={route(routes.view, item.id)}
+                        className="text-xs font-bold text-blue-500"
+                    >
+                        <i className="material-icons">visibility</i>
+                    </InertiaLink>
+                </IconTooltip>
             )}
 
-            {showDelete && onDelete && routes.delete && (
+            {showDelete && routes.delete && onDelete && (
                 <ConfirmDialog
                     message={confirmMessage.toString()}
                     onConfirm={() => onDelete(item.id)}
                     trigger={
                         <button className="cursor-pointer text-xs font-bold text-red-500">
-                            <i className="material-icons">delete</i>
+                            <IconTooltip label="حذف">
+                                <i className="material-icons">delete</i>
+                            </IconTooltip>
                         </button>
                     }
                 />

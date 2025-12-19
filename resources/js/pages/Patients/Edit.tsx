@@ -33,9 +33,9 @@ export default function EditPatient({ genders,
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Patient', href: route('patients.index') },
+        { title: 'المرضى', href: route('patients.index') },
         {
-            title: `Update: ${patient.name}`,
+            title: `تعديل بيانات المريض: ${patient.name}`,
             href: route('patients.edit', patient.id),
         },
     ];

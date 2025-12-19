@@ -1,7 +1,8 @@
-import InputError from '@/components/input-error';
+import { FormButton } from '@/components/FormButton';
+import { FormSelect } from '@/components/FormSelect';
 import { MedicalRecord, Patient, User } from '@/types';
 import { Tab } from '@headlessui/react';
-import { useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import { Fragment, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -91,9 +92,35 @@ export default function MedicalRecordForm({
         setExistingImages((prev) => prev.filter((img) => img !== image));
     };
 
+    const keyTranslations: Record<string, string> = {
+        chief_complaint: 'الشكوى الرئيسية',
+        present_illness_history: 'تاريخ المرض الحالي',
+        past_dental_history: 'التاريخ السني السابق',
+        has_cardiovascular_disease: 'يعاني من أمراض القلب والأوعية الدموية',
+        has_hypertension: 'يعاني من ارتفاع ضغط الدم',
+        has_respiratory_disease: 'يعاني من أمراض الجهاز التنفسي',
+        has_gastrointestinal_disease: 'يعاني من أمراض الجهاز الهضمي',
+        has_neural_disease: 'يعاني من أمراض عصبية',
+        has_hepatic_disease: 'يعاني من أمراض الكبد',
+        has_renal_disease: 'يعاني من أمراض الكلى',
+        has_endocrine_disease: 'يعاني من أمراض الغدد الصماء',
+        has_diabetes: 'يعاني من مرض السكري',
+        medical_disease_details: 'تفاصيل الأمراض الطبية',
+        allergic_to: 'حساسية تجاه',
+        current_medications: 'الأدوية الحالية',
+        hospitalized_or_operated: 'دخل المستشفى أو خضع لعملية جراحية',
+        hospital_details: 'تفاصيل المستشفى',
+        abnormal_bleeding_history: 'تاريخ نزيف غير طبيعي',
+        is_pregnant: 'حامل',
+        pregnancy_trimester: 'الفصل الثالث من الحمل',
+        clinical_notes: 'ملاحظات سريرية',
+        attachments: 'المرفقات',
+        images: 'الصور',
+    };
+
     const tabs = [
         {
-            name: 'Dental History',
+            name: 'المعالجات السنية',
             keys: [
                 'chief_complaint',
                 'present_illness_history',
@@ -101,7 +128,7 @@ export default function MedicalRecordForm({
             ],
         },
         {
-            name: 'Medical Conditions',
+            name: 'الحالة الصحية العامة',
             keys: [
                 'has_cardiovascular_disease',
                 'has_hypertension',
@@ -116,11 +143,11 @@ export default function MedicalRecordForm({
             ],
         },
         {
-            name: 'Medications & Allergies',
+            name: 'الأدوية والحساسية',
             keys: ['allergic_to', 'current_medications'],
         },
         {
-            name: 'Special Cases',
+            name: 'حالات خاصة',
             keys: [
                 'hospitalized_or_operated',
                 'hospital_details',
@@ -131,7 +158,7 @@ export default function MedicalRecordForm({
             ],
         },
         {
-            name: 'Media',
+            name: 'الوسائط',
             keys: ['attachments', 'images'],
         },
     ];
@@ -141,41 +168,36 @@ export default function MedicalRecordForm({
             onSubmit={handleSubmit}
             className="mx-auto max-w-4xl space-y-6 rounded-lg bg-white p-6 shadow"
         >
-            {/* Patient Select */}
-            <div className="flex flex-col md:flex-row md:items-center md:space-x-4">
-                <label className="font-medium md:w-1/4">Patient</label>
-                <select
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormSelect
+                    label="المريض"
+                    name="patient_id"
                     value={data.patient_id}
-                    onChange={(e) => setData('patient_id', e.target.value)}
-                    className="w-full rounded border p-2 md:w-3/4"
+                    onChange={(val: string) => setData('patient_id', val)}
+                    options={[
+                        { value: '', label: 'اختر اسم المريض' },
+                        ...(patients.map((p) => ({
+                            value: String(p.id),
+                            label: p.name,
+                        })) ?? []),
+                    ]}
+                    error={errors.patient_id}
                     disabled={!!medicalRecord}
-                >
-                    <option value="">Select Patient</option>
-                    {patients.map((p) => (
-                        <option key={p.id} value={p.id}>
-                            {p.name}
-                        </option>
-                    ))}
-                </select>
-                <InputError message={errors.patient_id} />
-            </div>
-
-            {/* Doctor Select */}
-            <div className="flex flex-col md:flex-row md:items-center md:space-x-4">
-                <label className="font-medium md:w-1/4">Doctor</label>
-                <select
+                />
+                <FormSelect
+                    label="الطبيب"
+                    name="doctor_id"
                     value={data.doctor_id || ''}
-                    onChange={(e) => setData('doctor_id', e.target.value)}
-                    className="w-full rounded border p-2 md:w-3/4"
-                >
-                    <option value="">Select Doctor</option>
-                    {doctors.map((d) => (
-                        <option key={d.id} value={d.id}>
-                            {d.name}
-                        </option>
-                    ))}
-                </select>
-                <InputError message={errors.doctor_id} />
+                    onChange={(val: string) => setData('doctor_id', val)}
+                    options={[
+                        { value: '', label: 'اختر اسم الطبيب' },
+                        ...(doctors.map((d) => ({
+                            value: String(d.id),
+                            label: d.name,
+                        })) ?? []),
+                    ]}
+                    error={errors.doctor_id}
+                />
             </div>
 
             {/* Tabs for other fields */}
@@ -217,9 +239,14 @@ export default function MedicalRecordForm({
                                             : handleDeleteImage;
                                     return (
                                         <div key={key}>
-                                            <label className="font-medium capitalize">
+                                            {/* <label className="font-medium capitalize">
                                                 {key.replace(/_/g, ' ')}
+                                            </label> */}
+                                            <label className="font-medium capitalize md:w-1/4">
+                                                {keyTranslations[key] ||
+                                                    key.replace(/_/g, ' ')}
                                             </label>
+
                                             <input
                                                 type="file"
                                                 multiple
@@ -287,9 +314,14 @@ export default function MedicalRecordForm({
                                         key={key}
                                         className="flex flex-col md:flex-row md:items-center md:space-x-4"
                                     >
-                                        <label className="font-medium capitalize md:w-1/4">
+                                        {/* <label className="font-medium capitalize md:w-1/4">
                                             {key.replace(/_/g, ' ')}
+                                        </label> */}
+                                        <label className="font-medium capitalize md:w-1/4">
+                                            {keyTranslations[key] ||
+                                                key.replace(/_/g, ' ')}
                                         </label>
+
                                         {isBoolean ? (
                                             <input
                                                 type="checkbox"
@@ -349,15 +381,20 @@ export default function MedicalRecordForm({
                 </Tab.Panels>
             </Tab.Group>
 
-            <div className="text-right">
-                <button
-                    type="submit"
-                    disabled={processing}
-                    className="rounded-lg bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700"
-                >
-                    {submitLabel}
-                </button>
-            </div>
+            <div className="flex items-center justify-end space-x-2">
+                        <Link
+                          href={route('medical-records.index')}
+                          className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                        >
+                          إنهاء
+                        </Link>
+
+                        <FormButton
+                          processing={processing}
+                          label="حفظ"
+                          loadingLabel={submitLabel}
+                        />
+                      </div>
         </form>
     );
 }

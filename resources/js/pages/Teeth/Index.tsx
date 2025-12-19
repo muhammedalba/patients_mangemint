@@ -1,9 +1,10 @@
 import { DynamicTable } from '@/components/DynamicTable';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, PageProps, PaginatedData } from '@/types';
-import { Head, Link as InertiaLink, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -49,7 +50,16 @@ console.log(teeth.data);
         auth.user.roles.includes(role),
     );
     const [showToast, setShowToast] = useState(false);
-    const columns: ColumnDef<any>[] = [
+
+    useEffect(() => {
+        if (props.flash?.success) {
+            setShowToast(true);
+            const timer = setTimeout(() => setShowToast(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [props.flash]);
+
+    const columns: ColumnDef<Teeth>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'patient.name', accessorKey: 'patient.name', header: 'الاسم' },
         {
@@ -74,7 +84,7 @@ console.log(teeth.data);
                         showEdit={true}
                         showView={false}
                         showDelete={userHasDeletePermission}
-                        confirmMessage="Are you sure you want to delete this teeth?"
+                        confirmMessage="هل أنت متأكد من حذف هذا السن؟"
                         onDelete={handleDelete}
                     />
                 );
@@ -96,14 +106,14 @@ console.log(teeth.data);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Teeth',
+            title: 'الأسنان',
             href: route('teeth.index'),
         },
-    ];
+    ]
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Teeth" />
+            <Head title="الأسنان" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">الأسنان</h1>
@@ -112,31 +122,17 @@ console.log(teeth.data);
                             {props.flash?.success || props.flash?.error}
                         </div>
                     )}
-                    <div className="mb-4 flex items-center justify-between">
-                        <InertiaLink
-                            href={route('teeth.create')}
-                            className="inline-block rounded bg-blue-500 px-4 py-2 text-white"
-                        >
-                            <span className="flex items-center gap-1">
-                                <i className="material-icons text-lg">add</i>
-                                إضافة سن
-                            </span>
-                        </InertiaLink>
-                        <div className="relative w-full max-w-md">
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search..."
-                                className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            />
-                            <span className="absolute top-2.5 left-3 text-gray-400">
-                                <i className="material-icons text-lg">search</i>
-                            </span>
-                        </div>
-                    </div>
 
-                    <section className="p-6">
+                    <SearchBar
+                        value={search}
+                        onChange={setSearch}
+                        showSearch={true}
+                        showButton={true}
+                        buttonLabel="إضافة سن"
+                        buttonRoute="teeth.create"
+                    />
+
+                    <section className="p-4">
                         <DynamicTable
                             data={[...teeth.data]}
                             columns={columns}
