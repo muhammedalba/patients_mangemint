@@ -1,23 +1,37 @@
 import { Patient, Service, ServiceCategory, Tooth } from '@/types';
-import { Link, useForm } from '@inertiajs/react';
-import { FormEvent, useRef, useState } from 'react';
+import { Link, router, useForm } from '@inertiajs/react';
+import { FormEvent, useState } from 'react';
 import { Odontogram } from 'react-odontogram';
 import { route } from 'ziggy-js';
 import { FormButton } from './FormButton';
 import { FormInput } from './FormInput';
 import { FormSelect } from './FormSelect';
 
-type Chart = Record<string, any>;
-
+type Chart = Tooth[];
 interface Procedure {
+    id: number;
     name: string;
-    description: string;
-    cost: string;
-    tooth_id: string | null;
-    tooth_number: string;
-    patient_id:number;
-    patient_name: string;
-    category: string;
+    description?: string;
+    cost?: number;
+    tooth_id: number;
+    patient_id: number;
+    category?: string;
+}
+interface Tooth {
+    id: number;
+    tooth_number: number;
+    status?: string;
+    notes?: string;
+    procedures?: Procedure[];
+}
+interface OdontoTooth {
+    id: string;
+    notations: {
+        fdi: string;
+        universal: string;
+        palmer: string;
+    };
+    type: string;
 }
 
 type ProceduresByTooth = {
@@ -25,11 +39,9 @@ type ProceduresByTooth = {
 };
 
 export default function DentalChartPage({
-    teeth,
     patient,
     services_category = [],
 }: {
-    teeth: Tooth[];
     patient: Patient;
     services_category?: ServiceCategory[];
 }) {
@@ -37,134 +49,97 @@ export default function DentalChartPage({
         name: string;
         description: string;
         cost: string;
-        tooth_id: string | null;
-        tooth_number: string;
+        tooth_id: string;
         patient_id: number;
-        patient_name: string;
         category: string;
     }>({
         name: '',
         description: '',
         cost: '',
         tooth_id: '',
-        tooth_number: '',
         patient_id: patient.id,
-        patient_name: patient.name,
         category: '',
     });
 
-    const [chart, setChart] = useState<Chart>({});
-    const [selectedTeeth, setSelectedTeeth] = useState<Tooth[]>([]);
+    const [chart, setChart] = useState<OdontoTooth[]>([]);
+    const [selectedTooth, setSelectedTooth] = useState<OdontoTooth | null>(
+        null,
+    );
+    const [selectedTeeth, setSelectedTeeth] = useState<OdontoTooth[]>([]);
     const [proceduresByTooth, setProceduresByTooth] =
         useState<ProceduresByTooth>({});
     const [showForm, setShowForm] = useState(false);
-    const prev = useRef<Chart>({});
 
-    const handleChange = (next: Chart) => {
-        let changedKey: string | null = null;
-
-        for (const k of Object.keys(next)) {
-            if (JSON.stringify(prev.current[k]) !== JSON.stringify(next[k])) {
-                changedKey = k;
-                break;
-            }
-        }
-
-        prev.current = next;
-        setChart(next);
-
-        if (!changedKey) return;
-
-        const toothObj = next[changedKey];
-        const fdi = toothObj?.notations?.fdi ?? toothObj?.fdi ?? changedKey;
-        const id = toothObj?.id ?? changedKey;
-
-        const newTooth: Tooth = {
-            id: String(id),
-            tooth_number: String(fdi),
-        };
-
-        setSelectedTeeth((prev) => {
-            const exists = prev.some((t) => t.id === newTooth.id);
-            return exists ? prev : [...prev, newTooth];
-        });
+    const handleChange = (newChart: OdontoTooth[]) => {
+        setChart(newChart);
+        setSelectedTeeth(newChart);
     };
 
-    const handleAddProcedureClick = (selectedTeeth: Tooth) => {
+    const handleAddProcedureClick = (tooth: OdontoTooth) => {
+        setSelectedTooth(tooth);
+        setData('tooth_id', String(tooth.id));
         setShowForm(true);
-        setData({
-            name: '',
-            description: '',
-            cost: '',
-            tooth_id: selectedTeeth.id,
-            tooth_number: selectedTeeth.tooth_number,
-            patient_id: patient.id,
-            patient_name: patient.name,
-            category: '',
-        });
-        console.log('Matched tooth:', selectedTeeth);
-        console.log('services_category', services_category);
     };
 
     const handleServiceSelect = (service: Service) => {
         setData('name', service.name);
         setData('cost', service.price.toString());
+        setSelectedTreatment(service);
     };
+
     const [selectedTreatment, setSelectedTreatment] = useState<Service | null>(
         null,
     );
 
     const handleSaveProcedure = (e: FormEvent) => {
         e.preventDefault();
+        if (!selectedTooth) return;
 
         const newProcedure: Procedure = {
+            id: Date.now(),
             name: data.name,
             description: data.description,
-            cost: data.cost,
-            tooth_number: data.tooth_number,
-            tooth_id: data.tooth_id,
-            patient_id: data.patient_id,
-            patient_name: data.patient_name,
+            cost: Number(data.cost),
+            tooth_id: Number(selectedTooth.id),
+            patient_id: patient.id,
             category: data.category,
         };
 
-        console.log('New procedure', newProcedure);
-
-        setProceduresByTooth((prev) => {
-            const updated = {
-                ...prev,
-                [data.tooth_number]: [
-                    ...(prev[data.tooth_number] || []),
-                    newProcedure,
-                ],
-            };
-            return updated;
-        });
-
-        post(route('procedures.store'), {
-            onSuccess: () => {
-                console.log('Procedure saved');
-                reset();
-                setShowForm(false);
-                setChart((prevChart) => {
-                    const updatedChart = {
-                        ...prevChart,
-                        [data.tooth_number]: {
-                            ...prevChart[data.tooth_number],
-                            style: {
-                                fill: 'red',
-                                stroke: 'darkred',
-                                strokeWidth: 2,
-                            },
-                        },
-                    };
-                    return updatedChart;
-                });
+        post(
+            route('procedures.store'),
+            {
+                name: newProcedure.name,
+                description: newProcedure.description,
+                cost: newProcedure.cost,
+                tooth_id: newProcedure.tooth_id,
+                patient_id: newProcedure.patient_id,
+                category: newProcedure.category,
             },
-            onError: (errors) => {
-                console.error('Backend validation errors:', errors);
+            {
+                onSuccess: () => {
+                    router.post(route('teeth.store'), {
+                        patient_id: patient.id,
+                        tooth_number: selectedTooth.notations.fdi,
+                        status: '',
+                        notes: '',
+                    });
+
+                    setProceduresByTooth((prev) => ({
+                        ...prev,
+                        [selectedTooth.notations.fdi]: [
+                            ...(prev[selectedTooth.notations.fdi] || []),
+                            newProcedure,
+                        ],
+                    }));
+
+                    reset();
+                    setShowForm(false);
+                },
+                onError: (errors) => {
+                    console.error('Backend validation errors:', errors);
+                },
             },
-        });
+        );
     };
 
     return (
@@ -191,7 +166,7 @@ export default function DentalChartPage({
                             className="flex items-center justify-between rounded border bg-gray-50 p-4"
                         >
                             <p className="font-semibold text-blue-600">
-                                رقم السن المحدد: {tooth.tooth_number}
+                                رقم السن المحدد: {tooth.notations.fdi}
                             </p>
                             <button
                                 onClick={() => handleAddProcedureClick(tooth)}
@@ -207,30 +182,27 @@ export default function DentalChartPage({
             {showForm && (
                 <form onSubmit={handleSaveProcedure} className="space-y-4">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                        {(services_category ?? []).map((category) => (
+                        {services_category.map((category) => (
                             <FormSelect
                                 key={category.id}
                                 label={`اختر خدمة من ${category.name}`}
                                 name={`service_${category.id}`}
                                 value={data.category}
                                 onChange={(val) => {
-                                    const selectedService = (
-                                        category.services ?? []
-                                    ).find(
-                                        (service) =>
-                                            service.id.toString() === val,
-                                    );
+                                    const selectedService =
+                                        category.services.find(
+                                            (service) =>
+                                                service.id.toString() === val,
+                                        );
                                     if (selectedService) {
                                         handleServiceSelect(selectedService);
                                     }
                                     setData('category', val);
                                 }}
-                                options={(category.services ?? []).map(
-                                    (service) => ({
-                                        value: service.id.toString(),
-                                        label: service.name,
-                                    }),
-                                )}
+                                options={category.services.map((service) => ({
+                                    value: service.id.toString(),
+                                    label: service.name,
+                                }))}
                                 error={errors.category}
                             />
                         ))}
@@ -267,27 +239,40 @@ export default function DentalChartPage({
                         />
                     </div>
 
-                    <FormInput
-                        label=" وصف الإجراء"
-                        name="description"
-                        type="textarea"
-                        value={data.description}
-                        onChange={(e) => setData('description', e.target.value)}
-                        placeholder="وصف الإجراء"
-                    />
-
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
                         <FormInput
-                            label=" اسم المريض "
-                            name="patient_name"
-                            value={data.patient_name}
+                        label="وصف الإجراء"
+                            name="description"
+                            value={data.description}
                             onChange={(e) =>
-                                setData('patient_name', e.target.value)
+                                setData('description', e.target.value)
                             }
-                            placeholder="اسم المريض"
+                            placeholder="وصف الإجراء"
                         />
                     </div>
 
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <FormInput
+                            label="اسم المريض"
+                            name="patient_name"
+                            value={patient.name}
+                            onChange={(val) => setData('patient_id', val)}
+                        />
+
+                        <FormSelect
+                            label="اسم السن"
+                            name="tooth_id"
+                            value={data.tooth_id.toString()}
+                            onChange={(val) => setData('tooth_id', val)}
+                            error={errors.tooth_id}
+                            options={(chart ?? []).map((tooth) => ({
+                                value: tooth.id.toString(),
+                                label: `رقم السن  ${tooth.notations.fdi}`,
+                            }))}
+                        />
+                    </div>
+
+                    {/* Actions */}
                     <div className="flex items-center justify-end space-x-2">
                         <Link
                             href={route('procedures.index')}
@@ -303,64 +288,6 @@ export default function DentalChartPage({
                         />
                     </div>
                 </form>
-                // <form
-                //     onSubmit={handleSaveProcedure}
-                //     className="mt-4 rounded border bg-white p-4 shadow"
-                // >
-                //     <h3 className="mb-2 font-bold">
-                //         إضافة إجراء للسن {data.tooth_number}
-                //     </h3>
-
-                //     <label className="mb-2 block">
-                //         اسم الإجراء:
-                //         <input
-                //             type="text"
-                //             value={data.name}
-                //             onChange={(e) => setData('name', e.target.value)}
-                //             className="w-full rounded border px-2 py-1"
-                //             required
-                //         />
-                //     </label>
-
-                //     <label className="mb-2 block">
-                //         الوصف:
-                //         <textarea
-                //             value={data.description}
-                //             onChange={(e) =>
-                //                 setData('description', e.target.value)
-                //             }
-                //             className="w-full rounded border px-2 py-1"
-                //         />
-                //     </label>
-
-                //     <label className="mb-2 block">
-                //         الكلفة:
-                //         <input
-                //             type="text"
-                //             value={data.cost}
-                //             onChange={(e) => setData('cost', e.target.value)}
-                //             className="w-full rounded border px-2 py-1"
-                //             required
-                //         />
-                //     </label>
-
-                //     <div className="flex gap-2">
-                //         <button
-                //             type="submit"
-                //             className="rounded bg-green-500 px-3 py-1 text-white hover:bg-green-600"
-                //             disabled={processing}
-                //         >
-                //             {processing ? 'جارِ الحفظ...' : 'حفظ'}
-                //         </button>
-                //         <button
-                //             type="button"
-                //             onClick={() => setShowForm(false)}
-                //             className="rounded bg-gray-400 px-3 py-1 text-white hover:bg-gray-500"
-                //         >
-                //             إلغاء
-                //         </button>
-                //     </div>
-                // </form>
             )}
 
             {Object.keys(proceduresByTooth).length > 0 && (

@@ -1,4 +1,3 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -14,79 +13,68 @@ import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
-    BookOpen,
-    CalendarCheck,
-    ClipboardPenLine,
-    Contact,
-    Folder,
-    LayoutGrid,
-    Users,
-} from 'lucide-react';
+    FaCalendarAlt,
+    FaChartPie,
+    FaFileMedical,
+    FaHospitalUser,
+    FaLayerGroup,
+    FaMoneyBill,
+    FaSyringe,
+    FaTooth,
+    FaUserMd,
+} from 'react-icons/fa';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'لوحة التحكم',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: FaChartPie,
     },
     {
-        title: 'users',
+        title: 'المستخدمون',
         href: '/users',
-        icon: Users,
+        icon: FaUserMd,
     },
     {
-        title: 'patients',
+        title: 'المرضى',
         href: '/patients',
-        icon: Contact,
+        icon: FaHospitalUser,
     },
     {
-        title: 'payments',
+        title: 'الدفعات',
         href: '/payments',
-        icon: ClipboardPenLine,
+        icon: FaMoneyBill,
     },
     {
-        title: 'appointments',
+        title: 'المواعيد',
         href: '/appointments',
-        icon: CalendarCheck,
+        icon: FaCalendarAlt,
     },
     {
-        title: 'procedures',
+        title: 'الإجراءات',
         href: '/procedures',
-        icon: ClipboardPenLine,
+        icon: FaSyringe,
     },
-     {
-        title: 'medical records',
+    {
+        title: 'السجلات الطبية',
         href: '/medical-records',
-        icon: ClipboardPenLine,
+        icon: FaFileMedical,
     },
     {
-        title: 'teeth',
+        title: 'الأسنان',
         href: '/teeth',
-        icon: ClipboardPenLine,
+        icon: FaTooth,
     },
     {
-        title: 'services',
+        title: 'الخدمات الطبية',
         href: '/services',
-        icon: ClipboardPenLine,
+        icon: FaUserMd,
     },
     {
-        title: 'service-categories',
+        title: 'فئات الخدمات الطبية',
         href: '/service-categories',
-        icon: ClipboardPenLine,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
+        icon: FaLayerGroup,
     },
 ];
 
@@ -110,7 +98,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

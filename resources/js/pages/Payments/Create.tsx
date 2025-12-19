@@ -1,11 +1,11 @@
-import { AppShell } from '@/components/app-shell';
 import { BreadcrumbItem, PageProps, Patient } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { route } from 'ziggy-js';
 
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
+import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
 
 interface CreateProps extends PageProps {
@@ -21,6 +21,10 @@ const Create: React.FC<CreateProps> = ({ auth, patients }) => {
         notes: '',
     });
     console.log(errors, 'errors');
+    const [selectedPatientName, setSelectedPatientName] = useState('');
+    const handlePatientSelect = (patient: Patient) => {
+        setData('patient_id', patient.id.toString());
+    };
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -40,25 +44,22 @@ const Create: React.FC<CreateProps> = ({ auth, patients }) => {
     ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-                <Head title="إضافة دفعة " />
-                <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                    <h1 className="mb-4 text-center text-xl font-bold text-gray-700">
-                        إضافة دفعة
-                    </h1>
+            <Head title="إضافة دفعة " />
+            <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+                <h1 className="mb-4 text-center text-xl font-bold text-gray-700">
+                    إضافة دفعة
+                </h1>
 
-                    <form
-                    onSubmit={handleSubmit}
-                    className="space-y-6"
-                >
-                    <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                        <FormInput
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <SearchInput
                             label="اسم المريض"
                             name="patient_id"
-                            value={data.patient_id}
-                            onChange={(e) =>
-                                setData('patient_id', e.target.value)
-                            }
-                            placeholder="Enter patient ID"
+                            value={selectedPatientName}
+                            onChange={(val) => setSelectedPatientName(val)}
+                            options={patients}
+                            onSelect={handlePatientSelect}
+                            placeholder="ابحث باسم المريض..."
                             error={errors.patient_id}
                         />
 
@@ -66,7 +67,7 @@ const Create: React.FC<CreateProps> = ({ auth, patients }) => {
                             label="الدفعة"
                             name="amount"
                             value={data.amount}
-                            onChange={(e) => setData('amount', e.target.value)}
+                            onChange={(val) => setData('amount', val)}
                             placeholder="ادخل قيمة الدفعة"
                             error={errors.amount}
                         />
@@ -76,9 +77,7 @@ const Create: React.FC<CreateProps> = ({ auth, patients }) => {
                             name="payment_date"
                             type="date"
                             value={data.payment_date}
-                            onChange={(e) =>
-                                setData('payment_date', e.target.value)
-                            }
+                            onChange={(val) => setData('payment_date', val)}
                             placeholder="ادخل تاريخ الدفعة"
                             error={errors.payment_date}
                         />
@@ -88,7 +87,7 @@ const Create: React.FC<CreateProps> = ({ auth, patients }) => {
                             name="notes"
                             type="text"
                             value={data.notes}
-                            onChange={(e) => setData('notes', e.target.value)}
+                            onChange={(val) => setData('notes', val)}
                             placeholder="الملاحظات"
                             error={errors.notes}
                         />
@@ -109,9 +108,8 @@ const Create: React.FC<CreateProps> = ({ auth, patients }) => {
                         />
                     </div>
                 </form>
-                </div>
-
-            </AppLayout>
+            </div>
+        </AppLayout>
     );
 };
 

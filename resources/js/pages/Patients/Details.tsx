@@ -1,43 +1,23 @@
 import DentalChartPage from '@/components/DentalChartPage';
 import { DynamicTable } from '@/components/DynamicTable';
 import AppLayout from '@/layouts/app-layout';
-import { Tooth, type BreadcrumbItem, type Patient } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { ServiceCategory, Tooth, type BreadcrumbItem, type Patient } from '@/types';
+import { Head, Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Show({
     patient,
     tooth,
+    services_category,
 }: {
     patient: Patient;
     tooth: any;
+    services_category: ServiceCategory[];
 }) {
     console.log(patient, 'patient');
     console.log(tooth, 'tooth');
-
-    const handleToothClick = (toothId: number) => {
-        router.get(
-            route('patients.details', { patient: patient.id, tooth: toothId }),
-        );
-    };
-
-    const { props } = usePage<{
-        flash: { success?: string; error?: string };
-    }>();
-
-    const [selectedToothId, setSelectedToothId] = useState<number | null>(
-        tooth ? tooth.id : null,
-    );
-
-    const handleDeleteTooth = (id: number) => {
-        if (confirm('هل تريد حذف السن؟')) {
-            router.delete(route('teeth.destroy', id), {
-                preserveScroll: true,
-            });
-        }
-    };
+    console.log(services_category, 'servicesCategory');
 
     const columns: ColumnDef<Tooth>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -101,7 +81,7 @@ export default function Show({
                 </div>
 
                 <div className="mt-2 ml-2 w-3/4 rounded-lg border shadow">
-                    <DentalChartPage teeth={tooth} patient={patient} />
+                    <DentalChartPage patient={patient} services_category={services_category} />
                 </div>
             </div>
 

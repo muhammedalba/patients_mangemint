@@ -58,20 +58,20 @@ export default function Index({
         return () => clearTimeout(handler);
     }, [search]);
     const columns: ColumnDef<any>[] = [
-        { id: 'patient', accessorKey: 'patient.name', header: 'Patient' },
-        { id: 'doctor', accessorKey: 'doctor.name', header: 'Doctor' },
-        { id: 'service', accessorKey: 'service.name', header: 'service' },
+        { id: 'patient', accessorKey: 'patient.name', header: 'اسم المريض' },
+        { id: 'doctor', accessorKey: 'doctor.name', header: 'اسم الطبيب' },
+        { id: 'service', accessorKey: 'service.name', header: 'المعالجة' },
         {
             id: 'date',
             accessorKey: 'date',
-            header: 'date',
+            header: 'تاريخ الموعد',
         },
-        { id: 'start_time', accessorKey: 'start_time', header: 'start_time' },
-        { id: 'end_time', accessorKey: 'end_time', header: 'end_time' },
-        { id: 'status', accessorKey: 'status', header: 'Status' },
+        { id: 'start_time', accessorKey: 'start_time', header: 'بداية الموعد' },
+        { id: 'end_time', accessorKey: 'end_time', header: 'نهاية الموعد' },
+        { id: 'status', accessorKey: 'status', header: 'حالة الموعد' },
         {
             id: 'actions',
-            header: 'Actions',
+            header: 'الإجراءات',
             cell: ({ row }) => {
                 const appointment = row.original;
                 return (
@@ -84,7 +84,7 @@ export default function Index({
                         showEdit={true}
                         showView={false}
                         showDelete={true}
-                        confirmMessage="Are you sure you want to delete this appointment?"
+                        confirmMessage="هل انت متأكد من حذف هذا الموعد؟"
                         onDelete={handleDelete}
                     />
                 );

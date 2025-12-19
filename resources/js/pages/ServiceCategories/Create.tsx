@@ -39,7 +39,7 @@ export default function CreateServiceCategory() {
             href: route('service-categories.index'),
         },
         {
-            title: 'إضافة فئة',
+            title: 'إضافة فئة تصنيف',
             href: route('service-categories.create'),
         },
     ];
@@ -58,7 +58,7 @@ export default function CreateServiceCategory() {
                             type="text"
                             name="name"
                             value={data.name}
-                           onChange={(e) => setData('name', e.target.value)}
+                           onChange={(val) => setData('name', val)}
                             placeholder="اسم الخدمة "
                             error={errors.name}
                         />
@@ -68,7 +68,7 @@ export default function CreateServiceCategory() {
                             type="textarea"
                             name="description"
                             value={data.description}
-                            onChange={(e) => setData('description', e.target.value)}
+                            onChange={(val) => setData('description', val)}
                             placeholder="وصف الخدمة"
                             error={errors.description}
                         />

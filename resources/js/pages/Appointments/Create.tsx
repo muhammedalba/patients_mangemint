@@ -1,8 +1,9 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
+import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
-import { PageProps, Patient, Procedure, User } from '@/types';
+import { BreadcrumbItem, PageProps, Patient, Procedure, Service, ServiceCategory, User } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -15,24 +16,35 @@ export default function Create({
 }: PageProps<{
     patients: Patient[];
     doctors: User[];
-    services: Procedure[];
+    services: ServiceCategory[];
 }>) {
     const { data, setData, post, errors, processing } = useForm({
         patient_id: '',
+        service_id:'',
         user_id: '',
-        service_id: '',
         date: '',
         start_time: '',
         notes: '',
         duration_slots: 1,
         status: 'scheduled',
+        category: '',
+        name: '',
     });
 
     const [availableAppointments, setAvailableAppointments] = useState<
         { start: string; end: string }[]
     >([]);
     const [isLoading, setIsLoading] = useState(false);
-
+    const [selectedPatientName, setSelectedPatientName] = useState('');
+    const handlePatientSelect = (patient: Patient) => {
+        setData('patient_id', patient.id.toString());
+    };
+    const handleServiceSelect = (service: { name: string; price: number }) => {
+        setData('name', service.name);
+    };
+    const [selectedTreatment, setSelectedTreatment] = useState<Service | null>(
+        null,
+    );
     // جلب المواعيد المتاحة عند تغيير التاريخ أو مدة الحجز
     const fetchAvailableAppointments = async () => {
         // لا ترسل الطلب إذا لم يتم تحديد التاريخ
@@ -96,17 +108,14 @@ export default function Create({
 
                 <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <FormSelect
+                        <SearchInput
                             label="اسم المريض"
                             name="patient_id"
-                            value={data.patient_id}
-                            onChange={(val: string) =>
-                                setData('patient_id', val)
-                            }
-                            options={patients.map((patient) => ({
-                                value: String(patient.id),
-                                label: patient.name,
-                            }))}
+                            value={selectedPatientName}
+                            onChange={(val) => setSelectedPatientName(val)}
+                            options={patients}
+                            onSelect={handlePatientSelect}
+                            placeholder="ابحث باسم المريض..."
                             error={errors.patient_id}
                         />
 
@@ -122,26 +131,50 @@ export default function Create({
                             error={errors.user_id}
                         />
 
-                        <FormSelect
-                            label="اسم المعالجة"
-                            name="service_id"
-                            value={data.service_id}
-                            onChange={(val: string) =>
-                                setData('service_id', val)
-                            }
-                            options={services.map((service) => ({
-                                value: String(service.id),
-                                label: service.name,
-                            }))}
-                            error={errors.service_id}
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                        {services.map((category) => (
+                            <FormSelect
+                                key={category.id}
+                                label={`اختر خدمة من ${category.name}`}
+                                name={`service_${category.id}`}
+                                value={data.service_id}
+                                onChange={(val) => {
+                                    const selectedService =
+                                        category.services.find(
+                                            (service) =>
+                                                service.id.toString() === val,
+                                        );
+                                    if (selectedService) {
+                                        handleServiceSelect(selectedService);
+                                    }
+                                    setData('service_id', val);
+                                }}
+                                options={category.services.map((service) => ({
+                                    value: service.id.toString(),
+                                    label: service.name,
+                                }))}
+                                error={errors.service_id}
+                            />
+                        ))}
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <FormInput
+                            label=" اسم الإجراء"
+                            name="name"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            placeholder="الاسم الإجراء"
+                            error={errors.name}
                         />
+                    </div>
 
                         <FormInput
                             label="تاريخ الموعد"
                             name="date"
                             type="date"
                             value={data.date}
-                            onChange={(e) => setData('date', e.target.value)}
+                            onChange={(val) => setData('date', val)}
                             error={errors.date}
                         />
 
@@ -192,7 +225,7 @@ export default function Create({
                             name="notes"
                             type="text"
                             value={data.notes}
-                            onChange={(e) => setData('notes', e.target.value)}
+                            onChange={(val) => setData('notes', val)}
                             placeholder="الملاحظات"
                             error={errors.notes}
                         />

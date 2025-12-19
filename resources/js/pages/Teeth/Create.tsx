@@ -1,10 +1,11 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
+import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, Patient } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function CreateTeeth({
@@ -27,6 +28,7 @@ export default function CreateTeeth({
     });
     console.log(patients);
     console.log(patient_id, 'patient_id');
+    const [selectedPatientName, setSelectedPatientName] = useState('');
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -34,13 +36,17 @@ export default function CreateTeeth({
             onSuccess: () => reset(),
         });
     };
+    const handlePatientSelect = (patient: Patient) => {
+        setData('patient_id', patient.id.toString());
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'الأسنان', href: route('teeth.index') },
         { title: 'إضافة سن ', href: route('teeth.create') },
     ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Teeth" />
+            <Head title="إضافة سن" />
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     إضافة سن جديد
@@ -48,24 +54,15 @@ export default function CreateTeeth({
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <FormSelect
+                        <SearchInput
                             label="اسم المريض"
                             name="patient_id"
-                            value={data.patient_id}
-                            onChange={(val: string) =>
-                                setData('patient_id', val)
-                            }
-                            options={[
-                                { value: '', label: 'اختر المريض' },
-                                ...(patients.length > 0
-                                    ? patients.map((patient) => ({
-                                          value: patient.id.toString(),
-                                          label: patient.name,
-                                      }))
-                                    : [{ value: '', label: 'لا يوجد مرضى' }]),
-                            ]}
+                            value={selectedPatientName}
+                            onChange={(val) => setSelectedPatientName(val)}
+                            options={patients}
+                            onSelect={handlePatientSelect}
+                            placeholder="ابحث باسم المريض..."
                             error={errors.patient_id}
-                            disabled={!!patient_id}
                         />
 
                         <FormInput
@@ -96,23 +93,22 @@ export default function CreateTeeth({
                             placeholder="ملاحظات"
                             error={errors.notes}
                         />
-                        </div>
+                    </div>
 
-                        <div className="flex items-center justify-end space-x-2">
-                            <Link
-                                href={route('procedures.index')}
-                                className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
-                            >
-                                إنهاء
-                            </Link>
+                    <div className="flex items-center justify-end space-x-2">
+                        <Link
+                            href={route('procedures.index')}
+                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                        >
+                            إنهاء
+                        </Link>
 
-                            <FormButton
-                                processing={processing}
-                                label="حفظ"
-                                loadingLabel="جارِ الحفظ ..."
-                            />
-                        </div>
-
+                        <FormButton
+                            processing={processing}
+                            label="حفظ"
+                            loadingLabel="جارِ الحفظ ..."
+                        />
+                    </div>
                 </form>
             </div>
         </AppLayout>

@@ -19,7 +19,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
             title="Reset password"
             description="Please enter your new password below"
         >
-            <Head title="Reset password" />
+            <Head title="استعادة كلمة المرور" />
 
             <Form
                 {...NewPasswordController.store.form()}

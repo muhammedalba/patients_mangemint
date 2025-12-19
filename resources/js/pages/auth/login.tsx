@@ -19,10 +19,10 @@ interface LoginProps {
 export default function Login({ status, canResetPassword }: LoginProps) {
     return (
         <AuthLayout
-            title="Welcome to Dental App"
+            title="Welcome to Zircon App"
             description="Enter your details below"
         >
-            <Head title="Log in" />
+            <Head title="تسجيل الدخول" />
 
             <Form
                 {...store.form()}

@@ -13,6 +13,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Payment } from '@/types/payment';
 import { ColumnDef } from '@tanstack/react-table';
 import { route } from 'ziggy-js';
+import TableActions from '@/components/TableActionsProps';
 interface IndexProps extends PageProps {
     payments: {
         data: Payment[];
@@ -29,41 +30,43 @@ const Index: React.FC<IndexProps> = () => {
     console.log(payments, 'payments');
     console.log(filters, 'filters');
     console.log(flash, 'flash');
+    const handleDelete = (id: number) => {
+        router.delete(route('payments.destroy', id));
+    };
 
     const columns: ColumnDef<Payment>[] = [
         {
             accessorKey: 'patient.name',
-            header: 'Patient',
+            header: 'اسم المريض',
         },
         {
             accessorKey: 'amount',
-            header: 'Amount',
+            header: 'قيمة الدفعة',
         },
         {
             accessorKey: 'payment_date',
-            header: 'Payment Date',
+            header: 'تاريخ الدفعة',
         },
         {
             id: 'actions',
-            header: 'Actions',
-            cell: ({ row }) => (
-                <div className="flex items-center space-x-2">
-                    <Link href={route('payments.edit', row.original.id)}>
-                        <Button variant="outline">Edit</Button>
-                    </Link>
-                    <ConfirmDialog
-                        onConfirm={() =>
-                            Inertia.delete(
-                                route('payments.destroy', row.original.id),
-                            )
-                        }
-                        title="Delete Payment"
-                        description="Are you sure you want to delete this payment? This action cannot be undone."
-                    >
-                        <Button variant="destructive">Delete</Button>
-                    </ConfirmDialog>
-                </div>
-            ),
+            header: 'الإجراءات',
+            cell: ({ row }) => {
+                            const payment = row.original;
+                            return (
+                                <TableActions
+                                    item={payment}
+                                    routes={{
+                                        edit: 'payments.edit',
+                                        delete: 'payments.destroy',
+                                    }}
+                                    showEdit={true}
+                                    showView={false}
+                                    showDelete={true}
+                                    confirmMessage="هل أنت متأكد من حذف هذه الدفعة؟"
+                                    onDelete={handleDelete}
+                                />
+                            );
+                        },
         },
     ];
     const [showToast, setShowToast] = useState(false);
