@@ -18,6 +18,7 @@ class Patient extends Model
         'birth_date',
         'gender',
         'marital_status',
+        'discount_amount',
     ];
     protected $hidden = [
         'password',

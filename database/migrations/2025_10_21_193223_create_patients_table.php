@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->enum('gender', ['male', 'female', 'other']);
             $table->date('birth_date');
             $table->enum('marital_status', ['single', 'married', 'divorced', 'widowed'])->nullable();
+            $table->decimal('discount_amount', 8, 2)->default(0);
             $table->string('phone', 50)->nullable()->index();
             $table->string('address', 300)->nullable();
             $table->text('notes')->nullable();

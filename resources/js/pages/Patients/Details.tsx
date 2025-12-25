@@ -112,7 +112,7 @@ export default function Show({
                             <tr
                                 key={tooth.id}
                                 className={
-                                    selectedToothId === tooth.id
+                                    tooth.id
                                         ? 'bg-blue-100'
                                         : ''
                                 }
@@ -135,17 +135,17 @@ export default function Show({
                                         تعديل
                                     </Link>
                                     <button
-                                        onClick={() =>
-                                            handleDeleteTooth(tooth.id)
-                                        }
+                                        // onClick={() =>
+                                        //     handleDeleteTooth(tooth.id)
+                                        // }
                                         className="rounded bg-red-500 px-2 py-1 text-white"
                                     >
                                         حذف
                                     </button>
                                     <button
-                                        onClick={() =>
-                                            handleToothClick(tooth.id)
-                                        }
+                                        // onClick={() =>
+                                        //     handleToothClick(tooth.id)
+                                        // }
                                         className="rounded bg-blue-500 px-2 py-1 text-white"
                                     >
                                         عرض الإجراءات

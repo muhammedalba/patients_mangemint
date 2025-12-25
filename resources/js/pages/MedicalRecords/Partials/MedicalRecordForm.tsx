@@ -222,7 +222,7 @@ export default function MedicalRecordForm({
                 </Tab.List>
 
                 <Tab.Panels>
-                    {tabs.map((tab) => (
+                    {tabs?.map((tab) => (
                         <Tab.Panel key={tab.name} className="space-y-4">
                             {tab.keys.map((key) => {
                                 const value = (data as any)[key];
@@ -261,9 +261,9 @@ export default function MedicalRecordForm({
                                                 }
                                                 className="w-full rounded border p-2"
                                             />
-                                            {existingFiles.length > 0 && (
+                                            {existingFiles?.length > 0 && (
                                                 <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                                                    {existingFiles.map(
+                                                    {existingFiles?.map(
                                                         (file) => (
                                                             <div
                                                                 key={file}

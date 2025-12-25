@@ -18,31 +18,14 @@ class ProcedureService
 
     public function create(ProcedureData $data): Procedure
     {
-        try {
-            return $this->repo->create($data->toArray());
-        } catch (\Throwable $e) {
-            Log::error('Procedure creation failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'data' => $data->toArray(),
-            ]);
-            throw $e;
-        }
+
+        return $this->repo->create($data->toArray());
     }
 
     public function update(Procedure $procedure, ProcedureData $data): Procedure
     {
-        try {
-            return $this->repo->update($procedure, $data->toArray());
-        } catch (\Throwable $e) {
-            Log::error('Procedure update failed', [
-                'procedure_id' => $procedure->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'data' => $data->toArray(),
-            ]);
-            throw $e;
-        }
+
+        return $this->repo->update($procedure, $data->toArray());
     }
 
     public function delete(Procedure $procedure): void

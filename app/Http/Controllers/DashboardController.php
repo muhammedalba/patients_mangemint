@@ -66,7 +66,7 @@ class DashboardController extends Controller
                 'revenue_total' => $revenueTotal,
                 'users_by_role' => $usersByRole,
                 'doctors_count' => $doctorsCount,
-                'appointmentsToday'=>$appointmentsToday
+                'appointmentsToday' => $appointmentsToday
             ];
         });
         return Inertia::render('dashboard', [

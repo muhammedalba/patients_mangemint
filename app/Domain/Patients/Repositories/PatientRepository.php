@@ -2,8 +2,10 @@
 
 namespace App\Domain\Patients\Repositories;
 
+use App\Domain\Patients\Exceptions\InvalidDiscountException;
 use App\Http\Controllers\DashboardController;
 use App\Models\Patient;
+use App\Models\Procedure;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Cache\TaggableStore;
@@ -23,7 +25,11 @@ class PatientRepository
     public function getAllPatients(array $filters = []): LengthAwarePaginator
     {
         $page = request('page', 1);
-        $cacheKey = "patients.page.{$page}.search." . ($filters['search'] ?? '');
+        $cacheKey = 'patients:' . md5(json_encode([
+            'page' => $page,
+            'filters' => $filters,
+        ]));
+
         $store = $this->getCacheStore();
 
         $build = function () use ($filters) {
@@ -48,13 +54,32 @@ class PatientRepository
     {
         $patient = Patient::create($data);
         $this->clearCache();
+        DashboardController::clearDashboardCache();
         return $patient;
     }
+
+    public function addDiscountToPatient(Patient $patient, float $discountAmount): bool
+    {
+
+        $updated = $patient->update([
+            'discount_amount' => $discountAmount,
+        ]);
+
+        if ($updated) {
+            $this->clearCache($patient->id);
+            DashboardController::clearDashboardCache();
+        }
+
+        return $updated;
+    }
+
+
 
     public function updatePatient(Patient $patient, array $data): bool
     {
         $updated = $patient->update($data);
-        $this->clearCache();
+        $this->clearCache($patient->id);
+
         return $updated;
     }
 
@@ -62,6 +87,7 @@ class PatientRepository
     {
         $deleted = $patient->delete();
         $this->clearCache();
+        DashboardController::clearDashboardCache();
         return $deleted;
     }
 
@@ -79,7 +105,10 @@ class PatientRepository
                 'appointments:id,patient_id,status,start_time,end_time,date,notes',
                 'medicalRecord:id,patient_id',
                 "teeth:id,patient_id,tooth_number,status,notes"
-            ]);
+            ])
+                ->loadSum('procedures', 'cost')
+                ->loadSum('payments', 'amount')
+                ->loadCount('procedures');
         };
 
         if ($store instanceof TaggableStore) {
@@ -109,16 +138,19 @@ class PatientRepository
 
         return ['ToothProcedures' => $data];
     }
-
-    private function clearCache(): void
+    private function clearCache($patient = null): void
     {
         $store = $this->getCacheStore();
+
         if ($store instanceof TaggableStore) {
-            Cache::tags('patients')->flush();
+
+            $patientsCache = Cache::tags('patients');
+
+            $patient
+                ? $patientsCache->forget("patient:{$patient->id}:details")
+                : $patientsCache->flush();
         } else {
             Cache::flush();
         }
-        DashboardController::clearDashboardCache();
-
     }
 }

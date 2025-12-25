@@ -54,9 +54,12 @@
 */
     Route::middleware($protected)->group(function () {
         Route::resource('patients', PatientController::class);
+        // add dicount amount route
+        Route::post('patients/{patient}/discount', [PatientController::class, 'addDiscount'])->name('patients.addDiscount');
+        // patient details route
 
         Route::get(
-            'patients/details/{patient}/{tooth?}',
+            'patients/details/{patient}',
             [PatientController::class, 'details']
         )->name('patients.details');
         // get Tooth Procedures
