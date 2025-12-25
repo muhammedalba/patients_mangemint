@@ -37,18 +37,21 @@ class Patient extends Model
         return $this->hasMany(Appointment::class);
     }
 
+    // public function procedures()
+    // {
+    //     return $this->hasManyThrough(
+    //         Procedure::class, // الموديل البعيد
+    //         Tooth::class,     // الموديل الوسيط
+    //         'patient_id',     // المفتاح الأجنبي في جدول الأسنان
+    //         'tooth_id',       // المفتاح الأجنبي في جدول الإجراءات
+    //         'id',             // المفتاح الأساسي في جدول المرضى
+    //         'id'              // المفتاح الأساسي في جدول الأسنان
+    //     );
+    // }
     public function procedures()
     {
-        return $this->hasManyThrough(
-            Procedure::class, // الموديل البعيد
-            Tooth::class,     // الموديل الوسيط
-            'patient_id',     // المفتاح الأجنبي في جدول الأسنان
-            'tooth_id',       // المفتاح الأجنبي في جدول الإجراءات
-            'id',             // المفتاح الأساسي في جدول المرضى
-            'id'              // المفتاح الأساسي في جدول الأسنان
-        );
+        return $this->hasMany(Procedure::class, 'patient_id');
     }
-
     public function payments()
     {
         return $this->hasMany(Payment::class);

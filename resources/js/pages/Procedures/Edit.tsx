@@ -32,7 +32,7 @@ export default function EditProcedure({
         description: procedure.description || '',
         cost: procedure.cost || 0,
         tooth_id: procedure.tooth_id || '',
-        patient_id: procedure.tooth?.patient_id || '',
+        patient_id: procedure.patient_id || '',
     });
     console.log(services_category, 'services_category edit');
     console.log(teeth, 'teeth edit');

@@ -30,19 +30,19 @@ class ProcedureController extends Controller
 
             $procedures = $this->service->listProcedures($search, 10);
 
-            $procedures->getCollection()->transform(function ($procedure) {
-                return [
-                    'id' => $procedure->id,
-                    'tooth_id' => $procedure->tooth_id,
-                    'description' => $procedure->description,
-                    'tooth_number' => $procedure->tooth?->tooth_number,
-                    'cost' => $procedure->cost,
-                    'name' => $procedure->name,
-                    'duration_minutes' => $procedure->duration_minutes,
-                    'follow_up_days' => $procedure->follow_up_days,
-                    'patient' => $procedure->tooth?->patient?->name,
-                ];
-            });
+            // $procedures->getCollection()->transform(function ($procedure) {
+            //     return [
+            //         'id' => $procedure->id,
+            //         'tooth_id' => $procedure->tooth_id,
+            //         'description' => $procedure->description,
+            //         'tooth_number' => $procedure->tooth?->tooth_number,
+            //         'cost' => $procedure->cost,
+            //         'name' => $procedure->name,
+            //         'duration_minutes' => $procedure->duration_minutes,
+            //         'follow_up_days' => $procedure->follow_up_days,
+            //         'patient' => $procedure->tooth?->patient?->name,
+            //     ];
+            // });
 
             return Inertia::render('Procedures/Index', ['procedures' => $procedures]);
         } catch (\Throwable $e) {
@@ -66,7 +66,7 @@ class ProcedureController extends Controller
             // تحديد معرّفات المريض والسن إن وُجدا
             $patientId = $patient_id ?? $request->query('patient_id');
             $toothId = $request->query('tooth_id');
-            // @dd($patientId, $toothId);
+
             $teeth = $toothId ? Tooth::select('tooth_number', 'id')->where('id', $toothId)->get() : [];
 
             $patients = $patientId ? Patient::select('id', 'name')->find($patientId) : Patient::select('id', 'name')->latest('updated_at')->get();
@@ -97,13 +97,12 @@ class ProcedureController extends Controller
 
     public function store(ProcedureStoreRequest $request)
     {
-        try{
-        $data = ProcedureData::fromValidated($request->validated());
+        try {
+            $data = ProcedureData::fromValidated($request->validated());
 
-        $this->service->create($data);
-
-        return redirect()->route('patients.details', $data->patient_id)->with('success', 'Procedure created successfully.');}
-        catch (\Throwable $e) {
+            $this->service->create($data);
+            return redirect()->route('patients.details', $data->patient_id)->with('success', 'Procedure created successfully.');
+        } catch (\Throwable $e) {
             Log::error('Failed to create procedure', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -115,7 +114,6 @@ class ProcedureController extends Controller
                 ->withInput()
                 ->with('error', __('Something went wrong while creating the procedure.'));
         }
-
     }
 
     public function edit(Procedure $procedure)
@@ -125,7 +123,7 @@ class ProcedureController extends Controller
             // $procedure = $this->service->find($procedure->id) ?? $procedure;
 
             $teeth = Tooth::select('id', 'tooth_number', 'patient_id')
-                ->where('patient_id', $procedure->tooth?->patient_id)
+                ->where('patient_id', $procedure->patient_id)
                 ->get();
 
             $services_category = ServiceCategory::with('services:category_id,id,name')
@@ -156,7 +154,10 @@ class ProcedureController extends Controller
 
     public function update(ProcedureUpdateRequest $request, Procedure $procedure)
     {
+        //  @dd('$procedure',$procedure);
+        // @dd('$request',$request->validated());
         $data = ProcedureData::fromValidated($request->validated());
+        // @dd('$data',$data);
         try {
             $this->service->update($procedure, $data);
 

@@ -46,10 +46,9 @@ class PatientController extends Controller
         try {
             $data = PatientData::fromArray($request->validated());
 
-            $this->service->createPatient($data);
-
+            $patient = $this->service->createPatient($data);
             return redirect()
-                ->route('patients.index')
+                ->route('medical-records.create',  $patient->id)
                 ->with('success', __('Patient created successfully.'));
         } catch (\Throwable $e) {
             Log::error('Failed to create patient', [

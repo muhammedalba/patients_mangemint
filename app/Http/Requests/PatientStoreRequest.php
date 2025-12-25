@@ -38,4 +38,5 @@ class PatientStoreRequest extends FormRequest
 
         ];
     }
+
 }

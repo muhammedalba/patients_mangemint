@@ -43,9 +43,12 @@ class MedicalRecordController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): Response
+    public function create($patient_id = null): Response
     {
-        $patients = Patient::select('id', 'name')->latest('updated_at')->get();
+        $patients = $patient_id
+            ? Patient::select('id', 'name')->where('id', $patient_id)->get()
+            : Patient::select('id', 'name')->latest('updated_at')->get();
+
         $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->select('id', 'name')->latest('name')->get();
         return Inertia::render('MedicalRecords/Create', [
             'patients' => $patients,

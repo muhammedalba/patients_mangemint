@@ -18,6 +18,7 @@ class ProcedureFactory extends Factory
     {
         return [
             'tooth_id' => \App\Models\Tooth::factory(),
+            'patient_id' => \App\Models\Patient::factory(),
             'name' => $this->faker->word(),
             'description' => $this->faker->sentence(),
             'cost' => $this->faker->randomFloat(2, 50, 500),

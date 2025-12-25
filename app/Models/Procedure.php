@@ -12,10 +12,13 @@ class Procedure extends Model
     protected $fillable = [
         'name',
         'description',
+        'processing_date',
         'cost',
         'duration_minutes',
         'follow_up_days',
         'tooth_id',
+        'patient_id',
+
     ];
 
 

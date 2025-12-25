@@ -123,7 +123,7 @@
         ->controller(MedicalRecordController::class)
         ->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
+            Route::get('create/{patient_id?}', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('{medicalRecord}/edit', 'edit')->name('edit');
             Route::put('{medicalRecord}', 'update')->name('update');

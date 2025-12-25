@@ -1,10 +1,9 @@
-
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, router, useForm, Link } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -50,6 +49,7 @@ export default function CreateProcedure({
         tooth_id: string;
         patient_id: string;
         category: string;
+        processing_date: string;
     }>({
         name: '',
         description: '',
@@ -57,7 +57,9 @@ export default function CreateProcedure({
         tooth_id: teeth[0]?.id?.toString() || '',
         patient_id: patient_id?.toString() || '',
         category: '',
+        processing_date: new Date().toISOString().split('T')[0], // تاريخ اليوم افتراضيًا
     });
+    console.log('errors', errors);
 
     const [selectedTreatment, setSelectedTreatment] = useState<Service | null>(
         null,
@@ -145,7 +147,7 @@ export default function CreateProcedure({
                         label=" اسم الإجراء"
                         name="name"
                         value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
+                        onChange={(e) => setData('name', e)}
                         placeholder="الاسم الإجراء"
                         error={errors.name}
                     />
@@ -155,7 +157,7 @@ export default function CreateProcedure({
                             label=" المعالجة المختارة"
                             name="treatment_name"
                             value={selectedTreatment.name}
-                            onChange={(e) => setData('name', e.target.value)}
+                            onChange={(e) => setData('name', e)}
                             placeholder="المعالجة المختارة"
                         />
                     )}
@@ -164,7 +166,7 @@ export default function CreateProcedure({
                         label=" كلفة الإجراء"
                         name="cost"
                         value={data.cost}
-                        onChange={(e) => setData('cost', e.target.value)}
+                        onChange={(e) => setData('cost', e)}
                         placeholder="كلفة الإجراء"
                     />
 
@@ -192,38 +194,52 @@ export default function CreateProcedure({
                         )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <FormSelect
-                        label=" اسم المريض"
-                        name="patient_id"
-                        value={data.patient_id}
-                        onChange={(val) => handlePatientSelect(val)}
-                        options={
-                            patients.length > 0
-                                ? patients.map((p) => ({
-                                      value: p.id.toString(),
-                                      label: p.name,
-                                  }))
-                                : [{ value: '', label: 'لا يوجد مرضى' }]
-                        }
-                        error={errors.patient_id}
-                    />
+                            label=" اسم المريض"
+                            name="patient_id"
+                            value={data.patient_id}
+                            onChange={(val) => handlePatientSelect(val)}
+                            options={
+                                patients.length > 0
+                                    ? patients.map((p) => ({
+                                          value: p.id.toString(),
+                                          label: p.name,
+                                      }))
+                                    : [{ value: '', label: 'لا يوجد مرضى' }]
+                            }
+                            error={errors.patient_id}
+                        />
+                        <FormInput
+                            label="تاريخ المعالجة"
+                            name="processing_date"
+                            type="date"
+                            // max={new Date().toISOString().split('T')[0]}
+                            value={data.processing_date}
+                            onChange={(e) => setData('processing_date', e)}
+                            error={errors.processing_date}
+                        />
 
-                    <FormSelect
-                        label=" اسم السن"
-                        name="tooth_id"
-                        value={data.tooth_id}
-                        onChange={(val) => setData('tooth_id', val)}
-                        options={
-                            filteredTeeth && filteredTeeth.length > 0
-                                ? filteredTeeth.map((tooth) => ({
-                                      value: tooth.id.toString(),
-                                      label: tooth.tooth_number,
-                                  }))
-                                : [{ value: '', label: 'لا توجد أسنان متاحة' }]
-                        }
-                        error={errors.tooth_id}
-                    />
+                        <FormSelect
+                            label=" اسم السن"
+                            name="tooth_id"
+                            value={data.tooth_id}
+                            onChange={(val) => setData('tooth_id', val)}
+                            options={
+                                filteredTeeth && filteredTeeth.length > 0
+                                    ? filteredTeeth.map((tooth) => ({
+                                          value: tooth.id.toString(),
+                                          label: tooth.tooth_number,
+                                      }))
+                                    : [
+                                          {
+                                              value: '',
+                                              label: 'لا توجد أسنان متاحة',
+                                          },
+                                      ]
+                            }
+                            error={errors.tooth_id}
+                        />
                     </div>
 
                     <div className="flex items-center justify-end space-x-2">

@@ -16,7 +16,9 @@ class ProcedureRepository
 
     public function create(array $data): Procedure
     {
+        // @dd('$data',$data);
         $procedure = Procedure::create($data);
+        //@dd('$procedure',$procedure);
         $this->clearCache();
         return $procedure;
     }
@@ -36,7 +38,7 @@ class ProcedureRepository
 
     public function find(int $id): ?Procedure
     {
-        return Procedure::with(['tooth.patient'])->find($id);
+        return Procedure::with(['patient'])->find($id);
     }
 
     public function list(?string $search = null, int $perPage = 10): LengthAwarePaginator
@@ -46,14 +48,14 @@ class ProcedureRepository
         $store = $this->getCacheStore();
 
         $build = function () use ($search, $perPage) {
-            return Procedure::with(['tooth:id,tooth_number,patient_id', 'tooth.patient:id,name'])
-                ->select(['id', 'name', 'description', 'cost', 'tooth_id'])
+            return Procedure::with(['patient:id,name', 'tooth:id,tooth_number'])
+
                 ->when($search, function ($q) use ($search) {
                     $q->where(function ($q) use ($search) {
                         $q->where('procedures.name', 'like', "%{$search}%")
                             ->orWhere('procedures.description', 'like', "%{$search}%")
-                            ->orWhereHas('tooth.patient', function ($q2) use ($search) {
-                                $q2->where('patients.name', 'like', "%{$search}%");
+                            ->orWhereHas('patient', function ($q2) use ($search) {
+                                $q2->where('name', 'like', "%{$search}%");
                             });
                     });
                 })

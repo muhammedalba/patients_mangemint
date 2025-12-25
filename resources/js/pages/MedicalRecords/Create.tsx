@@ -8,6 +8,8 @@ export default function Create({
     patients,
     doctors,
 }: PageProps<{ patients: Patient[]; doctors: User[] }>) {
+console.log(patients,'patients');
+console.log(doctors,'doctors');
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'السجلات الطبية', href: route('medical-records.index') },

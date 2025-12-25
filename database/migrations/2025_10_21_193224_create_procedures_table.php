@@ -11,12 +11,21 @@ return new class extends Migration {
             $table->id();
             $table->string('name')->index();
             $table->text('description')->nullable();
+
+            $table->timestamp('processing_date')->useCurrent();
             $table->decimal('cost', 10, 2)->default(0);
             $table->integer('duration_minutes')->nullable();
             $table->integer('follow_up_days')->nullable();
-            $table->foreignId('tooth_id')->constrained('teeth')->onDelete('cascade');
-            $table->fullText('description');
+            $table->unsignedBigInteger('tooth_id')->nullable()->index();
+
+            $table->foreign('tooth_id')
+                ->references('id')
+                ->on('teeth')
+                ->nullOnDelete();
+
+            $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+            $table->fullText('description');
         });
     }
 
