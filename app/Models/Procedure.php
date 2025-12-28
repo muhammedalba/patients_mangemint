@@ -13,6 +13,7 @@ class Procedure extends Model
         'name',
         'description',
         'processing_date',
+        'status',
         'cost',
         'duration_minutes',
         'follow_up_days',

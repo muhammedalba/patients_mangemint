@@ -99,7 +99,6 @@ class ProcedureController extends Controller
     {
         try {
             $data = ProcedureData::fromValidated($request->validated());
-
             $this->service->create($data);
             return redirect()->route('patients.details', $data->patient_id)->with('success', 'Procedure created successfully.');
         } catch (\Throwable $e) {
@@ -154,10 +153,9 @@ class ProcedureController extends Controller
 
     public function update(ProcedureUpdateRequest $request, Procedure $procedure)
     {
-        //  @dd('$procedure',$procedure);
-        // @dd('$request',$request->validated());
+
         $data = ProcedureData::fromValidated($request->validated());
-        // @dd('$data',$data);
+
         try {
             $this->service->update($procedure, $data);
 

@@ -12,6 +12,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Dashboard() {
     const { stats } = usePage().props as any;
+    console.log(stats);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -21,14 +22,35 @@ export default function Dashboard() {
                 {/* البطاقات الأساسية */}
                 <div className="grid gap-6 md:grid-cols-3">
                     <Card title="المرضى اليوم" value={stats.patients_today} />
-                    <Card title="المرضى هذا الشهر" value={stats.patients_month} />
+                    <Card
+                        title="المرضى هذا الشهر"
+                        value={stats.patients_month}
+                    />
                     <Card title="إجمالي المرضى" value={stats.total_patients} />
                 </div>
 
-                {/* الإيرادات */}
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Card title="إيرادات الشهر" value={`$${stats.revenue_month}`} />
-                    <Card title="إجمالي الإيرادات" value={`$${stats.revenue_total}`} />
+                {/* الإيرادات و المصروفات */}
+                <div className="grid gap-6 md:grid-cols-3">
+                    <Card
+                        title="إيرادات الشهر"
+                        value={`$${stats.revenue_month}`}
+                    />
+                    <Card
+                        title="إجمالي الإيرادات"
+                        value={`$${stats.revenue_total}`}
+                    />
+                    <Card
+                        title="مصروفات الشهر"
+                        value={`$${stats.expenses_month ?? 0}`}
+                    />
+                </div>
+
+                {/* صافي الربح/الخسارة هذا الشهر */}
+                <div className="mt-4 grid gap-6 md:grid-cols-1">
+                    <Card
+                        title="صافي الربح (الشهر)"
+                        value={`$${stats.net_profit_month ?? 0}`}
+                    />
                 </div>
 
                 {/* المواعيد حسب الحالة */}
@@ -53,6 +75,13 @@ export default function Dashboard() {
                     valueKey="total"
                 />
 
+                {/* أكثر فئات المصروفات لهذا الشهر */}
+                <StatsList
+                    title="أكبر فئات المصروفات هذا الشهر"
+                    items={stats.top_expense_categories || []}
+                    labelKey="category_name"
+                    valueKey="total"
+                />
                 {/* المستخدمون حسب الدور */}
                 <StatsList
                     title="عدد المستخدمين حسب الدور"
@@ -122,11 +151,21 @@ function AppointmentsToday({
                 <table className="w-full table-auto border-collapse">
                     <thead>
                         <tr className="bg-gray-200">
-                            <th className="border px-3 py-2 text-right">الوقت</th>
-                            <th className="border px-3 py-2 text-right">المريض</th>
-                            <th className="border px-3 py-2 text-right">الطبيب</th>
-                            <th className="border px-3 py-2 text-right">الخدمة</th>
-                            <th className="border px-3 py-2 text-right">الحالة</th>
+                            <th className="border px-3 py-2 text-right">
+                                الوقت
+                            </th>
+                            <th className="border px-3 py-2 text-right">
+                                المريض
+                            </th>
+                            <th className="border px-3 py-2 text-right">
+                                الطبيب
+                            </th>
+                            <th className="border px-3 py-2 text-right">
+                                الخدمة
+                            </th>
+                            <th className="border px-3 py-2 text-right">
+                                الحالة
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -135,10 +174,18 @@ function AppointmentsToday({
                                 <td className="border px-3 py-2">
                                     {a.start_time} – {a.end_time}
                                 </td>
-                                <td className="border px-3 py-2">{a.patient?.name}</td>
-                                <td className="border px-3 py-2">{a.doctor?.name}</td>
-                                <td className="border px-3 py-2">{a.service?.name}</td>
-                                <td className="border px-3 py-2 capitalize">{a.status}</td>
+                                <td className="border px-3 py-2">
+                                    {a.patient?.name}
+                                </td>
+                                <td className="border px-3 py-2">
+                                    {a.doctor?.name}
+                                </td>
+                                <td className="border px-3 py-2">
+                                    {a.service?.name}
+                                </td>
+                                <td className="border px-3 py-2 capitalize">
+                                    {a.status}
+                                </td>
                             </tr>
                         ))}
                     </tbody>

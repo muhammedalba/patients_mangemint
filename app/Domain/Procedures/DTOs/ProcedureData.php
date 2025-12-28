@@ -8,8 +8,10 @@ class ProcedureData
 {
     public function __construct(
         public string $name,
+        public string $status,
         public ?string $description = null,
         public float $cost = 0.0,
+
         public int $duration_minutes = 0,
         public CarbonImmutable $processing_date,
         public ?int $tooth_id = null,
@@ -22,6 +24,7 @@ class ProcedureData
         return new self(
             name: $validated['name'],
             description: $validated['description'] ?? null,
+            status: $validated['status'],
             processing_date: isset($validated['processing_date'])
                 ? CarbonImmutable::parse($validated['processing_date'])
                 : CarbonImmutable::now(),
@@ -38,6 +41,7 @@ class ProcedureData
         return [
             'name' => $this->name,
             'description' => $this->description,
+            'status' => $this->status,
             'cost' => $this->cost,
             'duration_minutes' => $this->duration_minutes,
             'processing_date' => $this->processing_date->toDateTimeString(),

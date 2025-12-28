@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('teeth', function (Blueprint $table) {
             $table->id();
             //  BILONGS TO PATIENT
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade')->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
             // tooth number
             $table->string('tooth_number');
             // status

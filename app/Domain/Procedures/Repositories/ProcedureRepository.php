@@ -16,9 +16,7 @@ class ProcedureRepository
 
     public function create(array $data): Procedure
     {
-        // @dd('$data',$data);
         $procedure = Procedure::create($data);
-        //@dd('$procedure',$procedure);
         $this->clearCache();
         return $procedure;
     }

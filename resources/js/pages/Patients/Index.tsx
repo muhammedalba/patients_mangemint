@@ -71,9 +71,9 @@ export default function Index() {
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <td className="border px-2 py-1 text-center">
+                    <div className="border px-2 py-1 text-center">
                         {getAgeFromBirthDate(p.birth_date)} سنة
-                    </td>
+                    </div>
                 );
             },
         },
@@ -89,7 +89,7 @@ export default function Index() {
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <td className="justify-between gap-1 border px-1 py-1 text-center">
+                    <div className="justify-between gap-1 border px-1 py-1 text-center">
                         {p.phone && (
                             <>
                                 <a
@@ -99,8 +99,8 @@ export default function Index() {
                                 >
                                     <IconTooltip label={`${p.phone}`}>
                                         <i className="material-icons text-xs leading-none font-bold text-gray-700">
-                                        phone_enabled
-                                    </i>
+                                            phone_enabled
+                                        </i>
                                     </IconTooltip>
                                 </a>
                                 <a
@@ -130,7 +130,7 @@ export default function Index() {
                                 </IconTooltip>
                             </a>
                         )}
-                    </td>
+                    </div>
                 );
             },
         },

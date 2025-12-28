@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Appointments\Exceptions\AppointmentConflictException;
+use App\Domain\MonthClosures\Exceptions\ClosureException;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RedirectIfNoRole;
@@ -40,7 +41,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AppointmentConflictException $e, Request $request) {
             return redirect()
                 ->back()
-                ->withErrors(['error' => $e->getMessage()])
+               ->withErrors([$e->field => $e->getMessage()])
+                ->withInput();
+        });
+        $exceptions->render(function (ClosureException $e, Request $request) {
+            return redirect()
+                ->back()
+                ->withErrors([$e->field => $e->getMessage()])
                 ->withInput();
         });
     })->create();

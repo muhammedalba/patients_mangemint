@@ -45,6 +45,7 @@ export default function CreateProcedure({
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         description: string;
+        status: string;
         cost: string;
         tooth_id: string;
         patient_id: string;
@@ -52,6 +53,7 @@ export default function CreateProcedure({
         processing_date: string;
     }>({
         name: '',
+        status: 'planned',
         description: '',
         cost: '',
         tooth_id: teeth[0]?.id?.toString() || '',
@@ -116,6 +118,21 @@ export default function CreateProcedure({
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <FormSelect
+                            label="الحالة"
+                            name="status"
+                            value={data.status}
+                            onChange={(val) => setData('status', val as string)}
+                            options={[
+                                { value: 'planned', label: 'مخطط' },
+                                { value: 'in_progress', label: 'قيد التنفيذ' },
+                                { value: 'completed', label: 'مكتمل' },
+                                { value: 'cancelled', label: 'ملغي' },
+                            ]}
+                            error={errors.status}
+                        />
+                    </div>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                         {services_category.map((category) => (
                             <FormSelect

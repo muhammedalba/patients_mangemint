@@ -23,6 +23,7 @@ class ProcedureUpdateRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'status' => 'required|in:planned,in_progress,completed,cancelled',
             'description' => 'nullable|string',
             'cost' => 'required|numeric|min:0',
             'duration_minutes' => 'nullable|integer|min:1',

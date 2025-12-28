@@ -40,7 +40,7 @@ class UserRepository
         $store = $this->getCacheStore();
 
         $build = function () use ($filters, $perPage) {
-            $query = User::query()->with('roles:name,id')
+            $query = User::query()->with('roles:id,name')
                 ->select(['id', 'name', 'email', 'phone']);
 
             if (!empty($filters['search'])) {

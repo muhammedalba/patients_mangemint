@@ -11,9 +11,12 @@ return new class extends Migration {
             $table->id();
 
 
-            $table->unsignedBigInteger('patient_id')->nullable(false);
-            $table->unsignedBigInteger('user_id')->nullable(false);
-            $table->unsignedBigInteger('service_id')->nullable(false);
+            // $table->unsignedBigInteger('patient_id')->nullable(false);
+            // $table->unsignedBigInteger('user_id')->nullable(false);
+            // $table->unsignedBigInteger('service_id')->nullable(false);
+            $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('service_id')->nullable()->constrained()->nullOnDelete();
 
 
             $table->date('date');
@@ -31,8 +34,7 @@ return new class extends Migration {
             $table->index('service_id');
             $table->index('status');
             $table->index('date');
-            $table->index(['user_id', 'date', 'start_time','end_time']);
-
+            $table->index(['user_id', 'date', 'start_time', 'end_time']);
         });
     }
 

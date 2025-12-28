@@ -17,13 +17,13 @@ return new class extends Migration {
             $table->integer('duration_minutes')->nullable();
             $table->integer('follow_up_days')->nullable();
             $table->unsignedBigInteger('tooth_id')->nullable()->index();
-
+            $table->enum('status', ['planned', 'in_progress', 'completed', 'cancelled'])->default('planned');
             $table->foreign('tooth_id')
                 ->references('id')
                 ->on('teeth')
                 ->nullOnDelete();
 
-            $table->foreignId('patient_id')->constrained()->onDelete('cascade');
+            $table->foreignId('patient_id')->constrained()->onDelete('cascade')->index();
             $table->timestamps();
             $table->fullText('description');
         });
