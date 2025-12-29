@@ -1,5 +1,6 @@
 import DentalChartPage from '@/components/DentalChartPage';
 import { DynamicTable } from '@/components/DynamicTable';
+import  FormButton  from '@/components/FormButton';
 import AppLayout from '@/layouts/app-layout';
 import { ServiceCategory, Tooth, type BreadcrumbItem, type Patient } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -43,6 +44,17 @@ export default function Show({
                     className="mt-2 mr-2 h-auto w-1/4 rounded-lg border bg-white p-4 shadow"
                     dir="rtl"
                 >
+                    <div className='flex flex-col gap-2 border rounded-2xl p-2'>
+                        <FormButton className="block w-full text-center rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 transition">
+                            <a href='/appointments/create'>إضافة موعد</a>
+                        </FormButton>
+                        <div className="block w-full text-center rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 transition">
+                            <a href='/payments/create'>إضافة دفعة</a>
+                        </div>
+                    <div className="block w-full text-center rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 transition">
+                       <a href='/procedures/create'>إضافة إجراء</a>
+                    </div>
+                    </div>
                     <h2 className="mb-4 text-center text-xl font-bold text-blue-500">
                         بيانات المريض
                     </h2>
@@ -85,7 +97,7 @@ export default function Show({
                 </div>
             </div>
 
-            <div className="mx-auto mt-10 max-w-4xl rounded-xl border border-gray-100 bg-white p-6">
+            {/* <div className="mx-auto mt-10 max-w-4xl rounded-xl border border-gray-100 bg-white p-6">
                 <div className="flex justify-between">
                     <h2 className="text-2xl font-bold text-gray-600">
                         الأسنان
@@ -101,7 +113,7 @@ export default function Show({
                 <section className="p-4">
                     <DynamicTable data={patient.teeth} columns={columns} />
                 </section>
-            </div>
+            </div> */}
         </AppLayout>
     );
 }

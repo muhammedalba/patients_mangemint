@@ -14,6 +14,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
     FaCalendarAlt,
+    FaChartBar,
     FaChartPie,
     FaFileMedical,
     FaHospitalUser,
@@ -76,6 +77,11 @@ const mainNavItems: NavItem[] = [
         href: '/service-categories',
         icon: FaLayerGroup,
     },
+    {
+        title: 'الإحصائيات',
+        href: dashboard(),
+        icon: FaChartBar,
+    }
 ];
 
 export function AppSidebar() {
