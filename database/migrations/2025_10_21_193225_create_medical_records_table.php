@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-         Schema::create('medical_records', function (Blueprint $table) {
+        Schema::create('medical_records', function (Blueprint $table) {
             $table->id();
 
             // كل مريض له سجل طبي واحد
@@ -46,7 +46,10 @@ return new class extends Migration {
             $table->enum('pregnancy_trimester', ['I', 'II', 'III'])->nullable();
 
             $table->text('clinical_notes')->nullable();
-
+            $table->index('doctor_id');
+            $table->fullText(
+                'chief_complaint'
+            );
             $table->timestamps();
         });
     }

@@ -42,7 +42,7 @@ export default function Index(filters: { search?: string }) {
 
     const columns: ColumnDef<any>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
-        { id: 'patient_name', accessorKey: 'patient', header: 'اسم المريض' },
+        { id: 'patient_name', accessorKey: 'patient.name', header: 'اسم المريض' },
         { id: 'name', accessorKey: 'name', header: 'اسم المعالجة' },
         { id: 'description', accessorKey: 'description', header: 'الوصف' },
         { id: 'cost', accessorKey: 'cost', header: 'التكلفة' },
@@ -52,7 +52,7 @@ export default function Index(filters: { search?: string }) {
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <span className="border px-2 py-1">{p.tooth_number}</span>
+                    <span className="border px-2 py-1">{p?.tooth?.tooth_number}</span>
                 );
             },
         },

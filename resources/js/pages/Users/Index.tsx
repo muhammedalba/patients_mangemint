@@ -86,8 +86,6 @@ export default function Index({
 
     useEffect(() => {
         const handler = setTimeout(() => {
-            setIsLoading(true);
-
             router.get(
                 route('users.index'),
                 { search },

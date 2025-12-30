@@ -16,6 +16,10 @@
         PaymentController,
         ServicesController,
         ServiceCategoriesController,
+        ExpenseCategoryController,
+        ExpenseController,
+        ExpenseAuditController,
+        MonthClosureController,
         ToothController
     };
 
@@ -54,11 +58,16 @@
 */
     Route::middleware($protected)->group(function () {
         Route::resource('patients', PatientController::class);
+        // add dicount amount route
+        Route::post('patients/{patient}/discount', [PatientController::class, 'addDiscount'])->name('patients.addDiscount');
+        // patient details route
 
         Route::get(
-            'patients/details/{patient}/{tooth?}',
+            'patients/details/{patient}',
             [PatientController::class, 'details']
         )->name('patients.details');
+        // get Tooth Procedures
+        Route::get('/patients/{patient}/tooth/{tooth}/procedures', [PatientController::class, 'getToothProcedures'])->name('patients.tooth.procedures');
     });
 
     /*
@@ -118,7 +127,7 @@
         ->controller(MedicalRecordController::class)
         ->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
+            Route::get('create/{patient_id?}', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('{medicalRecord}/edit', 'edit')->name('edit');
             Route::put('{medicalRecord}', 'update')->name('update');
@@ -160,6 +169,72 @@
             Route::get('{tooth}/edit', 'edit')->name('edit');
             Route::put('{tooth}', 'update')->name('update');
             Route::delete('{tooth}', 'destroy')->name('destroy');
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Expense Categories
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware($protected)
+        ->prefix('expense-categories')
+        ->name('expense-categories.')
+        ->controller(ExpenseCategoryController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('{expenseCategory}/edit', 'edit')->name('edit');
+            Route::patch('{expenseCategory}', 'update')->name('update');
+            Route::delete('{expenseCategory}', 'destroy')->name('destroy');
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Expenses
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware($protected)
+        ->prefix('expenses')
+        ->name('expenses.')
+        ->controller(ExpenseController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('{expense}/edit', 'edit')->name('edit');
+            Route::PATCH('{expense}', 'update')->name('update');
+            Route::delete('{expense}', 'destroy')->name('destroy');
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Expense Audits
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware($protected)
+        ->prefix('expenses/{expense}/audits')
+        ->name('expense-audits.')
+        ->controller(ExpenseAuditController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'store')->name('store');
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Month Closures
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware($protected)
+        ->prefix('month-closures')
+        ->name('month-closures.')
+        ->controller(MonthClosureController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('close', 'close')->name('close');
+            Route::post('close', 'closeMonth')->name('closeMonth');
+            Route::delete('{monthClosure}', 'destroy')->name('destroy');
         });
 
     // Other route files

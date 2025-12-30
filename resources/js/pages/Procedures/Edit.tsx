@@ -32,7 +32,8 @@ export default function EditProcedure({
         description: procedure.description || '',
         cost: procedure.cost || 0,
         tooth_id: procedure.tooth_id || '',
-        patient_id: procedure.tooth?.patient_id || '',
+        patient_id: procedure.patient_id || '',
+        status: (procedure as any).status || 'planned',
     });
     console.log(services_category, 'services_category edit');
     console.log(teeth, 'teeth edit');
@@ -159,6 +160,28 @@ export default function EditProcedure({
                         {errors.tooth_id && (
                             <p className="mt-1 text-sm text-red-500">
                                 {errors.tooth_id}
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="mb-1 block text-gray-700">
+                            الحالة
+                        </label>
+                        <select
+                            name="status"
+                            value={data.status}
+                            onChange={(e) => setData('status', e.target.value)}
+                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                        >
+                            <option value="planned">مخطط</option>
+                            <option value="in_progress">قيد التنفيذ</option>
+                            <option value="completed">مكتمل</option>
+                            <option value="cancelled">ملغي</option>
+                        </select>
+                        {errors.status && (
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.status}
                             </p>
                         )}
                     </div>

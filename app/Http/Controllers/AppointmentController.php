@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
@@ -41,7 +42,10 @@ class AppointmentController extends Controller
             ->select('id', 'name')->latest('name')
             ->get();
         return Inertia::render('Appointments/Create', [
-            'patients' => Patient::all(['id', 'name']),
+            'patients' => Patient::select('id', 'name')
+                ->latest('updated_at')
+                ->get(),
+
             'doctors' => User::role('doctor')->get(['id', 'name']), // Assuming you have a 'doctor' role
             'services' => $services_category,
         ]);
@@ -60,10 +64,7 @@ class AppointmentController extends Controller
                 ->route('appointments.index')
                 ->with('success', 'Appointment booked successfully.');
         } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->withErrors(['error' => $e->getMessage()])
-                ->withInput();
+            throw $e;
         }
     }
 
@@ -106,10 +107,15 @@ class AppointmentController extends Controller
      */
     public function update(AppointmentUpdateRequest $request, Appointment $appointment): RedirectResponse
     {
-        $data = AppointmentData::fromValidated($request->validated());
-        $this->service->update($appointment, $data);
+        try {
+            $data = AppointmentData::fromValidated($request->validated());
+            $this->service->update($appointment, $data);
 
-        return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
+            return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to update appointment', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'appointment_id' => $appointment->id, 'data' => $request->validated()]);
+            throw $e;
+        }
     }
 
     /**
@@ -119,7 +125,7 @@ class AppointmentController extends Controller
      */
     public function availableSlots(AppointmentAvailableRequest $request)
     {
-        $available_appointments = $this->service->availableSlots($request->validated()); // الآن ستعمل validated() بشكل صحيح
+        $available_appointments = $this->service->availableSlots($request->validated());
 
         return response()->json([
             'available_appointments' => $available_appointments

@@ -18,6 +18,7 @@ class Patient extends Model
         'birth_date',
         'gender',
         'marital_status',
+        'discount_amount',
     ];
     protected $hidden = [
         'password',
@@ -36,12 +37,22 @@ class Patient extends Model
         return $this->hasMany(Appointment::class);
     }
 
+    // public function procedures()
+    // {
+    //     return $this->hasManyThrough(
+    //         Procedure::class, // الموديل البعيد
+    //         Tooth::class,     // الموديل الوسيط
+    //         'patient_id',     // المفتاح الأجنبي في جدول الأسنان
+    //         'tooth_id',       // المفتاح الأجنبي في جدول الإجراءات
+    //         'id',             // المفتاح الأساسي في جدول المرضى
+    //         'id'              // المفتاح الأساسي في جدول الأسنان
+    //     );
+    // }
     public function procedures()
     {
-        return $this->hasManyThrough(Procedure::class, Tooth::class);
+        return $this->hasMany(Procedure::class, 'patient_id');
     }
-
-    public function payment()
+    public function payments()
     {
         return $this->hasMany(Payment::class);
     }
@@ -49,9 +60,5 @@ class Patient extends Model
     public function medicalRecord()
     {
         return $this->hasOne(MedicalRecord::class);
-    }
-    public function apointments()
-    {
-        return $this->hasMany(Apointment::class);
     }
 }

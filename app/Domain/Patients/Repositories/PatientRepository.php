@@ -2,16 +2,21 @@
 
 namespace App\Domain\Patients\Repositories;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Domain\Patients\Exceptions\InvalidDiscountException;
+use App\Http\Controllers\DashboardController;
 use App\Models\Patient;
+use App\Models\Procedure;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Cache\TaggableStore;
 
 class PatientRepository
 {
-    /**
-     * Base query for patients.
-     */
+    private function getCacheStore()
+    {
+        return Cache::getStore();
+    }
+
     public function query()
     {
         return Patient::query()->select('id', 'name', 'email', 'phone', 'birth_date', 'gender', 'marital_status');
@@ -20,13 +25,15 @@ class PatientRepository
     public function getAllPatients(array $filters = []): LengthAwarePaginator
     {
         $page = request('page', 1);
-        $cacheKey = "patients.page.{$page}.search." . ($filters['search'] ?? '');
+        $cacheKey = 'patients:' . md5(json_encode([
+            'page' => $page,
+            'filters' => $filters,
+        ]));
 
-        $store = Cache::getStore();
+        $store = $this->getCacheStore();
 
         $build = function () use ($filters) {
             $query = $this->query();
-
             if (!empty($filters['search'])) {
                 $query->where(function ($q) use ($filters) {
                     $q->where('name', 'like', "%{$filters['search']}%")
@@ -34,41 +41,44 @@ class PatientRepository
                         ->orWhere('phone', 'like', "%{$filters['search']}%");
                 });
             }
-
             return $query->latest('updated_at')->paginate(10)->withQueryString();
         };
 
         if ($store instanceof TaggableStore) {
             return Cache::tags('patients')->remember($cacheKey, now()->addMinutes(10), $build);
         }
-
         return Cache::remember($cacheKey, now()->addMinutes(10), $build);
     }
 
     public function createPatient(array $data): Patient
     {
         $patient = Patient::create($data);
-
-        $store = Cache::getStore();
-        if ($store instanceof TaggableStore) {
-            Cache::tags('patients')->flush();
-        } else {
-            Cache::flush();
-        }
-
+        $this->clearCache();
+        DashboardController::clearDashboardCache();
         return $patient;
     }
+
+    public function addDiscountToPatient(Patient $patient, float $discountAmount): bool
+    {
+
+        $updated = $patient->update([
+            'discount_amount' => $discountAmount,
+        ]);
+
+        if ($updated) {
+            $this->clearCache($patient->id);
+            DashboardController::clearDashboardCache();
+        }
+
+        return $updated;
+    }
+
+
 
     public function updatePatient(Patient $patient, array $data): bool
     {
         $updated = $patient->update($data);
-
-        $store = Cache::getStore();
-        if ($store instanceof TaggableStore) {
-            Cache::tags('patients')->flush();
-        } else {
-            Cache::flush();
-        }
+        $this->clearCache($patient->id);
 
         return $updated;
     }
@@ -76,56 +86,71 @@ class PatientRepository
     public function deletePatient(Patient $patient): bool
     {
         $deleted = $patient->delete();
-
-        $store = Cache::getStore();
-        if ($store instanceof TaggableStore) {
-            Cache::tags('patients')->flush();
-        } else {
-            Cache::flush();
-        }
-
+        $this->clearCache();
+        DashboardController::clearDashboardCache();
         return $deleted;
     }
 
-    public function getPatientDetails(Patient $patient, $toothId = null): array
+    public function getPatientDetails(Patient $patient)
     {
-        $patient->load('teeth');
+        $cacheKey = "patient:{$patient->id}:details";
+        $store = $this->getCacheStore();
 
-        $toothWithProcedures = null;
-        if ($toothId) {
-            $toothWithProcedures = $patient->teeth()
-                ->where('id', $toothId)
-                ->with('procedures')
+        $loadData = function () use ($patient) {
+            return $patient->load([
+                'procedures' => function ($query) {
+                    $query->select('procedures.id', 'procedures.tooth_id', 'procedures.cost');
+                },
+                'payments:id,patient_id,amount,payment_date',
+                'appointments:id,patient_id,status,start_time,end_time,date,notes',
+                'medicalRecord:id,patient_id',
+                "teeth:id,patient_id,tooth_number,status,notes"
+            ])
+                ->loadSum('procedures', 'cost')
+                ->loadSum('payments', 'amount')
+                ->loadCount('procedures');
+        };
+
+        if ($store instanceof TaggableStore) {
+            return Cache::tags('patients')->remember($cacheKey, now()->addMinutes(10), $loadData);
+        }
+        return Cache::remember($cacheKey, now()->addMinutes(10), $loadData);
+    }
+
+    public function getToothProcedures(Patient $patient, $toothId)
+    {
+        $cacheKey = "tooth:{$patient->id}:{$toothId}:procedures";
+        $store = $this->getCacheStore();
+
+        $loadData = function () use ($patient, $toothId) {
+            return $patient->teeth()
+                ->where('teeth.id', $toothId)
+                ->select('teeth.id', 'teeth.tooth_number')
+                ->with(['procedures:id,name,description,cost,tooth_id,duration_minutes,follow_up_days'])
                 ->first();
+        };
+
+        if ($store instanceof TaggableStore) {
+            $data = Cache::tags('patients')->remember($cacheKey, now()->addMinutes(10), $loadData);
+        } else {
+            $data = Cache::remember($cacheKey, now()->addMinutes(10), $loadData);
         }
 
-        return [
-            'patient' => [
-                'id' => $patient->id,
-                'name' => $patient->name,
-                'email' => $patient->email,
-                'phone' => $patient->phone,
-                'address' => $patient->address,
-                'notes' => $patient->notes,
-                'birth_date' => $patient->birth_date,
-                'gender' => $patient->gender,
-                'marital_status' => $patient->marital_status,
-                'teeth' => $patient->teeth->map(function ($tooth) {
-                    return [
-                        'id' => $tooth->id,
-                        'tooth_number' => $tooth->tooth_number,
-                        'status' => $tooth->status,
-                        'notes' => $tooth->notes,
-                    ];
-                }),
-            ],
-            'tooth' => $toothWithProcedures
-                ? [
-                    'id' => $toothWithProcedures->id,
-                    'tooth_number' => $toothWithProcedures->tooth_number,
-                    'procedures' => $toothWithProcedures->procedures,
-                ]
-                : null,
-        ];
+        return ['ToothProcedures' => $data];
+    }
+    private function clearCache($patient = null): void
+    {
+        $store = $this->getCacheStore();
+
+        if ($store instanceof TaggableStore) {
+
+            $patientsCache = Cache::tags('patients');
+
+            $patient
+                ? $patientsCache->forget("patient:{$patient->id}:details")
+                : $patientsCache->flush();
+        } else {
+            Cache::flush();
+        }
     }
 }

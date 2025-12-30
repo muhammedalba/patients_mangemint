@@ -59,10 +59,10 @@ class MedicalRecordService
 
     public function delete(MedicalRecord $medicalRecord): void
     {
+        // @dd($medicalRecord->images);
         DB::transaction(function () use ($medicalRecord) {
             $this->deleteFiles($medicalRecord->attachments ?? []);
             $this->deleteFiles($medicalRecord->images ?? []);
-
             $this->repository->delete($medicalRecord);
         });
     }
@@ -87,8 +87,10 @@ class MedicalRecordService
      *
      * @param array<int, string> $paths
      */
-    private function deleteFiles(array $paths): void
+    private function deleteFiles(array|string|null $paths): void
     {
+        $paths = (array) $paths;
+
         if (empty($paths)) {
             return;
         }

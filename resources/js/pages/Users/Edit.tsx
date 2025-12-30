@@ -1,7 +1,9 @@
+import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
 import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -40,7 +42,6 @@ export default function EditUser({ user }: { user: User }) {
         { key: 'admin', label: 'مدير' },
         { key: 'doctor', label: 'طبيب' },
         { key: 'receptionist', label: 'استقبال' },
-        { key: 'patient', label: 'مريض' },
     ];
 
     // التبديل بين إضافة/إزالة الدور
@@ -72,144 +73,107 @@ export default function EditUser({ user }: { user: User }) {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'المستخدمون', href: route('users.index') },
         {
-            title: `Update: ${user.name}`,
-            href: route('patients.edit', user.id),
+            title: `تعديل بيانات المستخدم: ${user.name}`,
+            href: route('users.edit', user.id),
         },
     ];
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="uesrs" />
-            <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+            <Head title={` تعديل المستخدم : ${user.name}`} />
+            <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
-                    Update User
+                    تعديل المستخدم{' '}
                 </h1>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="mb-1 block text-gray-700">
-                            Full Name
-                        </label>
-                        <input
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <FormInput
                             type="text"
+                            label="الاسم الكامل"
+                            name="name"
                             value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
+                            onChange={(val) => setData('name', val)}
                             placeholder="Full Name"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                            error={errors.name}
                         />
-                        {errors.name && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.name}
-                            </p>
-                        )}
-                    </div>
 
-                    <div>
-                        <label className="mb-1 block text-gray-700">
-                            Email{' '}
-                        </label>
-                        <input
+                        <FormInput
                             type="email"
+                            label="البريد الإلكتروني"
+                            name="email"
                             value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
+                            onChange={(val) => setData('email', val)}
                             placeholder="example@email.com"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                            error={errors.email}
                         />
-                        {errors.email && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.email}
-                            </p>
-                        )}
-                    </div>
 
-                    {/* كلمة المرور */}
-                    <div>
-                        <label className="mb-1 block text-gray-700">
-                            Password (Optional){' '}
-                        </label>
-                        <input
+                        <FormInput
                             type="password"
+                            label="كلمة المرور (اختياري)"
+                            name="password"
                             value={data.password}
-                            onChange={(e) =>
-                                setData('password', e.target.value)
-                            }
+                            onChange={(val) => setData('password', val)}
                             placeholder="New Password"
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                            error={errors.password}
                         />
-                        {errors.password && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.password}
-                            </p>
-                        )}
-                    </div>
 
-                    <div>
-                        <label className="mb-1 block text-gray-700">
-                            Phone
-                        </label>
-                        <input
+                        <FormInput
                             type="text"
+                            label="رقم الهاتف"
+                            name="phone"
                             value={data.phone}
-                            onChange={(e) => setData('phone', e.target.value)}
-                            placeholder="Phone "
-                            className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+                            onChange={(val) => setData('phone', val)}
+                            placeholder="Phone"
+                            error={errors.phone}
                         />
-                        {errors.phone && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.phone}
-                            </p>
-                        )}
-                    </div>
-
-                    <div>
-                        <label className="mb-2 block text-gray-700">
-                            Roles{' '}
-                        </label>
-                        <div className="flex flex-wrap gap-2">
-                            {availableRoles.map((role) => {
-                                const selected = data.roles.includes(role.key);
-                                return (
-                                    <button
-                                        key={role.key}
-                                        type="button"
-                                        onClick={() => toggleRole(role.key)}
-                                        className={`rounded-full border px-4 py-2 text-sm font-medium transition-all duration-150 ${
-                                            selected
-                                                ? 'border-green-600 bg-green-600 text-white shadow-sm'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                        }`}
-                                    >
-                                        {role.label}
-                                    </button>
-                                );
-                            })}
+                        <div>
+                            <label className="mb-2 block text-gray-700">
+                                الأدوار
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                                {availableRoles.map((role) => {
+                                    const selected = data.roles.includes(
+                                        role.key,
+                                    );
+                                    return (
+                                        <button
+                                            key={role.key}
+                                            type="button"
+                                            onClick={() => toggleRole(role.key)}
+                                            className={`rounded-full border px-4 py-2 text-sm font-medium transition-all duration-150 ${
+                                                selected
+                                                    ? 'border-blue-600 bg-blue-600 text-white shadow-sm'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {role.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {errors.roles && (
+                                <p className="mt-1 text-sm text-red-500">
+                                    {errors.roles}
+                                </p>
+                            )}
                         </div>
-                        {errors.roles && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.roles}
-                            </p>
-                        )}
                     </div>
 
-                    <div className="mt-4 text-center">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className={`rounded-lg px-6 py-2 font-semibold text-white transition-all duration-200 ${
-                                processing
-                                    ? 'cursor-not-allowed bg-green-400'
-                                    : 'bg-green-600 hover:bg-green-700'
-                            }`}
+                    <div className="flex items-center justify-end space-x-2">
+                        <Link
+                            href={route('users.index')}
+                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
                         >
-                            {processing ? 'Updating...' : 'Update User'}
-                        </button>
+                            إنهاء
+                        </Link>
 
-                        {submitted && (
-                            <p className="mt-3 text-sm text-green-600">
-                                ✅ Update Successfully
-                            </p>
-                        )}
+                        <FormButton
+                            processing={processing}
+                            label="حفظ"
+                            loadingLabel="جارِ التعديل ..."
+                        />
                     </div>
                 </form>
             </div>

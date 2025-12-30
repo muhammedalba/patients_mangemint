@@ -5,7 +5,6 @@ namespace App\Domain\Appointments\Repositories;
 use App\Domain\Appointments\Exceptions\AppointmentConflictException;
 use Carbon\Carbon;
 use App\Models\Appointment;
-use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Cache\TaggableStore;
@@ -31,6 +30,13 @@ class AppointmentRepository
 
     public function update(Appointment $appointment, array $data): Appointment
     {
+
+        // check if date in past
+        $appointmentDate = Carbon::createFromFormat('Y-m-d', $data['date']);
+        $today = Carbon::today();
+        if ($appointmentDate->lt($today)) {
+            throw new AppointmentConflictException('date', 'لا يمكن تعديل موعد في تاريخ سابق.');
+        }
         // حساب end_time والتحقق من التداخل فقط إذا تم تغيير وقت أو تاريخ الموعد
         if (
             (isset($data['date']) && $data['date'] != $appointment->date) ||
@@ -52,7 +58,7 @@ class AppointmentRepository
             );
 
             if ($conflict) {
-                throw new AppointmentConflictException('الفترة الزمنية المطلوبة غير متاحة (يوجد تداخل).');
+                throw new AppointmentConflictException('start_time', 'الفترة الزمنية المطلوبة غير متاحة (يوجد تداخل).');
             }
         }
 
@@ -89,7 +95,8 @@ class AppointmentRepository
                     })->orWhereHas('service', function ($q) use ($search) {
                         $q->where('name', 'like', "%{$search}%");
                     })->orWhere('date', 'like', "%{$search}%")
-                        ->orWhere('times', 'like', "%{$search}%")
+                        ->orWhere('start_time', 'like', "%{$search}%")
+                        ->orWhere('end_time', 'like', "%{$search}%")
                         ->orWhere('status', 'like', "%{$search}%");
                 });
             }

@@ -3,6 +3,7 @@
 namespace App\Domain\Appointments\Services;
 
 use App\Domain\Appointments\DTOs\AppointmentData;
+use App\Domain\Appointments\Exceptions\AppointmentConflictException;
 use App\Domain\Appointments\Repositories\AppointmentRepository;
 use App\Models\Appointment;
 use Illuminate\Support\Facades\Log;
@@ -48,10 +49,8 @@ class AppointmentService
             return $this->repo->list($search, $perPage);
         } catch (\Throwable $e) {
             Log::error('Appointment list failed', [
-                'appointment_id' => $appointment->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'data' => $data->toArray(),
             ]);
             throw $e;
         }
@@ -60,17 +59,7 @@ class AppointmentService
 
     public function update(Appointment $appointment, AppointmentData $data): Appointment
     {
-        try {
             return $this->repo->update($appointment, $data->toArray());
-        } catch (\Throwable $e) {
-            Log::error('Appointment update failed', [
-                'appointment_id' => $appointment->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'data' => $data->toArray(),
-            ]);
-            throw $e;
-        }
     }
 
     public function delete(Appointment $appointment): void
@@ -86,7 +75,13 @@ class AppointmentService
     public function create(AppointmentData $data)
     {
 
+        // check if date is in the past
+        $appointmentDate = Carbon::createFromFormat('Y-m-d', $data->date);
+        $today = Carbon::today();
 
+        if ($appointmentDate->lt($today)) {
+            throw new AppointmentConflictException('date', 'لا يمكن حجز موعد في تاريخ سابق.');
+        }
         // parse start as Carbon (only time matters here)
         $start = Carbon::createFromFormat('H:i', $data->start_time);
         $minutes = $data->duration_slots * $this->slotMinutes;
@@ -99,7 +94,7 @@ class AppointmentService
         // Optional: enforce business hours (customize as needed)
         $workDayEnd = Carbon::createFromFormat('H:i', '17:00')->format('H:i:s');
         if ($endTimeFormatted > $workDayEnd) {
-            throw new Exception('المدة المختارة تتجاوز ساعات العمل المتاحة.');
+            throw new AppointmentConflictException('duration_slots', 'المدة المختارة تتجاوز ساعات العمل المتاحة.');
         }
 
         return DB::transaction(function () use ($data, $startTimeFormatted, $endTimeFormatted) {
@@ -107,7 +102,7 @@ class AppointmentService
             $conflict = $this->repo->isConflict($data->date, $startTimeFormatted, $endTimeFormatted, $data->user_id);
 
             if ($conflict) {
-                throw new Exception('الفترة الزمنية المطلوبة غير متاحة (يوجد تداخل).');
+                throw new AppointmentConflictException('start_time', 'الفترة الزمنية المطلوبة غير متاحة (يوجد تداخل).');
             }
 
             // إنشاء الموعد عبر الـ Repository

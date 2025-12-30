@@ -13,6 +13,7 @@ import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import {
+    FaArchive,
     FaCalendarAlt,
     FaChartBar,
     FaChartPie,
@@ -20,7 +21,9 @@ import {
     FaHospitalUser,
     FaLayerGroup,
     FaMoneyBill,
+    FaReceipt,
     FaSyringe,
+    FaTags,
     FaTooth,
     FaUserMd,
 } from 'react-icons/fa';
@@ -48,6 +51,11 @@ const mainNavItems: NavItem[] = [
         icon: FaMoneyBill,
     },
     {
+        title: 'المصروفات',
+        href: '/expenses',
+        icon: FaReceipt,
+    },
+    {
         title: 'المواعيد',
         href: '/appointments',
         icon: FaCalendarAlt,
@@ -68,6 +76,11 @@ const mainNavItems: NavItem[] = [
         icon: FaTooth,
     },
     {
+        title: 'فئات المصروفات',
+        href: '/expense-categories',
+        icon: FaTags,
+    },
+    {
         title: 'الخدمات الطبية',
         href: '/services',
         icon: FaUserMd,
@@ -81,7 +94,12 @@ const mainNavItems: NavItem[] = [
         title: 'الإحصائيات',
         href: dashboard(),
         icon: FaChartBar,
-    }
+    },
+    {
+        title: 'إغلاق الشهر',
+        href: '/month-closures',
+        icon: FaArchive,
+    },
 ];
 
 export function AppSidebar() {

@@ -30,6 +30,7 @@ export default function Create({
         category: '',
         name: '',
     });
+console.log(errors);
 
     const [availableAppointments, setAvailableAppointments] = useState<
         { start: string; end: string }[]

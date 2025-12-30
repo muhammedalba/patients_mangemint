@@ -114,6 +114,65 @@ export default function Show({
                     <DynamicTable data={patient.teeth} columns={columns} />
                 </section>
             </div> */}
+
+                <table className="w-full border">
+                    <thead>
+                        <tr className="bg-gray-100">
+                            <th className="border px-2 py-1">ID</th>
+                            <th className="border px-2 py-1">رقم السن</th>
+                            <th className="border px-2 py-1">الحالة</th>
+                            <th className="border px-2 py-1">ملاحظات</th>
+                            <th className="border px-2 py-1">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {patient?.teeth?.map((tooth, i) => (
+                            <tr
+                                key={tooth.id}
+                                className={
+                                    tooth.id
+                                        ? 'bg-blue-100'
+                                        : ''
+                                }
+                            >
+                                <td className="border px-2 py-1">{i + 1}</td>
+                                <td className="border px-2 py-1">
+                                    {tooth.tooth_number}
+                                </td>
+                                <td className="border px-2 py-1">
+                                    {tooth.status}
+                                </td>
+                                <td className="border px-2 py-1">
+                                    {tooth.notes}
+                                </td>
+                                <td className="border px-2 py-1">
+                                    <Link
+                                        href={route('teeth.edit', tooth.id)}
+                                        className="mr-2 rounded bg-green-500 px-2 py-1 text-white"
+                                    >
+                                        تعديل
+                                    </Link>
+                                    <button
+                                        // onClick={() =>
+                                        //     handleDeleteTooth(tooth.id)
+                                        // }
+                                        className="rounded bg-red-500 px-2 py-1 text-white"
+                                    >
+                                        حذف
+                                    </button>
+                                    <button
+                                        // onClick={() =>
+                                        //     handleToothClick(tooth.id)
+                                        // }
+                                        className="rounded bg-blue-500 px-2 py-1 text-white"
+                                    >
+                                        عرض الإجراءات
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
         </AppLayout>
     );
 }

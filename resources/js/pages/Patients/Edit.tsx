@@ -44,7 +44,7 @@ export default function EditPatient({ genders, marital_statuses, patient }) {
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={` Update Patient: ${patient.name}`} />
+            <Head title={` تعديل المريض : ${patient.name}`} />
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     تعديل بيانات المريض
