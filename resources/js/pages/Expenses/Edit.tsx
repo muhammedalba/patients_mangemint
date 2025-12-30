@@ -3,7 +3,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
 
 export default function Edit() {
-    const { expense, categories } = usePage<any>().props;
+    const { expense, categories,flash } = usePage<any>().props;
 
     const { data, setData, post, processing, errors } = useForm({
         amount: expense.amount || '',
@@ -22,6 +22,11 @@ export default function Edit() {
     return (
         <AppLayout>
             <Head title="Edit Expense" />
+             {flash?.error && (
+                    <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
+                        {flash.error}
+                    </div>
+                )}
             <div className="mx-auto mt-6 max-w-2xl rounded bg-white p-6">
                 <h1 className="mb-4 text-xl font-bold">Edit Expense</h1>
                 <form onSubmit={handleSubmit} className="space-y-4">

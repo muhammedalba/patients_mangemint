@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
+
 use Inertia\Inertia;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
@@ -38,16 +38,12 @@ class ExpenseController extends Controller
 
     public function store(ExpenseStoreRequest $request)
     {
-        try {
-            $data = ExpenseData::fromArray($request->validated());
 
-            $this->service->createExpense($data);
+        $data = ExpenseData::fromArray($request->validated());
 
-            return redirect()->route('expenses.index')->with('success', __('Expense created successfully.'));
-        } catch (\Throwable $e) {
-            Log::error('Failed to create expense', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'data' => $request->validated()]);
-            return redirect()->back()->withInput()->with('error', __('Something went wrong while creating the expense.'));
-        }
+        $this->service->createExpense($data);
+
+        return redirect()->route('expenses.index')->with('success', __('Expense created successfully.'));
     }
 
     public function edit(Expense $expense)
@@ -61,35 +57,19 @@ class ExpenseController extends Controller
 
     public function update(ExpenseUpdateRequest $request, Expense $expense)
     {
-        try {
-            $data = ExpenseData::fromArray($request->validated());
+        // @dd($request->validated());
+        $data = ExpenseData::fromArray($request->validated());
+        // @dd($data);
+        $this->service->updateExpense($expense, $data);
 
-            $updated = $this->service->updateExpense($expense, $data);
-
-            if (! $updated) {
-                return redirect()->back()->withInput()->with('error', __('This expense belongs to a closed month and cannot be modified.'));
-            }
-
-            return redirect()->route('expenses.index')->with('success', __('Expense updated successfully.'));
-        } catch (\Throwable $e) {
-            Log::error('Failed to update expense', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'expense_id' => $expense->id, 'data' => $request->validated()]);
-            return redirect()->back()->withInput()->with('error', __('Something went wrong while updating the expense.'));
-        }
+        return redirect()->route('expenses.index')->with('success', __('Expense updated successfully.'));
     }
 
     public function destroy(Expense $expense)
     {
-        try {
-            $deleted = $this->service->deleteExpense($expense);
 
-            if (! $deleted) {
-                return redirect()->back()->with('error', __('This expense belongs to a closed month and cannot be deleted.'));
-            }
+        $this->service->deleteExpense($expense);
 
-            return redirect()->route('expenses.index')->with('success', __('Expense deleted successfully.'));
-        } catch (\Throwable $e) {
-            Log::error('Failed to delete expense', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'expense_id' => $expense->id]);
-            return redirect()->route('expenses.index')->with('error', __('Something went wrong while deleting the expense.'));
-        }
+        return redirect()->route('expenses.index')->with('success', __('Expense deleted successfully.'));
     }
 }

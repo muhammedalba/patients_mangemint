@@ -3,9 +3,11 @@
 namespace App\Domain\Expenses\Services;
 
 use App\Domain\Expenses\DTOs\ExpenseData;
+use App\Domain\Expenses\Exceptions\IsBlockException;
 use App\Domain\Expenses\Repositories\ExpenseRepository;
 use App\Models\Expense;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
 
 class ExpenseService
 {
@@ -26,21 +28,32 @@ class ExpenseService
 
     public function updateExpense(Expense $expense, ExpenseData $data): bool
     {
+
         if ($expense->is_locked) {
-            return false;
+            throw new IsBlockException(
+                'expense',
+                'Expense is locked and cannot be updated',
+                true,
+            );
         }
 
         $payload = array_merge($data->toArray(), [
             'updated_by' => auth()->id(),
         ]);
+
         return $this->repository->update($expense, $payload);
     }
 
     public function deleteExpense(Expense $expense): bool
     {
         if ($expense->is_locked) {
-            return false;
+            throw new IsBlockException(
+                'expense',
+                'Expense is locked and cannot be deleted',
+                true,
+            );
         }
+
 
         return $this->repository->delete($expense);
     }

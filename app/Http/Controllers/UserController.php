@@ -2,25 +2,20 @@
 
 namespace App\Http\Controllers;
 
-
-use App\Domain\Users\Exceptions\CannotDeleteSelfException;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
-
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
-
 use App\Domain\Users\DTOs\UserData;
 use App\Domain\Users\Services\UserService;
-
 class UserController extends Controller
 {
     public function __construct(private UserService $userService) {}
 
     public function index()
     {
-         $filters = request()->only('search');
+        $filters = request()->only('search');
         $users = $this->userService->listUsers($filters);
 
         return Inertia::render('Users/Index', [
@@ -70,11 +65,9 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        try {
-            $this->userService->deleteUser($user);
-        } catch (CannotDeleteSelfException $e) {
-            return redirect()->route('users.index')->with('error', $e->getMessage());
-        }
+
+        $this->userService->deleteUser($user);
+
 
         return redirect()->route('users.index')->with('success', __('User deleted successfully.'));
     }

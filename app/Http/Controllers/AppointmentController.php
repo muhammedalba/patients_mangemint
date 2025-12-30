@@ -15,7 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+
 
 class AppointmentController extends Controller
 {
@@ -56,16 +56,13 @@ class AppointmentController extends Controller
      */
     public function store(AppointmentStoreRequest $request): RedirectResponse
     {
-        try {
-            $data = AppointmentData::fromValidated($request->validated());
-            $this->service->create($data);
 
-            return redirect()
-                ->route('appointments.index')
-                ->with('success', 'Appointment booked successfully.');
-        } catch (\Exception $e) {
-            throw $e;
-        }
+        $data = AppointmentData::fromValidated($request->validated());
+        $this->service->create($data);
+
+        return redirect()
+            ->route('appointments.index')
+            ->with('success', 'Appointment booked successfully.');
     }
 
 
@@ -107,15 +104,12 @@ class AppointmentController extends Controller
      */
     public function update(AppointmentUpdateRequest $request, Appointment $appointment): RedirectResponse
     {
-        try {
+
             $data = AppointmentData::fromValidated($request->validated());
             $this->service->update($appointment, $data);
 
             return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
-        } catch (\Exception $e) {
-            Log::error('Failed to update appointment', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'appointment_id' => $appointment->id, 'data' => $request->validated()]);
-            throw $e;
-        }
+
     }
 
     /**

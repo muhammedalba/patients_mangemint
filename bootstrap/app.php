@@ -1,7 +1,7 @@
 <?php
 
-use App\Domain\Appointments\Exceptions\AppointmentConflictException;
-use App\Domain\MonthClosures\Exceptions\ClosureException;
+use App\Domain\Exceptions\DomainRuleException;
+
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RedirectIfNoRole;
@@ -13,6 +13,7 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -37,17 +38,49 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
-        $exceptions->render(function (AppointmentConflictException $e, Request $request) {
-            return redirect()
-                ->back()
-               ->withErrors([$e->field => $e->getMessage()])
-                ->withInput();
+        $exceptions->render(function (DomainRuleException $e, Request $request) {
+
+            if ($request->header('X-Inertia')) {
+
+                $redirect = redirect()
+                    ->back();
+
+                if ($e->isGlobal) {
+
+                    return $redirect
+                        ->with('error', $e->getMessage());
+                }
+
+                if ($e->field && ! $e->isGlobal) {
+
+                    return $redirect
+                        ->withErrors([$e->field => $e->getMessage()])
+                        ->withInput();
+                }
+
+                return $redirect->setStatusCode(409);
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'errors' => $e->field
+                        ? [$e->field => [$e->getMessage()]]
+                        : null,
+                ], 422);
+            }
+
+            return back()->withErrors(
+                $e->field ? [$e->field => $e->getMessage()] : []
+            );
         });
-        $exceptions->render(function (ClosureException $e, Request $request) {
-            return redirect()
-                ->back()
-                ->withErrors([$e->field => $e->getMessage()])
-                ->withInput();
+
+        $exceptions->report(function (\Throwable $e) {
+            if (! $e instanceof DomainRuleException) {
+                Log::error('Unhandled exception', [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
         });
     })->create();

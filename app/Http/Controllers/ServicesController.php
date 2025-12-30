@@ -8,7 +8,6 @@ use App\Http\Requests\ServiceStoreRequest;
 use App\Http\Requests\ServiceUpdateRequest;
 use App\Models\Service;
 use App\Models\ServiceCategory;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ServicesController extends Controller
@@ -58,7 +57,7 @@ class ServicesController extends Controller
      */
     public function store(ServiceStoreRequest $request)
     {
-        try {
+
             $data = ServiceData::fromValidated($request->validated());
 
             $this->service->create($data);
@@ -66,18 +65,7 @@ class ServicesController extends Controller
             return redirect()
                 ->route('services.index')
                 ->with('success', __('Service created successfully.'));
-        } catch (\Throwable $e) {
-            Log::error('Failed to create service', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'data' => $request->all(),
-            ]);
 
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', __('Something went wrong while creating the service.'));
-        }
     }
 
     /**
@@ -99,7 +87,7 @@ class ServicesController extends Controller
      */
     public function update(ServiceUpdateRequest $request, Service $service)
     {
-        try {
+
             $data = ServiceData::fromValidated($request->validated());
 
             $this->service->update($service, $data);
@@ -107,19 +95,7 @@ class ServicesController extends Controller
             return redirect()
                 ->route('services.index')
                 ->with('success', __('Service updated successfully.'));
-        } catch (\Throwable $e) {
-            Log::error('Failed to update service', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'service_id' => $service->id,
-                'data' => $request->all(),
-            ]);
 
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', __('Something went wrong while updating the service.'));
-        }
     }
 
     /**
@@ -127,22 +103,12 @@ class ServicesController extends Controller
      */
     public function destroy(Service $service)
     {
-        try {
+
             $this->service->delete($service);
 
             return redirect()
                 ->route('services.index')
                 ->with('success', __('Service deleted successfully.'));
-        } catch (\Throwable $e) {
-            Log::error('Failed to delete service', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'service_id' => $service->id,
-            ]);
 
-            return redirect()
-                ->route('services.index')
-                ->with('error', __('Something went wrong while deleting the service.'));
-        }
     }
 }

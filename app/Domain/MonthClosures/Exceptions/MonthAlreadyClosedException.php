@@ -2,4 +2,6 @@
 
 namespace App\Domain\MonthClosures\Exceptions;
 
-class MonthAlreadyClosedException extends ClosureException {}
+use App\Domain\Exceptions\DomainRuleException;
+
+class MonthAlreadyClosedException extends DomainRuleException {}

@@ -5,8 +5,8 @@ import { Head, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { expenses, filters } = usePage<any>().props;
-console.log('expenses',expenses);
+    const { expenses, filters, flash } = usePage<any>().props;
+    console.log('expenses', expenses);
 
     const handleDelete = (id: number) => {
         if (confirm('Are you sure you want to delete this expense?')) {
@@ -18,6 +18,12 @@ console.log('expenses',expenses);
         <AppLayout>
             <Head title="Expenses" />
             <div className="mx-auto mt-6 max-w-6xl">
+                {flash?.error && (
+                    <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
+                        {flash.error}
+                    </div>
+                )}
+
                 <div className="mb-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Expenses</h1>
                     <a
