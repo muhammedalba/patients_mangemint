@@ -34,11 +34,11 @@ class ToothController extends Controller
         ]);
     }
 
-    public function create(Request $request)
+    public function create(Request $request, $patient_id = null)
     {
         // patient_id from query params if exists
-        $patient_id = $request->query('patient_id');
-        $patients = $patient_id ? Patient::where('id', $patient_id)->select('id', 'name')->get() : Patient::select('id', 'name')->latest('updated_at')->get();
+        $patient_id = $patient_id ?? $request->query('patient_id');
+        $patients = $patient_id ? collect([Patient::findOrFail($patient_id)->only(['id', 'name'])]) : Patient::select('id', 'name')->latest('updated_at')->get();
 
 
         return Inertia::render('Teeth/Create', [

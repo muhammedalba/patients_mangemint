@@ -2,6 +2,7 @@
 
 namespace App\Domain\Payments\Services;
 
+use App\Domain\Exceptions\DomainRuleException;
 use App\Models\Patient;
 use App\Models\Payment;
 use App\Models\Procedure;
@@ -11,7 +12,7 @@ class PatientBalanceService
     public function getRemainingBalance(int $patientId): float
     {
         // 1) get patient details
-        $patient = Patient::findOrFail($patientId);
+        $patient = Patient::findOrFail($patientId)->only(['id', 'discount_amount']);
 
         // 2) get total procedures cost
         $totalProcedures = Procedure::where('patient_id', $patientId)
@@ -24,7 +25,6 @@ class PatientBalanceService
 
         // 4) apply discount if any
         $discount = $patient->discount_amount ?? 0;
-        // @dd($discount);
         return max(
             ($totalProcedures - $discount) - $totalPayments,
             0
@@ -36,11 +36,11 @@ class PatientBalanceService
         $remaining = $this->getRemainingBalance($patientId);
 
         if ($remaining <= 0) {
-            throw new \DomainException('Patient has no outstanding balance.');
+            throw new DomainRuleException('amount','Patient has no outstanding balance.');
         }
 
         if ($amount > $remaining) {
-            throw new \DomainException(
+            throw new DomainRuleException('amount',
                 'Payment amount exceeds the outstanding balance.'
             );
         }

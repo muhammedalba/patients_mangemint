@@ -22,11 +22,17 @@ class PaymentController extends Controller
         return Inertia::render('Payments/Index', ['payments' => $payments]);
     }
 
-    public function create()
+    public function create($patient_id = null)
     {
-        // get all patients
-        $patients = Patient::select('id', 'name')->latest('updated_at')->get();
 
+        // if patient id is provided, get that patient only
+        $patient_id = $patient_id ?? request()->input('patient_id');
+
+        if ($patient_id) {
+            $patients = collect([Patient::findOrFail($patient_id)->only(['id', 'name'])]);
+        } else {
+            $patients = Patient::select('id', 'name')->latest('updated_at')->get();
+        }
         return Inertia::render('Payments/Create',  ['patients' => $patients,]);
     }
 

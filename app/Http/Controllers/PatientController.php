@@ -8,6 +8,8 @@ use Inertia\Inertia;
 use App\Models\Patient;
 use App\Domain\Patients\Services\PatientService;
 use App\Domain\Patients\DTOs\PatientData;
+use App\Models\ServiceCategory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PatientController extends Controller
 {
@@ -43,13 +45,12 @@ class PatientController extends Controller
     public function store(PatientStoreRequest $request)
     {
 
-            $data = PatientData::fromArray($request->validated());
+        $data = PatientData::fromArray($request->validated());
 
-            $patient = $this->service->createPatient($data);
-            return redirect()
-                ->route('medical-records.create',  $patient->id)
-                ->with('success', __('Patient created successfully.'));
-
+        $patient = $this->service->createPatient($data);
+        return redirect()
+            ->route('medical-records.create',  $patient->id)
+            ->with('success', __('Patient created successfully.'));
     }
 
 
@@ -85,33 +86,38 @@ class PatientController extends Controller
     public function update(PatientUpdateRequest $request, Patient $patient)
     {
 
-            $data = PatientData::fromArray($request->validated());
-            $this->service->updatePatient($patient, $data);
+        $data = PatientData::fromArray($request->validated());
+        $this->service->updatePatient($patient, $data);
 
-            return redirect()
-                ->route('patients.index')
-                ->with('success', __('Patient updated successfully.'));
-
+        return redirect()
+            ->route('patients.index')
+            ->with('success', __('Patient updated successfully.'));
     }
     // add discount amount to patient
     public function addDiscount(Patient $patient)
     {
         $discountAmount = request()->input('discount_amount', 0);
 
-            $this->service->addDiscountToPatient($patient, $discountAmount);
+        $this->service->addDiscountToPatient($patient, $discountAmount);
 
-            return redirect()
-                ->route('patients.details', $patient)
-                ->with('success', __('Discount amount added successfully.'));
-
+        return redirect()
+            ->route('patients.details', $patient)
+            ->with('success', __('Discount amount added successfully.'));
     }
 
 
     public function details(Patient $patient, $toothId = null)
     {
+        $services_category = ServiceCategory::with('services:id,category_id,name,price')
+            ->select('id', 'name')
+            ->latest('name')
+            ->get();
         $patientDetails = $this->service->getPatientDetails($patient, $toothId);
 
-        return Inertia::render('Patients/Details', $patientDetails);
+        return Inertia::render('Patients/Details', [
+            'patientDetails' => $patientDetails,
+            'services_category' => $services_category,
+        ]);
     }
 
 
@@ -120,9 +126,8 @@ class PatientController extends Controller
     public function getToothProcedures(Patient $patient, $toothId)
     {
 
-            $toothProcedures = $this->service->getToothProcedures($patient, $toothId);
-            return response()->json(['tooth_procedures' => $toothProcedures]);
-
+        $toothProcedures = $this->service->getToothProcedures($patient, $toothId);
+        return response()->json(['tooth_procedures' => $toothProcedures]);
     }
 
 
@@ -134,11 +139,28 @@ class PatientController extends Controller
     public function destroy(Patient $patient)
     {
 
-            $this->service->deletePatient($patient);
+        $this->service->deletePatient($patient);
 
-            return redirect()
-                ->route('patients.index')
-                ->with('success', __('Patient deleted successfully.'));
+        return redirect()
+            ->route('patients.index')
+            ->with('success', __('Patient deleted successfully.'));
+    }
 
+    // Create Invoice for Patient
+    // public function downloadInvoice(Patient $patient)
+    // {
+    //     // get patient details with procedures
+    //     $patientDetails= $this->service->getPatientDetails($patient);
+    //     $pdf = Pdf::loadView('patients.pdf', ['patient'=> $patientDetails]);
+
+    //     return $pdf->download('invoice-patient-' . $patient->id . '.pdf');
+    // }
+    public function downloadInvoice(Patient $patient)
+    {
+        $patientDetails = $this->service->getPatientDetails($patient);
+        // @dd(compact('patientDetails'));
+        $pdf = Pdf::loadView('patients.pdf', compact('patientDetails'));
+
+        return $pdf->download('invoice-patient-' . $patient->id . '.pdf');
     }
 }

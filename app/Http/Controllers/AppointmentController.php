@@ -36,16 +36,20 @@ class AppointmentController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
+        // patient_id from query params if exists
+        $patient_id = $patient_id ?? $request->query('patient_id');
+        
+        $patients = $patient_id ? collect([Patient::findOrFail($patient_id)->only(['id', 'name'])]) : Patient::select('id', 'name')->latest('updated_at')->get();
+
+        // get patient our patients
         $services_category = ServiceCategory::with('services:category_id,id,name')
             ->select('id', 'name')->latest('name')
             ->get();
-        return Inertia::render('Appointments/Create', [
-            'patients' => Patient::select('id', 'name')
-                ->latest('updated_at')
-                ->get(),
 
+        return Inertia::render('Appointments/Create', [
+            'patients' => $patients,
             'doctors' => User::role('doctor')->get(['id', 'name']), // Assuming you have a 'doctor' role
             'services' => $services_category,
         ]);
@@ -105,11 +109,10 @@ class AppointmentController extends Controller
     public function update(AppointmentUpdateRequest $request, Appointment $appointment): RedirectResponse
     {
 
-            $data = AppointmentData::fromValidated($request->validated());
-            $this->service->update($appointment, $data);
+        $data = AppointmentData::fromValidated($request->validated());
+        $this->service->update($appointment, $data);
 
-            return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
-
+        return redirect()->route('appointments.index')->with('success', 'Appointment updated successfully.');
     }
 
     /**

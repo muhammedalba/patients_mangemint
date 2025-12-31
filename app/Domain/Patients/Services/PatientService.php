@@ -35,52 +35,52 @@ class PatientService
 
     public function getPatientDetails(Patient $patient): array
     {
-        $this->repository->getPatientDetails($patient);
+        $data = $this->repository->getPatientDetails($patient);
+        // calculate financial summary
 
-        $totalProceduresCost = $patient->procedures_sum_cost ?? 0;
-        $totalPayments       = $patient->payments_sum_amount ?? 0;
-        $totalProcedures     = $patient->procedures_count ?? 0;
-
-        $discountAmount = $patient->discount_amount ?? 0;
-
+        $totalProceduresCost = $data->procedures_sum_cost ?? 0;
+        $totalPayments       = $data->payments_sum_amount ?? 0;
+        $totalProcedures     = $data->procedures_count ?? 0;
+        //get discount amount
+        $discountAmount = $data->discount_amount ?? 0;
+        // calculate total after discount
         $totalAfterDiscount = max(
             $totalProceduresCost - $discountAmount,
             0
         );
-
+        // calculate remaining balance
         $remainingBalance = $totalAfterDiscount - $totalPayments;
-
+        //  @dd($patient->procedures);
         return [
-            'patient' => [
-                'id' => $patient->id,
-                'name' => $patient->name,
-                'email' => $patient->email,
-                'phone' => $patient->phone,
-                'address' => $patient->address,
-                'notes' => $patient->notes,
-                'birth_date' => $patient->birth_date,
-                'gender' => $patient->gender,
-                'marital_status' => $patient->marital_status,
+            'id' => $patient->id,
+            'name' => $patient->name,
+            'email' => $patient->email,
+            'phone' => $patient->phone,
+            'address' => $patient->address,
+            'notes' => $patient->notes,
+            'birth_date' => $patient->birth_date,
+            'gender' => $patient->gender,
+            'marital_status' => $patient->marital_status,
 
-                // علاقات العرض
-                'teeth' => $patient->teeth,
-                'payments' => $patient->payments,
-                'appointments' => $patient->appointments,
-                'procedures' => $patient->procedures,
-                'medical_record' => $patient->medicalRecord,
+            // related data
+            'teeth' => $patient->teeth,
+            'payments' => $patient->payments,
+            'appointments' => $patient->appointments,
+            'procedures' => $patient->procedures,
+            'medical_record' => $patient->medicalRecord,
 
-                // الملخص المالي
-                'financial_summary' => [
-                    'total_procedures' => $totalProcedures,
-                    'total_procedures_cost' => $totalProceduresCost,
-                    'discount_amount' => $discountAmount,
-                    'total_procedures_after_discount' => $totalAfterDiscount,
-                    'total_payments' => $totalPayments,
-                    'remaining_balance' => $remainingBalance,
-                ],
-
-
+            //  financial summary
+            'financial_summary' => [
+                'total_procedures' => $totalProcedures,
+                'total_procedures_cost' => $totalProceduresCost,
+                'discount_amount' => $discountAmount,
+                'total_procedures_after_discount' => $totalAfterDiscount,
+                'total_payments' => $totalPayments,
+                'remaining_balance' => $remainingBalance,
             ],
+
+
+
         ];
     }
 

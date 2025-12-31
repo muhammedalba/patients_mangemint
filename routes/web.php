@@ -61,13 +61,11 @@
         // add dicount amount route
         Route::post('patients/{patient}/discount', [PatientController::class, 'addDiscount'])->name('patients.addDiscount');
         // patient details route
-
-        Route::get(
-            'patients/details/{patient}',
-            [PatientController::class, 'details']
-        )->name('patients.details');
+        Route::get('patients/details/{patient}',[PatientController::class, 'details'])->name('patients.details');
         // get Tooth Procedures
         Route::get('/patients/{patient}/tooth/{tooth}/procedures', [PatientController::class, 'getToothProcedures'])->name('patients.tooth.procedures');
+        // create invoice for patient
+        Route::get('patients/{patient}/download-invoice', [PatientController::class, 'downloadInvoice'])->name('patients.download-invoice');
     });
 
     /*
@@ -81,7 +79,7 @@
         ->controller(ProcedureController::class)
         ->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('create/{patient?}', 'create')->name('create');
+            Route::get('create/{patient_id?}', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('{procedure}/edit', 'edit')->name('edit');
             Route::put('{procedure}', 'update')->name('update');
@@ -146,7 +144,7 @@
         ->controller(PaymentController::class)
         ->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
+            Route::get('create/{patient_id?}', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('{payment}/edit', 'edit')->name('edit');
             Route::put('{payment}', 'update')->name('update');
@@ -164,7 +162,7 @@
         ->controller(ToothController::class)
         ->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
+            Route::get('create/{patient_id?}', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('{tooth}/edit', 'edit')->name('edit');
             Route::put('{tooth}', 'update')->name('update');

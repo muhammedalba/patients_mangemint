@@ -1,23 +1,25 @@
 import DentalChartPage from '@/components/DentalChartPage';
-import { DynamicTable } from '@/components/DynamicTable';
-import  {FormButton}  from '@/components/FormButton';
+import { FormButton } from '@/components/FormButton';
 import AppLayout from '@/layouts/app-layout';
-import { ServiceCategory, Tooth, type BreadcrumbItem, type Patient } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Tooth, type BreadcrumbItem, type Patient } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { route } from 'ziggy-js';
 
 export default function Show({
-    patient,
-    tooth,
-    services_category,
+    // patient,
+    // patientDetails,
+    // services_category,
 }: {
-    patient: Patient;
-    tooth: any;
-    services_category: ServiceCategory[];
+    // patient: Patient;
+    // patientDetails: any;
+    // services_category: ServiceCategory[];
 }) {
-    console.log(patient, 'patient');
-    console.log(tooth, 'tooth');
+    const { services_category, patientDetails, flash } = usePage<any>().props;
+    // const {Patient} = patientDetails;
+
+
+    console.log(patientDetails, 'patientDetails');
     console.log(services_category, 'servicesCategory');
 
     const columns: ColumnDef<Tooth>[] = [
@@ -33,27 +35,27 @@ export default function Show({
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'المرضى', href: route('patients.index') },
-        { title: 'تفاصيل المريض', href: route('patients.details', patient.id) },
+        { title: 'تفاصيل المريض', href: route('patients.details', patientDetails?.id) },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`تفاصيل المريض : ${patient.name}`} />
+            <Head title={`تفاصيل المريض : ${patientDetails?.name}`} />
             <div className="flex w-full items-start gap-2">
                 <div
                     className="mt-2 mr-2 h-auto w-1/4 rounded-lg border bg-white p-4 shadow"
                     dir="rtl"
                 >
-                    <div className='flex flex-col gap-2 border rounded-2xl p-2'>
-                        <FormButton className="block w-full text-center rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 transition">
-                            <a href='/appointments/create'>إضافة موعد</a>
+                    <div className="flex flex-col gap-2 rounded-2xl border p-2">
+                        <FormButton className="block w-full rounded-lg bg-blue-600 px-4 py-2 text-center font-semibold text-white transition hover:bg-blue-700">
+                            <a href="/appointments/create">إضافة موعد</a>
                         </FormButton>
-                        <div className="block w-full text-center rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 transition">
-                            <a href='/payments/create'>إضافة دفعة</a>
+                        <div className="block w-full rounded-lg bg-blue-600 px-4 py-2 text-center font-semibold text-white transition hover:bg-blue-700">
+                            <a href="/payments/create">إضافة دفعة</a>
                         </div>
-                    <div className="block w-full text-center rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 transition">
-                       <a href='/procedures/create'>إضافة إجراء</a>
-                    </div>
+                        <div className="block w-full rounded-lg bg-blue-600 px-4 py-2 text-center font-semibold text-white transition hover:bg-blue-700">
+                            <a href="/procedures/create">إضافة إجراء</a>
+                        </div>
                     </div>
                     <h2 className="mb-4 text-center text-xl font-bold text-blue-500">
                         بيانات المريض
@@ -61,30 +63,30 @@ export default function Show({
                     <div className="grid grid-cols-1 gap-6 text-right text-gray-700">
                         <div>
                             <p className="font-semibold">الاسم</p>
-                            <p>{patient.name}</p>
+                            <p>{patientDetails?.name}</p>
                         </div>
                         <div>
                             <p className="font-semibold">رقم الهاتف</p>
-                            <p>{patient.phone}</p>
+                            <p>{patientDetails?.phone}</p>
                         </div>
                         <div>
                             <p className="font-semibold">الجنس</p>
-                            <p>{patient.gender}</p>
+                            <p>{patientDetails?.gender}</p>
                         </div>
                         <div>
                             <p className="font-semibold">تاريخ الميلاد</p>
-                            <p>{patient.birth_date}</p>
+                            <p>{patientDetails?.birth_date}</p>
                         </div>
                         <div>
                             <p className="font-semibold">العنوان</p>
-                            <p>{patient.address}</p>
+                            <p>{patientDetails?.address}</p>
                         </div>
                         <div>
                             <p className="font-semibold">العمر</p>
                             <p>
-                                {patient.birth_date
+                                {patientDetails?.birth_date
                                     ? new Date().getFullYear() -
-                                      new Date(patient.birth_date).getFullYear()
+                                      new Date(patientDetails?.birth_date).getFullYear()
                                     : ''}{' '}
                                 سنة
                             </p>
@@ -93,7 +95,10 @@ export default function Show({
                 </div>
 
                 <div className="mt-2 ml-2 w-3/4 rounded-lg border shadow">
-                    <DentalChartPage patient={patient} services_category={services_category} />
+                    <DentalChartPage
+                        patient={patientDetails}
+                        services_category={services_category}
+                    />
                 </div>
             </div>
 
@@ -115,7 +120,7 @@ export default function Show({
                 </section>
             </div> */}
 
-                {/* <table className="w-full border">
+            {/* <table className="w-full border">
                     <thead>
                         <tr className="bg-gray-100">
                             <th className="border px-2 py-1">ID</th>
