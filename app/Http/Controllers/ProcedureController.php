@@ -37,17 +37,11 @@ class ProcedureController extends Controller
     {
         // select patient_id from route param or query param
         $patientId = $patient_id ?? $request->query('patient_id');
-        $toothId = $request->query('tooth_id');
 
-        // get teeth: if tooth_id provided, get that tooth only
-        $teeth = $toothId
-            ? Tooth::select('id', 'tooth_number')->where('id', $toothId)->get()
-            : Tooth::select('id', 'tooth_number')->latest('updated_at')->get();
-
-        // get patients: if patient_id provided, get that patient only
+        // get patients: if patient_id provided, get that patient only with teeth
         if ($patientId) {
-            $patient = Patient::select('id', 'name')->find($patientId);
-            $patients = $patient ? collect([$patient->only(['id', 'name'])]) : collect([]);
+            $patient = Patient::with('teeth:id,patient_id,tooth_number')->select('id', 'name')->find($patientId);
+            $patients = $patients = $patient? collect([$patient]): collect([]);
         } else {
             $patients = Patient::select('id', 'name')->latest('updated_at')->get();
         }
@@ -59,7 +53,6 @@ class ProcedureController extends Controller
             ->get();
 
         return Inertia::render('Procedures/Create', [
-            'teeth' => $teeth,
             'services_category' => $services_category,
             'patients' => $patients,
         ]);
@@ -68,7 +61,7 @@ class ProcedureController extends Controller
 
     public function store(ProcedureStoreRequest $request)
     {
-        // @dd('store procedure called', $request);
+
         $data = ProcedureData::fromValidated($request->validated());
         $this->service->create($data);
 

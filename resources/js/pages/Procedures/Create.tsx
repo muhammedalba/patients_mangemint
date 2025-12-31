@@ -62,6 +62,7 @@ export default function CreateProcedure({
         processing_date: new Date().toISOString().split('T')[0], // تاريخ اليوم افتراضيًا
     });
     console.log('errors', errors);
+    console.log('patients', patients);
 
     const [selectedTreatment, setSelectedTreatment] = useState<Service | null>(
         null,
