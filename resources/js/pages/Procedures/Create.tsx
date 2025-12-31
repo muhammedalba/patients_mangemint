@@ -56,7 +56,7 @@ export default function CreateProcedure({
         status: 'planned',
         description: '',
         cost: '',
-        tooth_id: teeth[0]?.id?.toString() || '',
+        tooth_id: '',
         patient_id: patient_id?.toString() || '',
         category: '',
         processing_date: new Date().toISOString().split('T')[0], // تاريخ اليوم افتراضيًا
@@ -83,6 +83,8 @@ export default function CreateProcedure({
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        console.log(data);
+
         router.post(route('procedures.store'), data, {
             onSuccess: () => reset(),
             onFinish: () => setIsLoading(false),

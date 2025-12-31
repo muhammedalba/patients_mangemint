@@ -21,6 +21,7 @@ class AppointmentRepository
 
     public function create(array $data): Appointment
     {
+
         $appointment = Appointment::create($data);
 
         $this->clearCache();

@@ -68,7 +68,7 @@ class ProcedureController extends Controller
 
     public function store(ProcedureStoreRequest $request)
     {
-
+        // @dd('store procedure called', $request);
         $data = ProcedureData::fromValidated($request->validated());
         $this->service->create($data);
 
@@ -116,7 +116,7 @@ class ProcedureController extends Controller
     {
 
         $this->service->delete($procedure);
-        return redirect()->route('procedure.index', $procedure->patient_id)->with('success', 'Procedure deleted successfully.');
+        return redirect()->route('procedures.index', $procedure->patient_id)->with('success', 'Procedure deleted successfully.');
     }
 
     public function getTeeth(Patient $patient)

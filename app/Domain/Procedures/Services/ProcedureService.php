@@ -18,7 +18,6 @@ class ProcedureService
 
     public function create(ProcedureData $data): Procedure
     {
-
         return $this->repo->create($data->toArray());
     }
 

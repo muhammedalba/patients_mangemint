@@ -23,10 +23,10 @@ class AppointmentStoreRequest extends FormRequest
     {
         return [
             'patient_id' => 'required|exists:patients,id',
-            'user_id' => 'required|exists:users,id', // الطبيب
-            'service_id' => 'required|exists:services,id',
+            'user_id' => 'required|exists:users,id',
+            'service_id' => 'nullable|exists:services,id',
             'date' => 'required|date_format:Y-m-d',
-            'start_time' => ['required', 'date_format:H:i'], // أو H:i:s إذا ترسل ثواني
+            'start_time' => ['required', 'date_format:H:i'], //H:i:s
             'duration_slots' => 'required|integer|min:1',
             'notes' => 'nullable|string|max:1000',
             'status' => 'sometimes|string|in:scheduled,completed,canceled'

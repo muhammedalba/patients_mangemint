@@ -20,7 +20,7 @@ class ProcedureStoreRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
+    { 
         return [
             'name' => 'required|string|max:255',
             'status' => 'required|in:planned,in_progress,completed,cancelled',
@@ -34,6 +34,9 @@ class ProcedureStoreRequest extends FormRequest
                 'exists:teeth,id',
                 function ($attribute, $value, $fail) {
                     $tooth = \App\Models\Tooth::select('patient_id')->find($value);
+                    if ($tooth === null) {
+                        $fail('The selected tooth does not exist.');
+                    }
 
                     if ($tooth && $this->input('patient_id') && $tooth->patient_id !== (int) $this->input('patient_id')) {
                         $fail('The selected tooth does not belong to the specified patient.');

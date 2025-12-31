@@ -40,7 +40,7 @@ class AppointmentController extends Controller
     {
         // patient_id from query params if exists
         $patient_id = $patient_id ?? $request->query('patient_id');
-        
+
         $patients = $patient_id ? collect([Patient::findOrFail($patient_id)->only(['id', 'name'])]) : Patient::select('id', 'name')->latest('updated_at')->get();
 
         // get patient our patients
@@ -60,9 +60,9 @@ class AppointmentController extends Controller
      */
     public function store(AppointmentStoreRequest $request): RedirectResponse
     {
-
         $data = AppointmentData::fromValidated($request->validated());
         $this->service->create($data);
+     
 
         return redirect()
             ->route('appointments.index')

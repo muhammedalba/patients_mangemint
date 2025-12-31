@@ -16,7 +16,7 @@ class PatientBalanceService
 
         // 2) get total procedures cost
         $totalProcedures = Procedure::where('patient_id', $patientId)
-            ->whereIn('status', ['completed', 'in_progress'])
+            // ->whereIn('status', ['completed', 'in_progress'])
             ->sum('cost');
 
         // 3) get total payments made

@@ -146,19 +146,10 @@ class PatientController extends Controller
             ->with('success', __('Patient deleted successfully.'));
     }
 
-    // Create Invoice for Patient
-    // public function downloadInvoice(Patient $patient)
-    // {
-    //     // get patient details with procedures
-    //     $patientDetails= $this->service->getPatientDetails($patient);
-    //     $pdf = Pdf::loadView('patients.pdf', ['patient'=> $patientDetails]);
-
-    //     return $pdf->download('invoice-patient-' . $patient->id . '.pdf');
-    // }
     public function downloadInvoice(Patient $patient)
     {
-        $patientDetails = $this->service->getPatientDetails($patient);
-        // @dd(compact('patientDetails'));
+        $patientDetails = $this->service->getPatientInvoiceData($patient);
+        // @dd($patientDetails);
         $pdf = Pdf::loadView('patients.pdf', compact('patientDetails'));
 
         return $pdf->download('invoice-patient-' . $patient->id . '.pdf');

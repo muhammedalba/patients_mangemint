@@ -59,7 +59,7 @@ class AppointmentService
 
     public function update(Appointment $appointment, AppointmentData $data): Appointment
     {
-            return $this->repo->update($appointment, $data->toArray());
+        return $this->repo->update($appointment, $data->toArray());
     }
 
     public function delete(Appointment $appointment): void
@@ -98,18 +98,17 @@ class AppointmentService
         }
 
         return DB::transaction(function () use ($data, $startTimeFormatted, $endTimeFormatted) {
-            // تحقق التداخل بالنسبة للطبيب (user_id) — عادة نتحقق لطبيب محدد
+            // Check for conflicts
             $conflict = $this->repo->isConflict($data->date, $startTimeFormatted, $endTimeFormatted, $data->user_id);
 
             if ($conflict) {
                 throw new AppointmentConflictException('start_time', 'الفترة الزمنية المطلوبة غير متاحة (يوجد تداخل).');
             }
-
-            // إنشاء الموعد عبر الـ Repository
+            // create appointment
             return $this->repo->create([
                 'patient_id'     => $data->patient_id,
                 'user_id'        => $data->user_id,
-                'service_id'     => $data->service_id,
+                'service_id'     => $data->service_id ?? null,
                 'date'           => $data->date,
                 'start_time'     => $startTimeFormatted,
                 'end_time'       => $endTimeFormatted,

@@ -117,6 +117,40 @@ class PatientRepository
         return Cache::remember($cacheKey, now()->addMinutes(10), $loadData);
     }
 
+
+    /**
+     * Get patient invoice data with caching and eager loading.
+     *
+     * @param Patient|null $patient The patient model instance.
+     * @return Patient The loaded patient model with relations and aggregates.
+     * @throws \Exception If patient is not found.
+     */
+    public function getPatientInvoiceData(?Patient $patient): Patient
+    {
+        $cacheKey = "patient:{$patient->id}:InvoiceData";
+        $store = $this->getCacheStore();
+
+        $cacheTTL = config('cache.patient_invoice_ttl', now()->addMinutes(10));
+
+        $loadData = function () use ($patient) {
+            // Eager load relations and calculate aggregates
+            return $patient->loadMissing([
+                'procedures' => function ($query) {
+                    $query->select('procedures.id', 'procedures.tooth_id', 'procedures.cost');
+                },
+                'payments:id,patient_id,amount,payment_date',
+            ])
+                ->loadSum('procedures', 'cost')
+                ->loadSum('payments', 'amount')
+                ->loadCount('procedures');
+        };
+
+        if ($store instanceof TaggableStore) {
+            return Cache::tags('patients')->remember($cacheKey, $cacheTTL, $loadData);
+        }
+
+        return Cache::remember($cacheKey, $cacheTTL, $loadData);
+    }
     public function getToothProcedures(Patient $patient, $toothId)
     {
         $cacheKey = "tooth:{$patient->id}:{$toothId}:procedures";

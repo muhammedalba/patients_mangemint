@@ -10,13 +10,13 @@ return new class extends Migration {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
 
-
-            // $table->unsignedBigInteger('patient_id')->nullable(false);
-            // $table->unsignedBigInteger('user_id')->nullable(false);
-            // $table->unsignedBigInteger('service_id')->nullable(false);
             $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('service_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('service_id')
+                ->nullable()
+                ->constrained('services')
+                ->nullOnDelete();
+
 
 
             $table->date('date');
@@ -25,16 +25,14 @@ return new class extends Migration {
 
             $table->unsignedSmallInteger('duration_slots')->default(1);
 
-            $table->text('notes')->nullable();
+            $table->text('notes')->nullable()->default('معاينة');
             $table->enum('status', ['scheduled', 'completed', 'canceled'])->default('scheduled');
 
             $table->timestamps();
-
-            $table->index('patient_id');
-            $table->index('service_id');
-            $table->index('status');
-            $table->index('date');
-            $table->index(['user_id', 'date', 'start_time', 'end_time']);
+            $table->index(
+                ['user_id', 'date', 'start_time', 'end_time', 'patient_id', 'status'],
+                'appointments_multi_idx'
+            );
         });
     }
 
