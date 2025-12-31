@@ -95,11 +95,12 @@ export default function Index() {
             <Head title="المصروفات" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
-                {showToast && (
-                <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                    {flash?.success || flash?.error}
-                </div>
-            )}
+               {flash?.error && (
+                    <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
+                        {flash.error}
+                    </div>
+                )}
+
                     <h1 className="mb-4 text-2xl font-bold">المصروفات</h1>
                     {showToast && (
                         <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">

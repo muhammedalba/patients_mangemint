@@ -2,4 +2,6 @@
 
 namespace App\Domain\MonthClosures\Exceptions;
 
-class NoExpensesException extends ClosureException {}
+use App\Domain\Exceptions\DomainRuleException;
+
+class NoExpensesException extends DomainRuleException {}

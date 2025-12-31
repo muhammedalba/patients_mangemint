@@ -1,10 +1,10 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
+import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import axios from 'axios';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -68,32 +68,16 @@ export default function CreateProcedure({
     );
     const [isLoading, setIsLoading] = useState(false);
     const [filteredTeeth, setFilteredTeeth] = useState(teeth);
+    const [selectedPatientName, setSelectedPatientName] = useState('');
 
     const handleServiceSelect = (service: { name: string; price: number }) => {
         setData('name', service.name);
         setData('cost', service.price.toString());
     };
 
-    const handlePatientSelect = async (patientId: string) => {
-        setData('patient_id', patientId);
-        try {
-            const response = await axios.get(
-                route('procedures.getTeeth', { patient: patientId }),
-            );
-            if (response.data.teeth && Array.isArray(response.data.teeth)) {
-                setFilteredTeeth(response.data.teeth);
-                setData(
-                    'tooth_id',
-                    response.data.teeth[0]?.id?.toString() || '',
-                );
-            } else {
-                setFilteredTeeth([]);
-                setData('tooth_id', '');
-            }
-        } catch {
-            setFilteredTeeth([]);
-            setData('tooth_id', '');
-        }
+    const handlePatientSelect = (patient) => {
+        setSelectedPatientName(patient.name);
+        setData('patient_id', patient.id);
     };
 
     const handleSubmit = (e: FormEvent) => {
@@ -126,7 +110,10 @@ export default function CreateProcedure({
                             onChange={(val) => setData('status', val as string)}
                             options={[
                                 { value: 'planned', label: 'مخطط' },
-                                { value: 'in_progress', label: 'قيد التنفيذ' },
+                                {
+                                    value: 'in_progress',
+                                    label: 'قيد التنفيذ',
+                                },
                                 { value: 'completed', label: 'مكتمل' },
                                 { value: 'cancelled', label: 'ملغي' },
                             ]}
@@ -212,21 +199,17 @@ export default function CreateProcedure({
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <FormSelect
-                            label=" اسم المريض"
+                        <SearchInput
+                            label="اسم المريض"
                             name="patient_id"
-                            value={data.patient_id}
-                            onChange={(val) => handlePatientSelect(val)}
-                            options={
-                                patients.length > 0
-                                    ? patients.map((p) => ({
-                                          value: p.id.toString(),
-                                          label: p.name,
-                                      }))
-                                    : [{ value: '', label: 'لا يوجد مرضى' }]
-                            }
+                            value={selectedPatientName}
+                            onChange={(val) => setSelectedPatientName(val)}
+                            options={patients}
+                            onSelect={handlePatientSelect}
+                            placeholder="ابحث باسم المريض..."
                             error={errors.patient_id}
                         />
+
                         <FormInput
                             label="تاريخ المعالجة"
                             name="processing_date"
@@ -235,27 +218,6 @@ export default function CreateProcedure({
                             value={data.processing_date}
                             onChange={(e) => setData('processing_date', e)}
                             error={errors.processing_date}
-                        />
-
-                        <FormSelect
-                            label=" اسم السن"
-                            name="tooth_id"
-                            value={data.tooth_id}
-                            onChange={(val) => setData('tooth_id', val)}
-                            options={
-                                filteredTeeth && filteredTeeth.length > 0
-                                    ? filteredTeeth.map((tooth) => ({
-                                          value: tooth.id.toString(),
-                                          label: tooth.tooth_number,
-                                      }))
-                                    : [
-                                          {
-                                              value: '',
-                                              label: 'لا توجد أسنان متاحة',
-                                          },
-                                      ]
-                            }
-                            error={errors.tooth_id}
                         />
                     </div>
 

@@ -8,7 +8,7 @@ import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Edit() {
-    const { expense, categories } = usePage<any>().props;
+    const { expense, categories,flash } = usePage<any>().props;
 
     const { data, setData, post, processing, errors } = useForm({
         amount: expense.amount || '',
@@ -32,8 +32,14 @@ export default function Edit() {
     ];
 
     return (
+<<<<<<< HEAD
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`  تعديل المصروف: ${expense.name}`} />
+            {flash?.error && (
+                    <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
+                        {flash.error}
+                    </div>
+                )}
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     تعديل المصروف

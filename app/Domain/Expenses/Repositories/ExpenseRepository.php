@@ -77,12 +77,8 @@ class ExpenseRepository
 
     public function delete(Expense $expense): bool
     {
-        if ($expense->is_locked) {
-            return false;
-        }
 
         $deleted = $expense->delete();
-
         $store = Cache::getStore();
         if ($store instanceof TaggableStore) {
             Cache::tags('expenses')->flush();

@@ -12,7 +12,7 @@ use App\Models\Tooth;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProcedureStoreRequest;
 use App\Http\Requests\ProcedureUpdateRequest;
-use Illuminate\Support\Facades\Log;
+
 
 class ProcedureController extends Controller
 {
@@ -25,44 +25,18 @@ class ProcedureController extends Controller
 
     public function index(Request $request)
     {
-        try {
+
             $search = $request->input('search');
 
             $procedures = $this->service->listProcedures($search, 10);
 
-            // $procedures->getCollection()->transform(function ($procedure) {
-            //     return [
-            //         'id' => $procedure->id,
-            //         'tooth_id' => $procedure->tooth_id,
-            //         'description' => $procedure->description,
-            //         'tooth_number' => $procedure->tooth?->tooth_number,
-            //         'cost' => $procedure->cost,
-            //         'name' => $procedure->name,
-            //         'duration_minutes' => $procedure->duration_minutes,
-            //         'follow_up_days' => $procedure->follow_up_days,
-            //         'patient' => $procedure->tooth?->patient?->name,
-            //     ];
-            // });
-
             return Inertia::render('Procedures/Index', ['procedures' => $procedures]);
-        } catch (\Throwable $e) {
-            Log::error('Failed to load procedures index page', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
 
-            return redirect()
-                ->back()
-                ->with('error', __('Failed to load procedures index page'));
-        }
-        return redirect()
-            ->back()
-            ->with('error', __('Something went wrong while loading the procedures index page.'));
     }
 
     public function create(Request $request, $patient_id = null)
     {
-        try {
+
             // تحديد معرّفات المريض والسن إن وُجدا
             $patientId = $patient_id ?? $request->query('patient_id');
             $toothId = $request->query('tooth_id');
@@ -80,44 +54,22 @@ class ProcedureController extends Controller
                 'services_category' => $services_category,
                 'patients' => $patients,
             ]);
-        } catch (\Throwable $e) {
-            Log::error('Failed to load procedure create page', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
 
-            return redirect()
-                ->back()
-                ->with('error', __('Failed to load procedure create page'));
-        }
-        return redirect()
-            ->back()
-            ->with('error', __('Something went wrong while loading the procedure create page.'));
     }
 
     public function store(ProcedureStoreRequest $request)
     {
-        try {
+
             $data = ProcedureData::fromValidated($request->validated());
             $this->service->create($data);
-            return redirect()->route('patients.details', $data->patient_id)->with('success', 'Procedure created successfully.');
-        } catch (\Throwable $e) {
-            Log::error('Failed to create procedure', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'data' =>  $request->all(),
-            ]);
 
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('error', __('Something went wrong while creating the procedure.'));
-        }
+            return redirect()->route('patients.details', $data->patient_id)->with('success', 'Procedure created successfully.');
+
     }
 
     public function edit(Procedure $procedure)
     {
-        try {
+
             // ensure we have the relations loaded via service to mirror repository behavior with patient
             // $procedure = $this->service->find($procedure->id) ?? $procedure;
 
@@ -134,20 +86,7 @@ class ProcedureController extends Controller
                 'teeth' => $teeth,
                 'services_category' => $services_category,
             ]);
-        } catch (\Throwable $e) {
-            Log::error('Failed to load procedure edit page', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'procedure_id' => $procedure->id,
-            ]);
 
-            return redirect()
-                ->back()
-                ->with('error', __('Failed to load procedure edit page'));
-        }
-        return redirect()
-            ->back()
-            ->with('error', __('Something went wrong while loading the procedure edit page.'));
     }
 
 
@@ -156,7 +95,7 @@ class ProcedureController extends Controller
 
         $data = ProcedureData::fromValidated($request->validated());
 
-        try {
+
             $this->service->update($procedure, $data);
 
             $tooth = Tooth::select('tooth_number', 'id', 'patient_id')->find($data->tooth_id);
@@ -164,33 +103,16 @@ class ProcedureController extends Controller
             return redirect()
                 ->route('patients.details', $tooth->patient_id)
                 ->with('success', 'Procedure updated successfully.');
-        } catch (\Throwable $e) {
-            Log::error('Failed to update procedure', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'procedure_id' => $procedure->id,
-                'data' => $data->toArray(),
-            ]);
 
-            return back()->with('error', __('Failed to update procedure.'));
-        }
-        return back()->with('error', __('Something went wrong while updating the procedure.'));
+
     }
 
     public function destroy(Procedure $procedure)
     {
-        try {
-            $this->service->delete($procedure);
-        } catch (\Throwable $e) {
-            Log::error('Failed to delete procedure', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'procedure_id' => $procedure->id
-            ]);
 
-            return back()->with('error', __('Failed to delete procedure.'));
-        }
-        return back()->with('error', __('Something went wrong while delete procedure.'));
+            $this->service->delete($procedure);
+            return redirect()->route('procedure.index', $procedure->patient_id)->with('success', 'Procedure deleted successfully.');
+
     }
 
     public function getTeeth(Patient $patient)

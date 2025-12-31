@@ -43,17 +43,11 @@ class ExpenseCategoryController extends Controller
 
     public function store(ExpenseCategoryStoreRequest $request)
     {
-        try {
-            $data = ExpenseCategoryData::fromArray($request->all());
-            $this->service->createCategory($data);
 
-            return redirect()->route('expense-categories.index')->with('success', __('Category created successfully.'));
-        } catch (\Throwable $e) {
+        $data = ExpenseCategoryData::fromArray($request->all());
+        $this->service->createCategory($data);
 
-            Log::error('Failed to create expense category', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'data' => $request->all()]);
-
-            return redirect()->back()->withInput()->with('error', __('Something went wrong while creating the category.'));
-        }
+        return redirect()->route('expense-categories.index')->with('success', __('Category created successfully.'));
     }
 
     public function edit(ExpenseCategory $expenseCategory)
@@ -65,31 +59,18 @@ class ExpenseCategoryController extends Controller
 
     public function update(ExpenseCategoryUpdateRequest $request, ExpenseCategory $expenseCategory)
     {
-        try {
-            $data = ExpenseCategoryData::fromArray($request->all());
-            $this->service->updateCategory($expenseCategory, $data);
 
-            return redirect()->route('expense-categories.index')->with('success', __('Category updated successfully.'));
+        $data = ExpenseCategoryData::fromArray($request->all());
+        $this->service->updateCategory($expenseCategory, $data);
 
-        } catch (\Throwable $e) {
-
-            Log::error('Failed to update expense category', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'category_id' => $expenseCategory->id, 'data' => $request->all()]);
-
-            return redirect()->back()->withInput()->with('error', __('Something went wrong while updating the category.'));
-        }
+        return redirect()->route('expense-categories.index')->with('success', __('Category updated successfully.'));
     }
 
     public function destroy(ExpenseCategory $expenseCategory)
     {
-        try {
-            $this->service->deleteCategory($expenseCategory);
 
-            return redirect()->route('expense-categories.index')->with('success', __('Category deleted successfully.'));
+        $this->service->deleteCategory($expenseCategory);
 
-        } catch (\Throwable $e) {
-            Log::error('Failed to delete expense category', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'category_id' => $expenseCategory->id]);
-            
-            return redirect()->route('expense-categories.index')->with('error', __('Something went wrong while deleting the category.'));
-        }
+        return redirect()->route('expense-categories.index')->with('success', __('Category deleted successfully.'));
     }
 }

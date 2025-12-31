@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('expense_category_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('expense_category_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete()
+            ;
 
             $table->decimal('amount', 10, 2);
             $table->text('description')->nullable();

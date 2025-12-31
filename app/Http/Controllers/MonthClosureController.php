@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
+
 use Inertia\Inertia;
 
 use Illuminate\Http\Request;
@@ -10,9 +10,6 @@ use App\Domain\MonthClosures\DTOs\MonthClosureData;
 use App\Domain\MonthClosures\Services\MonthClosureService;
 use App\Http\Requests\MonthClosureStoreRequest;
 
-use App\Domain\MonthClosures\Exceptions\MonthAlreadyClosedException;
-use App\Domain\MonthClosures\Exceptions\MonthInFutureException;
-use App\Domain\MonthClosures\Exceptions\NoExpensesException;
 
 class MonthClosureController extends Controller
 {
@@ -43,15 +40,7 @@ class MonthClosureController extends Controller
             'closed_at' => now()->toDateTimeString(),
         ]);
 
-        try {
-            $this->service->closeMonth($data);
+         $this->service->closeMonth($data);
             return redirect()->route('expenses.index')->with('success', __('Month closed successfully.'));
-        } catch (MonthInFutureException | MonthAlreadyClosedException | NoExpensesException $e) {
-            Log::warning('Month closure validation failed', ['error' => $e->getMessage(), 'year' => $data->year, 'month' => $data->month]);
-            throw $e;
-        } catch (\Throwable $e) {
-            Log::error('Failed to close month', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'year' => $data->year, 'month' => $data->month]);
-            return redirect()->back()->with('error', __('Failed to close month.'));
-        }
     }
 }

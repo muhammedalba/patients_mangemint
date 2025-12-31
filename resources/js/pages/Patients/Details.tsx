@@ -1,6 +1,6 @@
 import DentalChartPage from '@/components/DentalChartPage';
 import { DynamicTable } from '@/components/DynamicTable';
-import  FormButton  from '@/components/FormButton';
+import  {FormButton}  from '@/components/FormButton';
 import AppLayout from '@/layouts/app-layout';
 import { ServiceCategory, Tooth, type BreadcrumbItem, type Patient } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -115,7 +115,7 @@ export default function Show({
                 </section>
             </div> */}
 
-                <table className="w-full border">
+                {/* <table className="w-full border">
                     <thead>
                         <tr className="bg-gray-100">
                             <th className="border px-2 py-1">ID</th>
@@ -172,7 +172,7 @@ export default function Show({
                             </tr>
                         ))}
                     </tbody>
-                </table>
+                </table> */}
         </AppLayout>
     );
 }

@@ -68,17 +68,7 @@ class MedicalRecordController extends Controller
         return redirect()->route('medical-records.index')->with('success', 'Medical record created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    // public function show(MedicalRecord $medicalRecord): Response
-    // {
-    //     $medicalRecord->load('patient', 'doctor');
-    //     return Inertia::render('MedicalRecords/Show', [
-    //         'medicalRecord' => $medicalRecord,
-    //     ]);
-    // }
-
+   
     /**
      * Show the form for editing the specified resource.
      */

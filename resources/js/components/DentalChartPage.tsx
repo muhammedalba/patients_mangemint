@@ -39,36 +39,45 @@ type ProceduresByTooth = {
 };
 
 export default function DentalChartPage({
+    teeth,
+    patient_id,
     patient,
-    services_category = [],
+    services_category,
 }: {
+    teeth: Tooth[];
+    patient_id?: number;
     patient: Patient;
-    services_category?: ServiceCategory[];
+    services_category: ServiceCategory[];
 }) {
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         description: string;
+        status: string;
         cost: string;
         tooth_id: string;
-        patient_id: number;
+        patient_id: string;
         category: string;
+        processing_date: string;
     }>({
         name: '',
+        status: 'planned',
         description: '',
         cost: '',
         tooth_id: '',
-        patient_id: patient.id,
+        patient_id: patient_id?.toString() || '',
         category: '',
+        processing_date: new Date().toISOString().split('T')[0], // تاريخ اليوم افتراضيًا
     });
+    console.log('errors', errors);
+    console.log('data', data);
 
     const [chart, setChart] = useState<OdontoTooth[]>([]);
-    const [selectedTooth, setSelectedTooth] = useState<OdontoTooth | null>(
-        null,
-    );
+    const [selectedTooth, setSelectedTooth] = useState<OdontoTooth>(null);
     const [selectedTeeth, setSelectedTeeth] = useState<OdontoTooth[]>([]);
     const [proceduresByTooth, setProceduresByTooth] =
         useState<ProceduresByTooth>({});
     const [showForm, setShowForm] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (newChart: OdontoTooth[]) => {
         setChart(newChart);
@@ -77,69 +86,59 @@ export default function DentalChartPage({
 
     const handleAddProcedureClick = (tooth: OdontoTooth) => {
         setSelectedTooth(tooth);
-        setData('tooth_id', String(tooth.id));
+        setData('tooth_id', selectedTooth ? selectedTooth.id.toString() : '');
+        setData('patient_id', patient.id.toString());
+
         setShowForm(true);
     };
 
     const handleServiceSelect = (service: Service) => {
         setData('name', service.name);
         setData('cost', service.price.toString());
-        setSelectedTreatment(service);
     };
-
-    const [selectedTreatment, setSelectedTreatment] = useState<Service | null>(
-        null,
-    );
 
     const handleSaveProcedure = (e: FormEvent) => {
         e.preventDefault();
         if (!selectedTooth) return;
 
-        const newProcedure: Procedure = {
-            id: Date.now(),
-            name: data.name,
-            description: data.description,
-            cost: Number(data.cost),
-            tooth_id: Number(selectedTooth.id),
-            patient_id: patient.id,
-            category: data.category,
-        };
+        setData('tooth_id', selectedTooth.id.toString());
+        setData('patient_id', patient.id.toString());
 
-        post(
-            route('procedures.store'),
-            {
-                name: newProcedure.name,
-                description: newProcedure.description,
-                cost: newProcedure.cost,
-                tooth_id: newProcedure.tooth_id,
-                patient_id: newProcedure.patient_id,
-                category: newProcedure.category,
+        post(route('procedures.store'), {
+            onSuccess: () => {
+                router.post(route('teeth.store'), {
+                    patient_id: patient.id,
+                    tooth_number: selectedTooth.notations.fdi,
+                    status: '',
+                    notes: '',
+                });
+
+                // حدّث الإجراءات في الواجهة
+                setProceduresByTooth((prev) => ({
+                    ...prev,
+                    [selectedTooth.notations.fdi]: [
+                        ...(prev[selectedTooth.notations.fdi] || []),
+                        {
+                            id: Date.now(),
+                            name: data.name,
+                            description: data.description,
+                            cost: Number(data.cost),
+                            tooth_id: Number(selectedTooth.id),
+                            patient_id: patient.id,
+                            category: data.category,
+                            status: data.status,
+                            processing_date: data.processing_date,
+                        },
+                    ],
+                }));
+
+                reset();
+                setShowForm(false);
             },
-            {
-                onSuccess: () => {
-                    router.post(route('teeth.store'), {
-                        patient_id: patient.id,
-                        tooth_number: selectedTooth.notations.fdi,
-                        status: '',
-                        notes: '',
-                    });
-
-                    setProceduresByTooth((prev) => ({
-                        ...prev,
-                        [selectedTooth.notations.fdi]: [
-                            ...(prev[selectedTooth.notations.fdi] || []),
-                            newProcedure,
-                        ],
-                    }));
-
-                    reset();
-                    setShowForm(false);
-                },
-                onError: (errors) => {
-                    console.error('Backend validation errors:', errors);
-                },
+            onError: (errors) => {
+                console.error('Backend validation errors:', errors);
             },
-        );
+        });
     };
 
     return (
@@ -179,10 +178,27 @@ export default function DentalChartPage({
                 </div>
             )}
 
-            {showForm && (
+            {showForm && selectedTooth && (
                 <form onSubmit={handleSaveProcedure} className="space-y-4">
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                        {services_category.map((category) => (
+                    {/* الحالة */}
+                    <FormSelect
+                        label="الحالة"
+                        name="status"
+                        value={data.status}
+                        onChange={(val) => setData('status', val)}
+                        options={[
+                            { value: 'planned', label: 'مخطط' },
+                            { value: 'in_progress', label: 'قيد التنفيذ' },
+                            { value: 'completed', label: 'مكتمل' },
+                            { value: 'cancelled', label: 'ملغي' },
+                        ]}
+                        error={errors.status}
+                    />
+
+                    {/* الخدمات */}
+                    {Array.isArray(services_category) &&
+                        services_category.length > 0 &&
+                        services_category.map((category) => (
                             <FormSelect
                                 key={category.id}
                                 label={`اختر خدمة من ${category.name}`}
@@ -196,81 +212,67 @@ export default function DentalChartPage({
                                         );
                                     if (selectedService) {
                                         handleServiceSelect(selectedService);
+                                        setData('name', selectedService.name);
+                                        setData('cost', selectedService.price.toString());
                                     }
                                     setData('category', val);
                                 }}
-                                options={category.services.map((service) => ({
-                                    value: service.id.toString(),
-                                    label: service.name,
-                                }))}
+                                options={(category.services ?? []).map(
+                                    (service) => ({
+                                        value: service.id.toString(),
+                                        label: service.name,
+                                    }),
+                                )}
                                 error={errors.category}
                             />
                         ))}
-                    </div>
 
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <FormInput
-                            label=" اسم الإجراء"
-                            name="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            placeholder="الاسم الإجراء"
-                            error={errors.name}
-                        />
+                    {/* الاسم والكلفة والوصف */}
+                    <FormInput
+                        label="اسم الإجراء"
+                        name="name"
+                        value={data.name}
+                        onChange={(val) => setData('name', val)}
+                        placeholder="اسم الإجراء"
+                        error={errors.name}
+                    />
 
-                        {selectedTreatment && (
-                            <FormInput
-                                label=" المعالجة المختارة"
-                                name="treatment_name"
-                                value={selectedTreatment.name}
-                                onChange={(e) =>
-                                    setData('name', e.target.value)
-                                }
-                                placeholder="المعالجة المختارة"
-                            />
-                        )}
+                    <FormInput
+                        label="كلفة الإجراء"
+                        name="cost"
+                        value={data.cost}
+                        onChange={(val) => setData('cost', val)}
+                        placeholder="كلفة الإجراء"
+                        error={errors.cost}
+                    />
 
-                        <FormInput
-                            label=" كلفة الإجراء"
-                            name="cost"
-                            value={data.cost}
-                            onChange={(e) => setData('cost', e.target.value)}
-                            placeholder="كلفة الإجراء"
-                        />
-                    </div>
-
-                    <div>
-                        <FormInput
+                    <FormInput
                         label="وصف الإجراء"
-                            name="description"
-                            value={data.description}
-                            onChange={(e) =>
-                                setData('description', e.target.value)
-                            }
-                            placeholder="وصف الإجراء"
-                        />
-                    </div>
+                        name="description"
+                        value={data.description}
+                        onChange={(val) => setData('description', val)}
+                        placeholder="وصف الإجراء"
+                        error={errors.description}
+                    />
 
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <FormInput
-                            label="اسم المريض"
-                            name="patient_name"
-                            value={patient.name}
-                            onChange={(val) => setData('patient_id', val)}
-                        />
+                    {/* المريض والسن */}
+                    <FormInput
+                        label="اسم المريض"
+                        value={patient.name}
+                        disabled={true}
+                    />
+                    <input type="hidden" name="patient_id" value={patient.id} />
 
-                        <FormSelect
-                            label="اسم السن"
-                            name="tooth_id"
-                            value={data.tooth_id.toString()}
-                            onChange={(val) => setData('tooth_id', val)}
-                            error={errors.tooth_id}
-                            options={(chart ?? []).map((tooth) => ({
-                                value: tooth.id.toString(),
-                                label: `رقم السن  ${tooth.notations.fdi}`,
-                            }))}
-                        />
-                    </div>
+                    <FormInput
+                        label="السن المحدد"
+                        value={`رقم السن ${selectedTooth.notations.fdi}`}
+                        disabled={true}
+                    />
+                    <input
+                        type="hidden"
+                        name="tooth_id"
+                        value={selectedTooth.id}
+                    />
 
                     {/* Actions */}
                     <div className="flex items-center justify-end space-x-2">
