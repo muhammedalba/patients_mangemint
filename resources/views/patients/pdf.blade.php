@@ -6,7 +6,9 @@
 
     <style>
         body {
-            font-family: Helvetica, Arial, sans-serif;
+           font-family: dejavusans;
+        direction: rtl;
+        text-align: right;
             color: #444;
             background: #f7f7f7;
         }
