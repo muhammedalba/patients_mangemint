@@ -33,6 +33,10 @@
 
     Route::middleware($protected)
         ->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::middleware($protected)
+        ->get('/today', [DashboardController::class, 'statistics'])->name('statistics');
+
     /*
 |--------------------------------------------------------------------------
 | Users

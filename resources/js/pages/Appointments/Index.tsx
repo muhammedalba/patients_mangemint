@@ -37,10 +37,7 @@ export default function Index({
 
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const canDeleteRoles = ['doctor', 'admin'];
-    const userHasDeletePermission = canDeleteRoles.some((role) =>
-        auth.user.roles.includes(role),
-    );
+
     useEffect(() => {
         const handler = setTimeout(() => {
             setIsLoading(true);
@@ -57,10 +54,10 @@ export default function Index({
 
         return () => clearTimeout(handler);
     }, [search]);
+
     const columns: ColumnDef<any>[] = [
         { id: 'patient', accessorKey: 'patient.name', header: 'اسم المريض' },
         { id: 'doctor', accessorKey: 'doctor.name', header: 'اسم الطبيب' },
-        { id: 'service', accessorKey: 'service.name', header: 'المعالجة' },
         {
             id: 'date',
             accessorKey: 'date',
@@ -111,8 +108,8 @@ export default function Index({
                 <h1 className="mb-4 text-2xl font-bold">المواعيد</h1>
 
                 <SearchBar
-                    value={''}
-                    onChange={() => {}}
+                    value={search}
+                    onChange={setSearch}
                     showSearch={true}
                     showButton={true}
                     buttonLabel="إضافة موعد"

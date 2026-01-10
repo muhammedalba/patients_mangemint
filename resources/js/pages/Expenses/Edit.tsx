@@ -32,7 +32,6 @@ export default function Edit() {
     ];
 
     return (
-<<<<<<< HEAD
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`  تعديل المصروف: ${expense.name}`} />
             {flash?.error && (

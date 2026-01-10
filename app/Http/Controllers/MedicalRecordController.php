@@ -65,10 +65,12 @@ class MedicalRecordController extends Controller
 
         $this->service->create($data);
 
-        return redirect()->route('medical-records.index')->with('success', 'Medical record created successfully.');
+        //return redirect()->route('medical-records.index')->with('success', 'Medical record created successfully.');
+        return redirect()->route('patients.details', $data->patient_id)
+                 ->with('success', 'Medical record created successfully.');
     }
 
-   
+
     /**
      * Show the form for editing the specified resource.
      */

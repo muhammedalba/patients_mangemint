@@ -62,16 +62,6 @@ export default function CreatePatient() {
             />
 
             <FormInput
-              label="البريد الإلكتروني"
-              name="email"
-              type="email"
-              value={data.email}
-              onChange={(val) => setData('email', val)}
-              placeholder="البريد الإلكتروني"
-              error={errors.email}
-            />
-
-            <FormInput
               label="رقم الهاتف"
               name="phone"
               type="text"
@@ -115,24 +105,15 @@ export default function CreatePatient() {
               ]}
               error={errors.marital_status}
             />
-
-            <div>
-              <label htmlFor="notes" className="mb-2 block text-gray-700">
-                الملاحظات
-              </label>
-              <textarea
-                id="notes"
-                name="notes"
-                value={data.notes}
-                onChange={(val) => setData('notes', val)}
-                placeholder="Notes"
-                className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                rows={3}
-              ></textarea>
-              {errors.notes && (
-                <p className="mt-1 text-sm text-red-500">{errors.notes}</p>
-              )}
-            </div>
+            <FormInput
+              label="ملاحظات"
+              name="notes"
+              type="notes"
+              value={data.notes}
+              onChange={(val) => setData('notes', val)}
+              placeholder="ملاحظات"
+              error={errors.notes}
+            />
           </div>
 
           <div className="flex items-center justify-end space-x-2">

@@ -5,7 +5,7 @@ import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 interface Tooth {
@@ -70,16 +70,29 @@ export default function CreateProcedure({
     const [isLoading, setIsLoading] = useState(false);
     const [filteredTeeth, setFilteredTeeth] = useState(teeth);
     const [selectedPatientName, setSelectedPatientName] = useState('');
+    const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
+            patient_id ?? null,
+        );
 
     const handleServiceSelect = (service: { name: string; price: number }) => {
         setData('name', service.name);
         setData('cost', service.price.toString());
     };
 
-    const handlePatientSelect = (patient) => {
+    const handlePatientSelect = (patient: Patient) => {
+        setSelectedPatientId(patient.id);
         setSelectedPatientName(patient.name);
-        setData('patient_id', patient.id);
+        setData('patient_id', patient.id.toString());
     };
+
+    useEffect(() => {
+      if (patients.length === 1) {
+        const patient = patients[0];
+        setSelectedPatientId(patient.id);
+        setSelectedPatientName(patient.name);
+        setData('patient_id', patient.id.toString());
+      }
+    }, [patients]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -105,29 +118,12 @@ export default function CreateProcedure({
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <FormSelect
-                            label="الحالة"
-                            name="status"
-                            value={data.status}
-                            onChange={(val) => setData('status', val as string)}
-                            options={[
-                                { value: 'planned', label: 'مخطط' },
-                                {
-                                    value: 'in_progress',
-                                    label: 'قيد التنفيذ',
-                                },
-                                { value: 'completed', label: 'مكتمل' },
-                                { value: 'cancelled', label: 'ملغي' },
-                            ]}
-                            error={errors.status}
-                        />
-                    </div>
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                     <h2 className='text-xl text-gray-700'>فئات المعالجات:</h2>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
                         {services_category.map((category) => (
                             <FormSelect
                                 key={category.id}
-                                label={`اختر خدمة من ${category.name}`}
+                                label={`  ${category.name}`}
                                 name={`service_${category.id}`}
                                 value={data.category}
                                 onChange={(val) => {
@@ -149,8 +145,8 @@ export default function CreateProcedure({
                             />
                         ))}
                     </div>
-
-                    <FormInput
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                        <FormInput
                         label=" اسم الإجراء"
                         name="name"
                         value={data.name}
@@ -176,32 +172,16 @@ export default function CreateProcedure({
                         onChange={(e) => setData('cost', e)}
                         placeholder="كلفة الإجراء"
                     />
-
-                    <div>
-                        <label
-                            htmlFor="description"
-                            className="mt-4 block text-right text-gray-700"
-                        >
-                            الوصف
-                        </label>
-                        <textarea
-                            name="description"
-                            title="وصف الإجراء"
-                            value={data.description}
-                            onChange={(e) =>
-                                setData('description', e.target.value)
-                            }
-                            placeholder="وصف الإجراء"
-                            className="w-full rounded-lg border px-3 py-2 text-right focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        />
-                        {errors.description && (
-                            <p className="mt-1 text-sm text-red-500">
-                                {errors.description}
-                            </p>
-                        )}
+<FormInput
+                        label=" وصف الإجراء"
+                        name="description"
+                        value={data.description}
+                        onChange={(e) => setData('description', e)}
+                        placeholder="وصف الإجراء"
+                    />
                     </div>
 
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <SearchInput
                             label="اسم المريض"
                             name="patient_id"
@@ -221,6 +201,22 @@ export default function CreateProcedure({
                             value={data.processing_date}
                             onChange={(e) => setData('processing_date', e)}
                             error={errors.processing_date}
+                        />
+                        <FormSelect
+                            label="الحالة"
+                            name="status"
+                            value={data.status}
+                            onChange={(val) => setData('status', val as string)}
+                            options={[
+                                { value: 'planned', label: 'مخطط' },
+                                {
+                                    value: 'in_progress',
+                                    label: 'قيد التنفيذ',
+                                },
+                                { value: 'completed', label: 'مكتمل' },
+                                { value: 'cancelled', label: 'ملغي' },
+                            ]}
+                            error={errors.status}
                         />
                     </div>
 

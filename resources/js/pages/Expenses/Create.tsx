@@ -88,12 +88,12 @@ export default function Create() {
                             error={errors.expense_date}
                         />
                         <FormInput
-                            label="الملاحظات"
+                            label="ملاحظات"
                             name="description"
                             type="text"
                             value={data.description}
                             onChange={(val) => setData('description', val)}
-                            placeholder="الملاحظات"
+                            placeholder="ملاحظات"
                             error={errors.description}
                         />
                     </div>

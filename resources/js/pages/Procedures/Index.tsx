@@ -42,9 +42,21 @@ export default function Index(filters: { search?: string }) {
 
     const columns: ColumnDef<any>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
-        { id: 'patient_name', accessorKey: 'patient.name', header: 'اسم المريض' },
+        {
+            id: 'patient_name',
+            accessorKey: 'patient.name',
+            header: 'اسم المريض',
+        },
         { id: 'name', accessorKey: 'name', header: 'اسم المعالجة' },
-        { id: 'description', accessorKey: 'description', header: 'الوصف' },
+        {
+            id: 'processing_date',
+            accessorKey: 'processing_date',
+            header: 'تاريخ المعالجة',
+            cell: ({ row }) =>
+                new Date(row.original.processing_date).toLocaleDateString(
+                    'en-SY',
+                ),
+        },
         { id: 'cost', accessorKey: 'cost', header: 'التكلفة' },
         {
             id: 'tooth_number',
@@ -52,7 +64,9 @@ export default function Index(filters: { search?: string }) {
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <span className="border px-2 py-1">{p?.tooth?.tooth_number}</span>
+                    <span className="border px-2 py-1">
+                        {p?.tooth?.tooth_number}
+                    </span>
                 );
             },
         },
@@ -120,7 +134,7 @@ export default function Index(filters: { search?: string }) {
             <Head title="الإجراءات" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 text-right">
                 <div>
-                    <h1 className="mb-4 text-2xl font-bold">الإجراء</h1>
+                    <h1 className="mb-4 text-2xl font-bold">الإجراءات</h1>
                     {showToast && (
                         <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
                             {props.flash?.success || props.flash?.error}
@@ -129,12 +143,13 @@ export default function Index(filters: { search?: string }) {
 
                     <SearchBar
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        showSearch={false}
+                        onChange={setSearch}
+                        showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة إجراء"
                         buttonRoute="procedures.create"
                     />
+
                     <section className="p-4">
                         <DynamicTable
                             data={[...procedures.data]}

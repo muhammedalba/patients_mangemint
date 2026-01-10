@@ -19,15 +19,15 @@ interface LoginProps {
 export default function Login({ status, canResetPassword }: LoginProps) {
     return (
         <AuthLayout
-            title="Welcome to Zircon App"
-            description="Enter your details below"
+            title="أهلاً بك في مركز زيركون"
+            description="سجّلْ معلومات حسابك أدناه"
         >
             <Head title="تسجيل الدخول" />
 
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
-                className="space-y-6"
+                className="space-y-6" dir='rtl'
             >
                 {({ processing, errors }) => (
                     <>
@@ -37,7 +37,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     htmlFor="email"
                                     className="text-sm font-medium text-gray-700"
                                 >
-                                    Email address
+                                    البريد الإلكتروني
                                 </Label>
                                 <Input
                                     id="email"
@@ -59,7 +59,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                         htmlFor="password"
                                         className="text-sm font-medium text-gray-700"
                                     >
-                                        Password
+                                        كلمة المرور
                                     </Label>
                                     {canResetPassword && (
                                         <TextLink
@@ -67,7 +67,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                             className="text-sm text-blue-600 hover:underline"
                                             tabIndex={5}
                                         >
-                                            Forgot password?
+                                            نسيت كلمة المرور؟
                                         </TextLink>
                                     )}
                                 </div>
@@ -95,7 +95,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                         htmlFor="remember"
                                         className="text-sm text-gray-700"
                                     >
-                                        Remember me
+                                        تذكّرني
                                     </Label>
                                 </div>
                                 <div>
@@ -104,7 +104,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                         className="text-sm text-blue-600 hover:underline"
                                         tabIndex={5}
                                     >
-                                        Forgot password?
+                                        نسيت كلمة المرور؟
                                     </TextLink>
                                 </div>
                             </div>
@@ -117,18 +117,17 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                تسجيل دخول
                             </Button>
                         </div>
 
                         <div className="text-center text-sm text-gray-600">
-                            Don't have an account?{' '}
-                            <TextLink
+ليس لديك حساب؟                            <TextLink
                                 href={register()}
                                 tabIndex={5}
                                 className="text-blue-600 hover:underline"
                             >
-                                Sign up
+                                أنشئ حساب جديد
                             </TextLink>
                         </div>
                     </>

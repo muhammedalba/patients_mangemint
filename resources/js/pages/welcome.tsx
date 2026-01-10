@@ -1,3 +1,4 @@
+import AppLayout from '@/layouts/app-layout';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { useState,useEffect } from 'react';
@@ -41,7 +42,7 @@ export default function Welcome() {
                 />
             </Head>
             <div className="flex min-h-screen flex-col items-center bg-[#FDFDFC] p-6 text-[#1b1b18] lg:justify-center lg:p-8 dark:bg-[#0a0a0a]">
-                <header className="fixed top-0 left-0 w-full z-50 border-b border-gray-200 bg-white shadow-sm dark:border-[#3E3E3A] dark:bg-[#1b1b18]">
+                <header dir='rtl' className="fixed top-0 left-0 w-full z-50 border-b border-gray-200 bg-white shadow-sm dark:border-[#3E3E3A] dark:bg-[#1b1b18]">
                     <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
                         {/* شعار الموقع */}
                         <Link
@@ -70,10 +71,10 @@ export default function Welcome() {
                             {auth?.user ? (
                                 <>
                                     <Link
-                                        href="/dashboard"
+                                        href="/today"
                                         className="rounded-md border border-[#19140035] px-4 py-1.5 hover:border-[#1915014a] dark:border-[#3E3E3A] dark:hover:border-[#62605b]"
                                     >
-                                        لوحة التحكم
+                                         جدول العمل
                                     </Link>
                                     <Link
                                         href="/logout"

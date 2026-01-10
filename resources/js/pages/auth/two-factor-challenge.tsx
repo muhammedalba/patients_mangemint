@@ -24,18 +24,18 @@ export default function TwoFactorChallenge() {
     }>(() => {
         if (showRecoveryInput) {
             return {
-                title: 'Recovery Code',
+                title: 'رمز الاسترداد',
                 description:
-                    'Please confirm access to your account by entering one of your emergency recovery codes.',
-                toggleText: 'login using an authentication code',
+                    'يرجى تأكيد الوصول إلى حسابك عن طريق إدخال أحد رموز الاسترداد الطارئة الخاصة بك.',
+                toggleText: 'تسجيل الدخول باستخدام رمز المصادقة',
             };
         }
 
         return {
-            title: 'Authentication Code',
+            title: 'رمز المصادقة',
             description:
-                'Enter the authentication code provided by your authenticator application.',
-            toggleText: 'login using a recovery code',
+                'أدخل رمز المصادقة الذي يوفره تطبيق المصادقة الخاص بك.',
+            toggleText: 'تسجيل الدخول باستخدام رمز الاسترداد',
         };
     }, [showRecoveryInput]);
 
@@ -50,7 +50,7 @@ export default function TwoFactorChallenge() {
             title={authConfigContent.title}
             description={authConfigContent.description}
         >
-            <Head title="Two-Factor Authentication" />
+            <Head title="المصادقة الثنائية" />
 
             <div className="space-y-6">
                 <Form
@@ -107,7 +107,7 @@ export default function TwoFactorChallenge() {
                                 className="w-full"
                                 disabled={processing}
                             >
-                                Continue
+                                تابع
                             </Button>
 
                             <div className="text-center text-sm text-muted-foreground">

@@ -13,21 +13,21 @@ import AuthLayout from '@/layouts/auth-layout';
 export default function Register() {
     return (
         <AuthLayout
-            title="Create an account"
-            description="Enter your details below to create your account"
+            title="تسجيل حساب جديد"
+            description="قم بتسجيل  معلومات حسابك"
         >
             <Head title="تسجيل حساب" />
             <Form
                 {...RegisteredUserController.store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
                 disableWhileProcessing
-                className="flex flex-col gap-6"
+                className="flex flex-col gap-6" dir='rtl'
             >
                 {({ processing, errors }) => (
                     <>
                         <div className="space-y-4">
                             <div className="space-y-1">
-                                <Label htmlFor="name" className="text-sm font-medium text-gray-700">Name</Label>
+                                <Label htmlFor="name" className="text-sm font-medium text-gray-700">الاسم</Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -46,7 +46,7 @@ export default function Register() {
                             </div>
 
                             <div className="space-y-1">
-                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email address</Label>
+                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">البريد الإلكتروني</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -61,7 +61,7 @@ export default function Register() {
                             </div>
 
                             <div className="space-y-1">
-                                <Label htmlFor="password" className="text-sm font-medium text-gray-700">Password</Label>
+                                <Label htmlFor="password" className="text-sm font-medium text-gray-700">كلمة المرور</Label>
                                 <Input
                                     id="password"
                                     type="password"
@@ -77,7 +77,7 @@ export default function Register() {
 
                             <div className="space-y-1">
                                 <Label htmlFor="password_confirmation" className="text-sm font-medium text-gray-700">
-                                    Confirm password
+                                    تأكيد كلمة المرور
                                 </Label>
                                 <Input
                                     id="password_confirmation"
@@ -101,14 +101,14 @@ export default function Register() {
                                 data-test="register-user-button"
                             >
                                 {processing && <Spinner />}
-                                Create account
+                                إنشاء حساب
                             </Button>
                         </div>
 
                         <div className="text-center text-sm text-muted-foreground">
-                            Already have an account?{' '}
+                            لديك حساب؟
                             <TextLink href={login()} tabIndex={6}>
-                                Log in
+                                سجل دخول
                             </TextLink>
                         </div>
                     </>

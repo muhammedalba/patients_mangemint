@@ -31,8 +31,8 @@ import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'لوحة التحكم',
-        href: dashboard(),
+        title: 'جدول اليوم',
+        href: '/today',
         icon: FaChartPie,
     },
     {

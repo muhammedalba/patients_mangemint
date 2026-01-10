@@ -12,10 +12,12 @@ interface Procedure {
     id: number;
     name: string;
     description?: string;
-    cost?: number;
-    tooth_id: number;
+    category: string;
+    processing_date: string;
+    cost: number;
     patient_id: number;
-    category?: string;
+    tooth_id: number;
+    status: string;
 }
 interface Tooth {
     id: number;
@@ -32,6 +34,8 @@ interface OdontoTooth {
         palmer: string;
     };
     type: string;
+    status?: 'healthy' | 'filled' | 'treated' | 'extracted';
+    procedures?: Procedure[];
 }
 
 type ProceduresByTooth = {
@@ -39,12 +43,10 @@ type ProceduresByTooth = {
 };
 
 export default function DentalChartPage({
-    teeth,
     patient_id,
     patient,
     services_category,
 }: {
-    teeth: Tooth[];
     patient_id?: number;
     patient: Patient;
     services_category: ServiceCategory[];
@@ -78,6 +80,7 @@ export default function DentalChartPage({
         useState<ProceduresByTooth>({});
     const [showForm, setShowForm] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
 
     const handleChange = (newChart: OdontoTooth[]) => {
         setChart(newChart);
@@ -131,6 +134,33 @@ export default function DentalChartPage({
                         },
                     ],
                 }));
+                // 👇 حدّث حالة السن في الـ chart
+
+                setChart((prevChart) =>
+                    prevChart.map((tooth) =>
+                        tooth.id === selectedTooth.id
+                            ? {
+                                  ...tooth,
+                                //   status:
+                                //       nameToStatus[data.name] || 'treated',
+                                  procedures: [
+                                      ...(tooth.procedures || []),
+                                      {
+                                          id: Date.now(),
+                                          name: data.name,
+                                          description: data.description,
+                                          category: data.category,
+                                          processing_date: data.processing_date,
+                                          cost: Number(data.cost),
+                                          patient_id: patient.id,
+                                          tooth_id: Number(selectedTooth.id),
+                                          status: data.status,
+                                      },
+                                  ],
+                              }
+                            : tooth,
+                    ),
+                );
 
                 reset();
                 setShowForm(false);
@@ -140,6 +170,9 @@ export default function DentalChartPage({
             },
         });
     };
+
+
+    console.log(chart);
 
     return (
         <div className="p-4" dir="rtl">
@@ -162,14 +195,14 @@ export default function DentalChartPage({
                     {selectedTeeth.map((tooth) => (
                         <div
                             key={tooth.id}
-                            className="flex items-center justify-between rounded border bg-gray-50 p-4"
+                            className="flex items-center justify-between rounded border bg-gray-50 p-1"
                         >
                             <p className="font-semibold text-blue-600">
                                 رقم السن المحدد: {tooth.notations.fdi}
                             </p>
                             <button
                                 onClick={() => handleAddProcedureClick(tooth)}
-                                className="mt-2 rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
+                                className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600"
                             >
                                 إضافة إجراء
                             </button>
@@ -180,28 +213,16 @@ export default function DentalChartPage({
 
             {showForm && selectedTooth && (
                 <form onSubmit={handleSaveProcedure} className="space-y-4">
-                    {/* الحالة */}
-                    <FormSelect
-                        label="الحالة"
-                        name="status"
-                        value={data.status}
-                        onChange={(val) => setData('status', val)}
-                        options={[
-                            { value: 'planned', label: 'مخطط' },
-                            { value: 'in_progress', label: 'قيد التنفيذ' },
-                            { value: 'completed', label: 'مكتمل' },
-                            { value: 'cancelled', label: 'ملغي' },
-                        ]}
-                        error={errors.status}
-                    />
-
-                    {/* الخدمات */}
-                    {Array.isArray(services_category) &&
+                    <div className=''>
+                    <h1 className='font-medium px-2 p-4 text-gray-700'>إضافة إجراء على السن</h1>
+                    <label className='mb-2 block text-gray-700'>المعالجات على الأسنان</label>
+                    <div className='grid grid-cols-1 md:grid-cols-5 gap-2'>
+                        {Array.isArray(services_category) &&
                         services_category.length > 0 &&
                         services_category.map((category) => (
                             <FormSelect
                                 key={category.id}
-                                label={`اختر خدمة من ${category.name}`}
+                                label={`${category.name}`}
                                 name={`service_${category.id}`}
                                 value={data.category}
                                 onChange={(val) => {
@@ -213,7 +234,10 @@ export default function DentalChartPage({
                                     if (selectedService) {
                                         handleServiceSelect(selectedService);
                                         setData('name', selectedService.name);
-                                        setData('cost', selectedService.price.toString());
+                                        setData(
+                                            'cost',
+                                            selectedService.price.toString(),
+                                        );
                                     }
                                     setData('category', val);
                                 }}
@@ -226,8 +250,21 @@ export default function DentalChartPage({
                                 error={errors.category}
                             />
                         ))}
-
-                    {/* الاسم والكلفة والوصف */}
+                    </div>
+                    <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                         <FormSelect
+                        label="الحالة"
+                        name="status"
+                        value={data.status}
+                        onChange={(val) => setData('status', val)}
+                        options={[
+                            { value: 'planned', label: 'مخطط' },
+                            { value: 'in_progress', label: 'قيد التنفيذ' },
+                            { value: 'completed', label: 'مكتمل' },
+                            { value: 'cancelled', label: 'ملغي' },
+                        ]}
+                        error={errors.status}
+                    />
                     <FormInput
                         label="اسم الإجراء"
                         name="name"
@@ -245,7 +282,6 @@ export default function DentalChartPage({
                         placeholder="كلفة الإجراء"
                         error={errors.cost}
                     />
-
                     <FormInput
                         label="وصف الإجراء"
                         name="description"
@@ -273,8 +309,8 @@ export default function DentalChartPage({
                         name="tooth_id"
                         value={selectedTooth.id}
                     />
+                    </div>
 
-                    {/* Actions */}
                     <div className="flex items-center justify-end space-x-2">
                         <Link
                             href={route('procedures.index')}
@@ -289,10 +325,11 @@ export default function DentalChartPage({
                             loadingLabel="جارِ الحفظ ..."
                         />
                     </div>
+                    </div>
                 </form>
             )}
 
-            {Object.keys(proceduresByTooth).length > 0 && (
+            {/* {Object.keys(proceduresByTooth).length > 0 && (
                 <div className="mt-6">
                     <h3 className="mb-2 text-lg font-bold">
                         الإجراءات حسب السن
@@ -335,7 +372,7 @@ export default function DentalChartPage({
                         </div>
                     ))}
                 </div>
-            )}
+            )} */}
         </div>
     );
 }

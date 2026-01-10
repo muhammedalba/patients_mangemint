@@ -16,8 +16,8 @@ interface ResetPasswordProps {
 export default function ResetPassword({ token, email }: ResetPasswordProps) {
     return (
         <AuthLayout
-            title="Reset password"
-            description="Please enter your new password below"
+            title="استعادة كلمة المرور"
+            description="من فضلك قم بإدخال كلمة المرور الجديدة"
         >
             <Head title="استعادة كلمة المرور" />
 
@@ -25,11 +25,12 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                 {...NewPasswordController.store.form()}
                 transform={(data) => ({ ...data, token, email })}
                 resetOnSuccess={['password', 'password_confirmation']}
+                dir='rtl'
             >
                 {({ processing, errors }) => (
                     <div className="grid gap-6">
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="email">البريد الإلكتروني</Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -46,7 +47,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">كلمة المرور</Label>
                             <Input
                                 id="password"
                                 type="password"
@@ -61,7 +62,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
 
                         <div className="grid gap-2">
                             <Label htmlFor="password_confirmation">
-                                Confirm password
+                                تأكيد كلمة المرور
                             </Label>
                             <Input
                                 id="password_confirmation"
@@ -84,7 +85,7 @@ export default function ResetPassword({ token, email }: ResetPasswordProps) {
                             data-test="reset-password-button"
                         >
                             {processing && <Spinner />}
-                            Reset password
+                            استعادة كلمة المرور
                         </Button>
                     </div>
                 )}

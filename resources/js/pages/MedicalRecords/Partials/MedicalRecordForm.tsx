@@ -1,9 +1,10 @@
 import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import { MedicalRecord, Patient, User } from '@/types';
 import { Tab } from '@headlessui/react';
 import { Link, useForm } from '@inertiajs/react';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 interface Props {
@@ -63,6 +64,16 @@ export default function MedicalRecordForm({
         medicalRecord?.images || [],
     );
     console.log(medicalRecord, 'medicalRecord');
+
+    const selectedPatient = patients.find(
+        (p) => String(p.id) === String(data.patient_id),
+    );
+
+    useEffect(() => {
+        if (!medicalRecord && patients.length === 1) {
+            setData('patient_id', patients[0].id);
+        }
+    }, [patients]);
 
     function handleSubmit(e: React.FormEvent) {
         console.log(data, 'data');
@@ -169,21 +180,15 @@ export default function MedicalRecordForm({
             className="mx-auto max-w-4xl space-y-6 rounded-lg bg-white p-6 shadow"
         >
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormSelect
+                <FormInput
+                    type="text"
                     label="المريض"
                     name="patient_id"
-                    value={data.patient_id}
-                    onChange={(val: string) => setData('patient_id', val)}
-                    options={[
-                        { value: '', label: 'اختر اسم المريض' },
-                        ...(patients.map((p) => ({
-                            value: String(p.id),
-                            label: p.name,
-                        })) ?? []),
-                    ]}
-                    error={errors.patient_id}
-                    disabled={!!medicalRecord}
+                    value={selectedPatient ? selectedPatient.name : ''}
+                    readOnly
+                    className="form-input"
                 />
+
                 <FormSelect
                     label="الطبيب"
                     name="doctor_id"
@@ -382,19 +387,19 @@ export default function MedicalRecordForm({
             </Tab.Group>
 
             <div className="flex items-center justify-end space-x-2">
-                        <Link
-                          href={route('medical-records.index')}
-                          className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
-                        >
-                          إنهاء
-                        </Link>
+                <Link
+                    href={route('medical-records.index')}
+                    className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                >
+                    إنهاء
+                </Link>
 
-                        <FormButton
-                          processing={processing}
-                          label="حفظ"
-                          loadingLabel={submitLabel}
-                        />
-                      </div>
+                <FormButton
+                    processing={processing}
+                    label="حفظ"
+                    loadingLabel={submitLabel}
+                />
+            </div>
         </form>
     );
 }

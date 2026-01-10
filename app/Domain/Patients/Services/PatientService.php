@@ -97,7 +97,7 @@ class PatientService
 
         // merge all data
         return array_merge($patientData, $relatedData, ['financial_summary' => $financialSummary]);
-       
+
     }
     // get Tooth Procedures
     public function getToothProcedures(Patient $patient, $toothId): array
@@ -107,7 +107,7 @@ class PatientService
 
     public function addDiscountToPatient(Patient $patient, float $discountAmount)
     {
-        if ($discountAmount <= 0) {
+        if ($discountAmount < 0) {
             throw new InvalidDiscountException($discountAmount, 0, __("Discount amount cannot be negative."));
         }
         // check if discount amount is greater than total procedures cost
@@ -141,6 +141,11 @@ class PatientService
         // calculate remaining balance
         $remainingBalance = $totalAfterDiscount - $totalPayments;
         //  @dd($patient->procedures);
+        if ($remainingBalance <= 0) {
+            $discountAmount = 0;
+            $remainingBalance = 0;
+            $totalAfterDiscount = $totalProceduresCost;
+        }
         return [
             'total_procedures' => $totalProcedures,
             'total_procedures_cost' => $totalProceduresCost,

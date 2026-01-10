@@ -5,7 +5,7 @@ import { Head, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'لوحة التحكم',
+        title: 'الإحصائيات',
         href: dashboard().url,
     },
 ];
@@ -16,7 +16,7 @@ export default function Dashboard() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="لوحة التحكم" />
+            <Head title="الإحصائيات" />
 
             <div className="flex h-full flex-1 flex-col gap-8 rounded-xl bg-gray-100 p-4 lg:p-8">
                 {/* البطاقات الأساسية */}
@@ -92,6 +92,7 @@ export default function Dashboard() {
 
                 {/* عدد الأطباء */}
                 <Card title="عدد الأطباء" value={stats.doctors_count} />
+
             </div>
         </AppLayout>
     );

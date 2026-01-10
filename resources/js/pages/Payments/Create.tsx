@@ -1,6 +1,6 @@
 import { BreadcrumbItem, PageProps, Patient } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 import { FormButton } from '@/components/FormButton';
@@ -10,28 +10,43 @@ import AppLayout from '@/layouts/app-layout';
 
 interface CreateProps extends PageProps {
     patients: Patient[];
+    patientId?: number;
 }
 
-const Create: React.FC<CreateProps> = ({ auth, patients }) => {
+const Create: React.FC<CreateProps> = ({ auth, patients, patientId }) => {
     const { data, setData, post, errors, processing } = useForm({
-        patient_id: '',
+        patient_id: patientId ? patientId.toString() : '',
         amount: '',
         payment_date: '',
         paid_at: '',
         notes: '',
     });
-    console.log(errors, 'errors');
+
     const [selectedPatientName, setSelectedPatientName] = useState('');
+    const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
+        patientId ?? null,
+    );
+
+    useEffect(() => {
+        if (patients.length === 1) {
+            const patient = patients[0];
+            setSelectedPatientId(patient.id);
+            setSelectedPatientName(patient.name);
+            setData('patient_id', patient.id.toString());
+        }
+    }, [patients]);
+
     const handlePatientSelect = (patient: Patient) => {
+        setSelectedPatientId(patient.id);
+        setSelectedPatientName(patient.name);
         setData('patient_id', patient.id.toString());
     };
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        console.log(data, 'data ');
-
         post(route('payments.store'));
     }
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'الدفعات',
@@ -42,6 +57,7 @@ const Create: React.FC<CreateProps> = ({ auth, patients }) => {
             href: route('payments.create'),
         },
     ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="إضافة دفعة " />
@@ -83,12 +99,12 @@ const Create: React.FC<CreateProps> = ({ auth, patients }) => {
                         />
 
                         <FormInput
-                            label="الملاحظات"
+                            label="ملاحظات"
                             name="notes"
                             type="text"
                             value={data.notes}
                             onChange={(val) => setData('notes', val)}
-                            placeholder="الملاحظات"
+                            placeholder="ملاحظات"
                             error={errors.notes}
                         />
                     </div>

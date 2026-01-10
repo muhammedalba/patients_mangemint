@@ -122,4 +122,19 @@ class DashboardController extends Controller
     {
         Cache::forget('dashboard.stats');
     }
+
+    public function statistics()
+{
+    $appointmentsToday = Appointment::with(['patient', 'doctor'])
+        ->whereDate('date', today())
+        ->orderBy('start_time')
+        ->get();
+
+    return Inertia::render('Statistics', [
+        'stats' => [
+            'appointmentsToday' => $appointmentsToday,
+        ],
+    ]);
+}
+
 }

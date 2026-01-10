@@ -14,8 +14,8 @@ import AuthLayout from '@/layouts/auth-layout';
 export default function ForgotPassword({ status }: { status?: string }) {
     return (
         <AuthLayout
-            title="Forgot password"
-            description="Enter your email to receive a password reset link"
+            title="نسيت كلمة المرور"
+            description=" قم بإدخال بريدك الإلكتروني لتتلقّى رابط استعادة كلمة مرور"  
         >
             <Head title="نسيت كلمة المرور" />
 
@@ -25,12 +25,12 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 </div>
             )}
 
-            <div className="space-y-6">
+            <div className="space-y-6" dir='rtl'>
                 <Form {...PasswordResetLinkController.store.form()}>
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email address</Label>
+                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">البريد الإلكتروني </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -53,7 +53,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     {processing && (
                                         <LoaderCircle className="h-4 w-4 animate-spin" />
                                     )}
-                                    Email password reset link
+                                    رابط استعادة كلمة المرور
                                 </Button>
                             </div>
                         </>
@@ -61,8 +61,8 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 </Form>
 
                 <div className="space-x-1 text-center text-sm text-muted-foreground">
-                    <span>Or, return to</span>
-                    <TextLink href={login()}>log in</TextLink>
+                    <span>أو، عُد إلى </span>
+                    <TextLink href={login()}>تسجيل الدخول </TextLink>
                 </div>
             </div>
         </AuthLayout>
