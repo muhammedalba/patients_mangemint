@@ -34,6 +34,16 @@ export default function Index({
     const [search, setSearch] = useState(filters.search || '');
     const [showToast, setShowToast] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/medical-records',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     const handleDelete = (id: number): void => {
         router.delete(route('medical-records.destroy', id));
@@ -126,7 +136,7 @@ export default function Index({
 
                     <SearchBar
                         value={search}
-                        onChange={setSearch}
+                        onChange={handleSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة سجل طبي"
@@ -139,7 +149,7 @@ export default function Index({
                             columns={columns}
                         />
                     </section>
-                    <Pagination links={medicalRecords.links} />
+                    <Pagination links={medicalRecords.links} search={search} perPage={perPage} baseRoute='/medical-records'/>
                 </div>
             </div>
         </AppLayout>

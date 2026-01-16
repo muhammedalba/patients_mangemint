@@ -34,9 +34,18 @@ export default function Index({
     console.log(appointments, 'appointments.data');
     console.log(auth, 'auth');
 
-
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/appointments',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -56,6 +65,7 @@ export default function Index({
     }, [search]);
 
     const columns: ColumnDef<any>[] = [
+        { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'patient', accessorKey: 'patient.name', header: 'اسم المريض' },
         { id: 'doctor', accessorKey: 'doctor.name', header: 'اسم الطبيب' },
         {
@@ -109,7 +119,7 @@ export default function Index({
 
                 <SearchBar
                     value={search}
-                    onChange={setSearch}
+                    onChange={handleSearch}
                     showSearch={true}
                     showButton={true}
                     buttonLabel="إضافة موعد"
@@ -118,13 +128,15 @@ export default function Index({
             </div>
 
             <section className="p-4">
-                <DynamicTable
-                    data={[...appointments.data]}
-                    columns={columns}
-                />
+                <DynamicTable data={[...appointments.data]} columns={columns} />
             </section>
 
-            <Pagination links={appointments.links} />
+            <Pagination
+                links={appointments.links}
+                search={search}
+                perPage={perPage}
+                baseRoute="/appointments"
+            />
         </AppLayout>
     );
 }

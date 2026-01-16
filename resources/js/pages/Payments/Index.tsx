@@ -1,19 +1,15 @@
-import { BreadcrumbItem, PageProps } from '@/types';
-import { Inertia } from '@inertiajs/inertia';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import React, { useEffect, useState } from 'react';
-// import { Heading } from '@/components/heading';
-import ConfirmDialog from '@/components/ConfirmDialog';
 import { DynamicTable } from '@/components/DynamicTable';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
-import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
-import { Payment } from '@/types/payment';
-import { ColumnDef } from '@tanstack/react-table';
-import { route } from 'ziggy-js';
 import TableActions from '@/components/TableActionsProps';
+import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem, PageProps } from '@/types';
+import { Payment } from '@/types/payment';
+import { Head, router, usePage } from '@inertiajs/react';
+import { ColumnDef } from '@tanstack/react-table';
+import React, { useEffect, useState } from 'react';
+import { route } from 'ziggy-js';
 interface IndexProps extends PageProps {
     payments: {
         data: Payment[];
@@ -35,6 +31,7 @@ const Index: React.FC<IndexProps> = () => {
     };
 
     const columns: ColumnDef<Payment>[] = [
+        { id: 'id', accessorKey: 'id', header: 'ID' },
         {
             accessorKey: 'patient.name',
             header: 'اسم المريض',
@@ -51,33 +48,37 @@ const Index: React.FC<IndexProps> = () => {
             id: 'actions',
             header: 'الإجراءات',
             cell: ({ row }) => {
-                            const payment = row.original;
-                            return (
-                                <TableActions
-                                    item={payment}
-                                    routes={{
-                                        edit: 'payments.edit',
-                                        delete: 'payments.destroy',
-                                    }}
-                                    showEdit={true}
-                                    showView={false}
-                                    showDelete={true}
-                                    confirmMessage="هل أنت متأكد من حذف هذه الدفعة؟"
-                                    onDelete={handleDelete}
-                                />
-                            );
-                        },
+                const payment = row.original;
+                return (
+                    <TableActions
+                        item={payment}
+                        routes={{
+                            edit: 'payments.edit',
+                            delete: 'payments.destroy',
+                        }}
+                        showEdit={true}
+                        showView={false}
+                        showDelete={true}
+                        confirmMessage="هل أنت متأكد من حذف هذه الدفعة؟"
+                        onDelete={handleDelete}
+                    />
+                );
+            },
         },
     ];
     const [showToast, setShowToast] = useState(false);
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'الدفعات',
-            href: route('payments.index'),
-        },
-    ];
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/payments',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
     useEffect(() => {
         if (flash?.success) {
             setShowToast(true);
@@ -103,18 +104,24 @@ const Index: React.FC<IndexProps> = () => {
         return () => clearTimeout(handler);
     }, [search]);
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'الدفعات',
+            href: route('payments.index'),
+        },
+    ];
+
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="الدفعات" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
-
-            {showToast && (
-                <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                    {flash?.success || flash?.error}
-                </div>
-            )}
+                    {showToast && (
+                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
+                            {flash?.success || flash?.error}
+                        </div>
+                    )}
 
                     <h1 className="mb-4 text-2xl font-bold">الدفعات</h1>
                     {showToast && (
@@ -125,7 +132,7 @@ const Index: React.FC<IndexProps> = () => {
 
                     <SearchBar
                         value={search}
-                        onChange={setSearch}
+                        onChange={handleSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة دفعة"
@@ -136,7 +143,12 @@ const Index: React.FC<IndexProps> = () => {
                         <DynamicTable data={payments?.data} columns={columns} />
                     </section>
                 </div>
-                <Pagination links={payments?.links} />
+                <Pagination
+                    links={payments?.links}
+                    search={search}
+                    perPage={perPage}
+                    baseRoute="/payments"
+                />
             </div>
         </AppLayout>
     );

@@ -44,6 +44,16 @@ export default function Index() {
     const [isLoading, setIsLoading] = useState(true);
     const getAgeFromBirthDate = (birthDate: string): number =>
         new Date().getFullYear() - new Date(birthDate).getFullYear();
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/patients',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -180,7 +190,7 @@ export default function Index() {
 
                     <SearchBar
                         value={search}
-                        onChange={setSearch}
+                        onChange={handleSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة مريض"
@@ -193,7 +203,7 @@ export default function Index() {
                         />
                     </section>
 
-                    <Pagination links={patients.links} />
+                    <Pagination links={patients.links} search={search} perPage={perPage} baseRoute='/patients'/>
                 </div>
             </div>
         </AppLayout>

@@ -6,8 +6,10 @@
     <title>Medical Record</title>
     <style>
         body {
-            font-family: 'DejaVu Sans', sans-serif;
+            font-family: dejavusans
             line-height: 1.6;
+             direction: rtl;
+        text-align: right;
             color: #333;
         }
         .container {

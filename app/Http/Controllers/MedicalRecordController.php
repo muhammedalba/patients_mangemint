@@ -9,7 +9,7 @@ use App\Models\Patient;
 use App\Models\User;
 use App\Domain\MedicalRecords\DTOs\MedicalRecordData;
 use App\Domain\MedicalRecords\Services\MedicalRecordService;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Providers\PdfService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -114,7 +114,14 @@ class MedicalRecordController extends Controller
     public function download(MedicalRecord $medicalRecord)
     {
         $medicalRecord->load('patient:id,name', 'doctor:id,name');
-        $pdf = Pdf::loadView('medical_records.pdf', ['medicalRecord' => $medicalRecord]);
-        return $pdf->download('medical-record-' . $medicalRecord->id . '.pdf');
+
+        $html = view('medical_records.pdf', compact('medicalRecord'))->render();
+        $pdf = PdfService::make();
+        $pdf->WriteHTML($html);
+
+        return response($pdf->Output(
+            'medical-record-' . $medicalRecord->id . '.pdf',
+            'S'
+        ))->header('Content-Type', 'application/pdf');
     }
 }

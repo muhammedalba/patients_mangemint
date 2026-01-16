@@ -68,7 +68,6 @@ export default function CreateProcedure({
         null,
     );
     const [isLoading, setIsLoading] = useState(false);
-    const [filteredTeeth, setFilteredTeeth] = useState(teeth);
     const [selectedPatientName, setSelectedPatientName] = useState('');
     const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
             patient_id ?? null,
@@ -111,7 +110,7 @@ export default function CreateProcedure({
     ];
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Procedure" />
+            <Head title="إضافة إجراء" />
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     إضافة إجراء جديد
@@ -119,7 +118,7 @@ export default function CreateProcedure({
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                      <h2 className='text-xl text-gray-700'>فئات المعالجات:</h2>
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-6">
                         {services_category.map((category) => (
                             <FormSelect
                                 key={category.id}
@@ -197,7 +196,6 @@ export default function CreateProcedure({
                             label="تاريخ المعالجة"
                             name="processing_date"
                             type="date"
-                            // max={new Date().toISOString().split('T')[0]}
                             value={data.processing_date}
                             onChange={(e) => setData('processing_date', e)}
                             error={errors.processing_date}

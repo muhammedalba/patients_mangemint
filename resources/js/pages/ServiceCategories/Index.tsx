@@ -38,6 +38,16 @@ export default function Index() {
     };
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(false);
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/service-categories',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -59,11 +69,6 @@ export default function Index() {
     const columns: ColumnDef<any>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'name', accessorKey: 'name', header: 'اسم الفئة' },
-        {
-            id: 'description',
-            accessorKey: 'description',
-            header: 'وصف',
-        },
         {
             id: 'actions',
             header: 'الإجراءات',
@@ -89,7 +94,7 @@ export default function Index() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'فئات تصنيف المعالجات',
+            title: 'فئات الخدمات الطبية ',
             href: route('service-categories.index'),
         },
     ];
@@ -97,11 +102,11 @@ export default function Index() {
     if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="فئات تصنيف المعالجات" />
+            <Head title="فئات الخدمات الطبية" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">
-                        فئات تصنيف المعالجات
+                        فئات الخدمات الطبية
                     </h1>
                     {showToast && (
                         <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
@@ -110,7 +115,7 @@ export default function Index() {
                     )}
                     <SearchBar
                         value={search}
-                        onChange={setSearch}
+                        onChange={handleSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة فئة"
@@ -123,7 +128,12 @@ export default function Index() {
                         />
                     </section>
 
-                    <Pagination links={serviceCategories.links} />
+                    <Pagination
+                        links={serviceCategories.links}
+                        search={search}
+                        perPage={perPage}
+                        baseRoute="/service-categories"
+                    />
                 </div>
             </div>
         </AppLayout>

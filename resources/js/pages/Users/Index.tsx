@@ -40,25 +40,35 @@ export default function Index({
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/users',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     const columns: ColumnDef<User>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'name', accessorKey: 'name', header: 'الاسم' },
         { id: 'email', accessorKey: 'email', header: 'البريد الإلكتروني' },
         {
-  id: 'roles',
-  accessorKey: 'roles',
-  header: 'الدور',
-  cell: ({ row }) => (
-    <div className="flex gap-2">
-      {row.original.roles.map((role: any) => (
-        <span key={role.id} className="badge">
-          {role.name}
-        </span>
-      ))}
-    </div>
-  ),
-},
+            id: 'roles',
+            accessorKey: 'roles',
+            header: 'الدور',
+            cell: ({ row }) => (
+                <div className="flex gap-2">
+                    {row.original.roles.map((role: any) => (
+                        <span key={role.id} className="badge">
+                            {role.name}
+                        </span>
+                    ))}
+                </div>
+            ),
+        },
 
         { id: 'phone', accessorKey: 'phone', header: 'الهاتف' },
         {
@@ -135,7 +145,7 @@ export default function Index({
 
                     <SearchBar
                         value={search}
-                        onChange={setSearch}
+                        onChange={handleSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة مستخدم"
@@ -148,7 +158,8 @@ export default function Index({
                             columns={columns}
                         />
                     </section>
-                    <Pagination links={users.links} />
+
+                    <Pagination links={users.links} search={search} perPage={perPage} baseRoute='/users' />
                 </div>
             </div>
         </AppLayout>

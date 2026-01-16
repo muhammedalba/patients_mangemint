@@ -1,6 +1,7 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
+import { FormTextArea } from '@/components/FormTextArea';
 import LoadingPage from '@/components/LoadingPage';
 import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
@@ -33,7 +34,7 @@ export default function Edit({
     const { data, setData, put, errors, processing } = useForm({
         patient_id: String(appointment.patient_id),
         user_id: String(appointment.user_id),
-        service_id: String(appointment.service_id),
+        //service_id: String(appointment.service_id),
         date: appointment.date,
         start_time: appointment.start_time,
         duration_slots: appointment.duration_slots,
@@ -103,7 +104,7 @@ export default function Edit({
                 </h1>
 
                 <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <SearchInput
                             label="اسم المريض"
                             name="patient_id"
@@ -184,14 +185,14 @@ export default function Edit({
                             error={errors.duration_slots}
                         />
 
-                        <FormInput
+                        <FormTextArea
                             label="الملاحظات"
                             name="notes"
-                            type="text"
                             value={data.notes}
                             onChange={(val) => setData('notes', val)}
                             placeholder="الملاحظات"
                             error={errors.notes}
+                            rows={4}
                         />
                     </div>
 

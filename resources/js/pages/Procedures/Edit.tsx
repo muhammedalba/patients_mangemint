@@ -1,7 +1,11 @@
+import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
+import { FormSelect } from '@/components/FormSelect';
+import { FormTextArea } from '@/components/FormTextArea';
 import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -77,12 +81,12 @@ export default function EditProcedure({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="تعديل الإجراء" />
-            <div className="mx-auto mt-4 w-xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
+            <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     تعديل الإجراء
                 </h1>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                {/* <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label className="mb-1 block text-gray-700">
                             الاسم
@@ -204,6 +208,82 @@ export default function EditProcedure({
                                 ✅ تم التحديث بنجاح!
                             </p>
                         )}
+                    </div>
+                </form> */}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-3 gap-4">
+                    <FormInput
+                        label="الاسم"
+                        name="name"
+                        type="text"
+                        value={data.name}
+                        onChange={(e) => setData('name', e)}
+                        placeholder="اسم الإجراء"
+                        error={errors.name}
+                    />
+
+                    <FormInput
+                        label="التكلفة"
+                        type="number"
+                        value={data.cost ?? ''}
+                        onChange={(e) =>
+                            setData('cost', e === '' ? null : Number(e))
+                        }
+                        placeholder="التكلفة"
+                        error={errors.cost}
+                    />
+
+                    <FormSelect
+                        label="السن"
+                        name="tooth_id"
+                        value={data.tooth_id}
+                        onChange={(e) => setData('tooth_id', e)}
+                        error={errors.tooth_id}
+                        options={[
+                            { label: 'اختر السن', value: '' },
+                            ...teeth.map((tooth) => ({
+                                label: tooth.tooth_number,
+                                value: tooth.id,
+                            })),
+                        ]}
+                    />
+
+                    <FormSelect
+                        label="الحالة"
+                        name="status"
+                        value={data.status}
+                        onChange={(e) => setData('status', e)}
+                        error={errors.status}
+                        options={[
+                            { label: 'مخطط', value: 'planned' },
+                            { label: 'قيد التنفيذ', value: 'in_progress' },
+                            { label: 'مكتمل', value: 'completed' },
+                            { label: 'ملغي', value: 'cancelled' },
+                        ]}
+                    />
+                     <FormTextArea
+                        label="الوصف"
+                        name="description"
+                        value={data.description}
+                        onChange={(e) => setData('description', e)}
+                        placeholder="وصف الإجراء"
+                        error={errors.description}
+                        rows={2}
+                    />
+                    </div>
+
+                    <div className="flex items-center justify-end space-x-2">
+                        <Link
+                            href={route('payments.index')}
+                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                        >
+                            إلغاء
+                        </Link>
+                        <FormButton
+                            processing={processing}
+                            label="تحديث"
+                            loadingLabel="جارِ التحديث ..."
+                        />
                     </div>
                 </form>
             </div>

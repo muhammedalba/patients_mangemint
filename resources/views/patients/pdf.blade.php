@@ -7,7 +7,9 @@
 
     <style>
         body {
-            font-family: Helvetica, Arial, sans-serif;
+            font-family: dejavusans;
+            direction: rtl;
+            text-align: right;
             color: #444;
             background: #f7f7f7;
         }
@@ -99,8 +101,6 @@
                 <tr>
                     <td>
                         <strong>{{ $patientDetails['name'] }}</strong><br>
-                        {!! nl2br(e($patientDetails['address'])) !!}<br>
-                        {{ $patientDetails['email'] }}<br>
                         {{ $patientDetails['phone'] }}
                     </td>
                 </tr>
@@ -108,7 +108,7 @@
         </div>
 
         {{-- Procedures --}}
-        <div class="section">
+        {{-- <div class="section">
             <h3>إجراءات المريض</h3>
             <table>
                 <tr class="heading">
@@ -134,7 +134,7 @@
                     </tr>
                 @endforelse
             </table>
-        </div>
+        </div> --}}
 
         {{-- Payments --}}
         <div class="section">
@@ -183,7 +183,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>إجمالي المبلغ الدفوع</td>
+                    <td>إجمالي المبلغ المدفوع</td>
                     <td class="text-right">
                         ${{ number_format($patientDetails['financial_summary']['total_payments'], 2) }}
                     </td>

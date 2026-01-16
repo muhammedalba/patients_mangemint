@@ -9,7 +9,8 @@ use App\Models\Patient;
 use App\Domain\Patients\Services\PatientService;
 use App\Domain\Patients\DTOs\PatientData;
 use App\Models\ServiceCategory;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Providers\PdfService;
+
 
 class PatientController extends Controller
 {
@@ -131,11 +132,6 @@ class PatientController extends Controller
     }
 
 
-
-
-
-
-
     public function destroy(Patient $patient)
     {
 
@@ -149,9 +145,15 @@ class PatientController extends Controller
     public function downloadInvoice(Patient $patient)
     {
         $patientDetails = $this->service->getPatientInvoiceData($patient);
-        // @dd($patientDetails);
-        $pdf = Pdf::loadView('patients.pdf', compact('patientDetails'));
 
-        return $pdf->download('invoice-patient-' . $patient->id . '.pdf');
+        $html = view('patients.pdf', compact('patientDetails'))->render();
+
+        $pdf = PdfService::make();
+        $pdf->WriteHTML($html);
+
+        return response($pdf->Output(
+            'invoice-patient-' . $patient->id . '.pdf',
+            'S'
+        ))->header('Content-Type', 'application/pdf');
     }
 }

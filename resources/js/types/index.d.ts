@@ -5,13 +5,22 @@ export type User = {
     phone?: string;
 };
 
-export type Tooth = {
+export type ToothStatus =
+    | 'healthy'
+    | 'filled'
+    | 'treated'
+    | 'extracted'
+    | 'crowned'
+    | 'implant';
+
+export interface Tooth {
     id: number;
-    name: string;
+    patient_id: number;
     tooth_number: string;
-    status: string;
-    notes: string;
-};
+    status: ToothStatus;
+    notes: string | null;
+    procedures?: Procedure[];
+}
 
 export type Patient = {
     id: number;
@@ -33,20 +42,28 @@ export type Procedure = {
     description?: string;
     cost: number;
     duration_minutes: number;
+    teeth: Tooth;
+    tooth_id: number;
+    patient: Patient;
+    patient_id: number;
+    status: string;
+    processing_date: Date;
+    follow_up_days: number;
 };
 
 export type Appointment = {
     id: number;
     patient_id: number;
     user_id: number;
-    service_id: number;
-    appointment_date: string;
+    service_id?: number;
+    date: string;
     notes?: string;
+    duration_slots: number;
     status: 'scheduled' | 'completed' | 'canceled';
     patient?: Patient;
     doctor?: User;
-    procedure?: Procedure;
-    times: string[];
+    start_time: string;
+    end_time: string;
 };
 
 export type PageProps<
@@ -119,4 +136,11 @@ export type ServiceCategory = {
     id: number;
     name: string;
     services: Service[];
+};
+export type patientDetails = {
+    id: number;
+    name: string;
+    birth_date: string;
+    procedures: Procedure[];
+    teeth: Tooth[];
 };

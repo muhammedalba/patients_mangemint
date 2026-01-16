@@ -27,7 +27,7 @@ export default function Index() {
         router.delete(route('expenses.destroy', id));
     };
     const columns: ColumnDef<Expense>[] = [
-        { accessorKey: 'id', header: 'المعرف' },
+        { accessorKey: 'id', header: 'ID' },
         { accessorKey: 'amount', header: 'المبلغ' },
         {
             accessorKey: 'category.name',
@@ -66,6 +66,16 @@ export default function Index() {
     const [search, setSearch] = useState('');
     const [showToast, setShowToast] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/expenses',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
     useEffect(() => {
             const handler = setTimeout(() => {
                 setIsLoading(true);
@@ -109,7 +119,7 @@ export default function Index() {
                     )}
                     <SearchBar
                         value={search}
-                        onChange={setSearch}
+                        onChange={handleSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة مصروف"
@@ -120,7 +130,7 @@ export default function Index() {
                         <DynamicTable data={expenses?.data} columns={columns} />
                     </section>
                 </div>
-                <Pagination links={expenses?.links} />
+                <Pagination links={expenses.links} search={search} perPage={perPage} baseRoute='/expenses' />
             </div>
         </AppLayout>
     );

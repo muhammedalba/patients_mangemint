@@ -28,7 +28,6 @@ export default function Index() {
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'category', accessorKey: 'category', header: '  الفئة' },
         { id: 'name', accessorKey: 'name', header: ' اسم الخدمة' },
-        { id: 'description', accessorKey: 'description', header: 'الوصف' },
         { id: 'price', accessorKey: 'price', header: 'التكلفة' },
         {
             id: 'actions',
@@ -57,6 +56,16 @@ export default function Index() {
         router.delete(route('services.destroy', id));
     };
     const [search, setSearch] = useState(filters.search || '');
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/services',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     useEffect(() => {
         if (flash?.success) {
@@ -99,7 +108,7 @@ export default function Index() {
 
                     <SearchBar
                         value={search}
-                        onChange={setSearch}
+                        onChange={handleSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة خدمة"
@@ -112,7 +121,12 @@ export default function Index() {
                         />
                     </section>
                 </div>
-                <Pagination links={services.links} />
+                <Pagination
+                    links={services.links}
+                    search={search}
+                    perPage={perPage}
+                    baseRoute="/services"
+                />
             </div>
         </AppLayout>
     );

@@ -39,6 +39,16 @@ export default function Index(filters: { search?: string }) {
     );
     const [isLoading, setIsLoading] = useState(true);
     const [showToast, setShowToast] = useState(false);
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/procedures',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     const columns: ColumnDef<any>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -59,7 +69,7 @@ export default function Index(filters: { search?: string }) {
         },
         { id: 'cost', accessorKey: 'cost', header: 'التكلفة' },
         {
-            id: 'tooth_number',
+            id: 'tooth_id',
             header: 'رقم السن',
             cell: ({ row }) => {
                 const p = row.original;
@@ -95,7 +105,6 @@ export default function Index(filters: { search?: string }) {
     const handleDelete = (id: number): void => {
         router.delete(route('procedures.destroy', id));
     };
-
     useEffect(() => {
         const handler = setTimeout(() => {
             setIsLoading(true);
@@ -143,7 +152,7 @@ export default function Index(filters: { search?: string }) {
 
                     <SearchBar
                         value={search}
-                        onChange={setSearch}
+                        onChange={handleSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة إجراء"
@@ -157,7 +166,7 @@ export default function Index(filters: { search?: string }) {
                         />
                     </section>
                 </div>
-                <Pagination links={procedures.links} />
+                <Pagination links={procedures.links} search={search} perPage={perPage} baseRoute='/procedures' />
             </div>
         </AppLayout>
     );

@@ -31,7 +31,17 @@ export default function Index({
         flash: { success?: string; error?: string };
     }>();
     const [search, setSearch] = useState(filters.search || '');
-console.log(teeth.data);
+    console.log(teeth.data);
+    const [perPage, setPerPage] = useState(10);
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/teeth',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -68,7 +78,6 @@ console.log(teeth.data);
             header: ' رقم السن',
         },
         { id: 'status', accessorKey: 'status', header: 'الحالة' },
-        { id: 'notes', accessorKey: 'notes', header: 'ملاحظات' },
         {
             id: 'actions',
             header: 'الإجراءات',
@@ -109,7 +118,7 @@ console.log(teeth.data);
             title: 'الأسنان',
             href: route('teeth.index'),
         },
-    ]
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -125,7 +134,7 @@ console.log(teeth.data);
 
                     <SearchBar
                         value={search}
-                        onChange={setSearch}
+                        onChange={handleSearch}
                         showSearch={true}
                         showButton={true}
                         buttonLabel="إضافة سن"
@@ -138,7 +147,12 @@ console.log(teeth.data);
                             columns={columns}
                         />
                     </section>
-                    <Pagination links={teeth.links} />
+                    <Pagination
+                        links={teeth.links}
+                        search={search}
+                        perPage={perPage}
+                        baseRoute="/teeth"
+                    />
                 </div>
             </div>
         </AppLayout>
