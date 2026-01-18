@@ -26,10 +26,10 @@
 
 
 
-    // Route::get('/', fn() => Inertia::render('welcome'))->name('home');
     Route::get('/', fn() => Inertia::render('auth/login', [
-            'canResetPassword' => false
-        ]))->name('home');
+        'canResetPassword' => Route::has('password.request'),
+        'status' => session('status'),
+    ]))->name('home');
 
     // Shared middleware
     $protected = ['auth', 'verified', 'role.redirect:doctor|admin'];

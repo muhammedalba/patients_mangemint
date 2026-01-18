@@ -61,15 +61,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     >
                                         كلمة المرور
                                     </Label>
-                                    {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="text-sm text-blue-600 hover:underline"
-                                            tabIndex={5}
-                                        >
-                                            نسيت كلمة المرور؟
-                                        </TextLink>
-                                    )}
+                                   
                                 </div>
                                 <Input
                                     id="password"
