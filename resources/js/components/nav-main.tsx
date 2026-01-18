@@ -26,7 +26,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                             tooltip={{ children: item.title }}
                         >
                             <Link href={item.href} prefetch>
-                                {item.icon && <item.icon />}
+                                {item.icon && <item.icon className="size-5" color={item.color} />}
                                 <span>{item.title}</span>
                             </Link>
                         </SidebarMenuButton>
