@@ -2,23 +2,36 @@ import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 export default function Create() {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         year: '',
         month: '',
     });
-    console.log(errors);
+    const { success, error } = useAppToast();
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('month-closures.closeMonth'), { onSuccess: () => reset() });
+        post(route('month-closures.closeMonth'),
+    {
+            onSuccess: () => {
+            success(
+                'تم حفظ إغلاق الشهر بنجاح',
+            );
+        },
+        onError: () => {
+            error(
+                'فشل حفظ إغلاق الشهر',
+            );
+        },
+        });
     };
     const breadcrumbs: BreadcrumbItem[] = [
             {
-                title: ' إغلاق الشهر',
+                title: 'إغلاق الشهر',
                 href: route('month-closures.index'),
             },
         ];

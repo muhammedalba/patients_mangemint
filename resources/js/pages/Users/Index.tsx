@@ -4,20 +4,13 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, PageProps, PaginatedData } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { type BreadcrumbItem, PageProps, PaginatedData, User } from '@/types';
+import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
-export interface User {
-    id: number;
-    name: string;
-    email: string;
-    roles: string[];
-    phone: string;
-}
+
 export default function Index({
     users,
     auth,
@@ -27,20 +20,14 @@ export default function Index({
     auth: { user: { roles: string[] } };
     filters: { search?: string };
 }>) {
-    const { props } = usePage<{
-        flash: { success?: string; error?: string };
-    }>();
-    console.log(props.flash, 'props');
-    console.log(users, 'users');
 
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
-    const [showToast, setShowToast] = useState(false);
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
-    const [perPage, setPerPage] = useState(10);
+    const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -61,13 +48,14 @@ export default function Index({
             header: 'الدور',
             cell: ({ row }) => (
                 <div className="flex gap-2">
-                    {row.original.roles.map((role: any) => (
+                    {row.original.roles.map((role) => (
                         <span key={role.id} className="badge">
                             {role.name}
                         </span>
                     ))}
                 </div>
             ),
+
         },
 
         { id: 'phone', accessorKey: 'phone', header: 'الهاتف' },
@@ -110,14 +98,6 @@ export default function Index({
         return () => clearTimeout(handler);
     }, [search]);
 
-    useEffect(() => {
-        if (props.flash?.success || props.flash?.error) {
-            setShowToast(true);
-            const timer = setTimeout(() => setShowToast(false), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [props.flash]);
-
     const handleDelete = (id: number): void => {
         router.delete(route('users.destroy', id));
     };
@@ -137,11 +117,6 @@ export default function Index({
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 text-right">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">المستخدمون</h1>
-                    {showToast && (
-                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                            {props.flash?.success || props.flash?.error}
-                        </div>
-                    )}
 
                     <SearchBar
                         value={search}

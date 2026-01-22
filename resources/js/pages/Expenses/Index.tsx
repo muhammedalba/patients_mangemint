@@ -4,24 +4,18 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, Expense, PaginatedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
-type Expense = {
-    id: number;
-    amount: number;
-    category?: { name: string };
-    payment_method: string;
-    expense_date?: string;
-    created_at: string;
+type PageProps = {
+    expenses: PaginatedData<Expense>;
 };
 
 export default function Index() {
-    const { expenses, filters, flash } = usePage<any>().props;
-    console.log('expenses', expenses);
+    const { expenses } = usePage<PageProps>().props;
 
     const handleDelete = (id: number) => {
         router.delete(route('expenses.destroy', id));
@@ -64,9 +58,8 @@ export default function Index() {
         },
     ];
     const [search, setSearch] = useState('');
-    const [showToast, setShowToast] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [perPage, setPerPage] = useState(10);
+    const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -77,21 +70,21 @@ export default function Index() {
         );
     };
     useEffect(() => {
-            const handler = setTimeout(() => {
-                setIsLoading(true);
-                router.get(
-                    route('expenses.index'),
-                    { search },
-                    {
-                        preserveState: true,
-                        replace: true,
-                        onFinish: () => setIsLoading(false),
-                    },
-                );
-            }, 300);
+        const handler = setTimeout(() => {
+            setIsLoading(true);
+            router.get(
+                route('expenses.index'),
+                { search },
+                {
+                    preserveState: true,
+                    replace: true,
+                    onFinish: () => setIsLoading(false),
+                },
+            );
+        }, 300);
 
-            return () => clearTimeout(handler);
-        }, [search]);
+        return () => clearTimeout(handler);
+    }, [search]);
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'المصروفات',
@@ -105,18 +98,7 @@ export default function Index() {
             <Head title="المصروفات" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
-               {flash?.error && (
-                    <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
-                        {flash.error}
-                    </div>
-                )}
-
                     <h1 className="mb-4 text-2xl font-bold">المصروفات</h1>
-                    {showToast && (
-                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                            {flash?.success || flash?.error}
-                        </div>
-                    )}
                     <SearchBar
                         value={search}
                         onChange={handleSearch}
@@ -130,9 +112,13 @@ export default function Index() {
                         <DynamicTable data={expenses?.data} columns={columns} />
                     </section>
                 </div>
-                <Pagination links={expenses.links} search={search} perPage={perPage} baseRoute='/expenses' />
+                <Pagination
+                    links={expenses.links}
+                    search={search}
+                    perPage={perPage}
+                    baseRoute="/expenses"
+                />
             </div>
         </AppLayout>
     );
 }
-

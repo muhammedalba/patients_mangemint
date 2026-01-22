@@ -10,10 +10,9 @@ import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { services, auth, flash, filters } = usePage<{
+    const { services, auth, filters } = usePage<{
         services: PaginatedData<Service>;
         auth: { user: { roles: string[] } };
-        flash: { success?: string; error?: string };
         filters: { search?: string };
     }>().props;
 
@@ -23,8 +22,7 @@ export default function Index() {
     );
     console.log(services, 'services');
 
-    const [showToast, setShowToast] = useState(false);
-    const columns: ColumnDef<any>[] = [
+    const columns: ColumnDef<Service>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'category', accessorKey: 'category', header: '  الفئة' },
         { id: 'name', accessorKey: 'name', header: ' اسم الخدمة' },
@@ -56,7 +54,7 @@ export default function Index() {
         router.delete(route('services.destroy', id));
     };
     const [search, setSearch] = useState(filters.search || '');
-    const [perPage, setPerPage] = useState(10);
+    const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -66,14 +64,6 @@ export default function Index() {
             { preserveState: true, preserveScroll: true },
         );
     };
-
-    useEffect(() => {
-        if (flash?.success) {
-            setShowToast(true);
-            const timer = setTimeout(() => setShowToast(false), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [flash]);
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -100,12 +90,6 @@ export default function Index() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">الخدمات الطبية</h1>
-                    {showToast && (
-                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                            {flash?.success || flash?.error}
-                        </div>
-                    )}
-
                     <SearchBar
                         value={search}
                         onChange={handleSearch}

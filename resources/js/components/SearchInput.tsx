@@ -1,10 +1,5 @@
+import { Patient } from "@/types";
 import { useEffect, useRef, useState } from "react";
-
-export interface Patient {
-  id: number;
-  name: string;
-}
-
 interface SearchInputProps {
   label: string;
   name: string;

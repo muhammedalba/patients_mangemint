@@ -1,12 +1,10 @@
 import { Procedure } from '@/types';
 import ToothSVG from './ToothSvg';
 import { memo, useCallback } from 'react';
-import { cn } from '@/lib/utils';
 
 interface Props {
     teeth: any[];
     getToothClasses: (toothNumber: number) => string; // Fixed return type to string based on usage
-    onToothClick: (tooth: any) => void;
     getLastProcedure: (toothNumber: number) => Procedure | null;
     onToothSelect: (toothNumber: number) => void;
 }
@@ -16,12 +14,11 @@ const MemoizedToothSVG = memo(ToothSVG);
 export default function DentalChart({
     teeth,
     getToothClasses,
-    onToothClick,
     getLastProcedure,
     onToothSelect,
 }: Props) {
     type ToothType = 'incisor' | 'canine' | 'premolar' | 'molar';
-    
+
     const getToothType = useCallback((toothNumber: string): ToothType => {
         const position = parseInt(toothNumber[1], 10);
         if (position <= 2) return 'incisor';
@@ -38,13 +35,13 @@ export default function DentalChart({
 
     return (
         <div className="dental-chart flex flex-col gap-8 py-8 select-none">
-            
+
             {/* Upper Jaw */}
             <div className="flex justify-center gap-1 md:gap-2">
                 {/* Quadrant 2 (Upper Left from Dr perspective, Right on screen) - effectively 28->21 */}
                 <div className="flex gap-2 md:gap-4">
                      {upperLeft.map((tooth) => (
-                        <MemoizedToothSVG 
+                        <MemoizedToothSVG
                             key={tooth.tooth_number}
                             tooth={tooth}
                             toothNumber={tooth.tooth_number}
@@ -55,13 +52,13 @@ export default function DentalChart({
                         />
                      ))}
                 </div>
-                
+
                 <div className="w-px bg-slate-200 mx-2 h-16 self-center" />
 
                 {/* Quadrant 1 (Upper Right from Dr perspective, Left on screen) - effectively 11->18 */}
                 <div className="flex gap-2 md:gap-4">
                     {upperRight.map((tooth) => (
-                        <MemoizedToothSVG 
+                        <MemoizedToothSVG
                             key={tooth.tooth_number}
                             tooth={tooth}
                             toothNumber={tooth.tooth_number}
@@ -81,11 +78,11 @@ export default function DentalChart({
             </div>
 
             {/* Lower Jaw */}
-            <div className="flex justify-center gap-1 md:gap-2">
+            <div className="flex justify-center gap-1 md:gap-2 lower-jaw mb-10">
                 {/* Quadrant 3 (Lower Left from Dr perspective) - effectively 38->31 */}
                  <div className="flex gap-2 md:gap-4">
                     {lowerLeft.map((tooth) => (
-                        <MemoizedToothSVG 
+                        <MemoizedToothSVG
                             key={tooth.tooth_number}
                             tooth={tooth}
                             toothNumber={tooth.tooth_number}
@@ -102,7 +99,7 @@ export default function DentalChart({
                 {/* Quadrant 4 (Lower Right from Dr perspective) - effectively 41->48 */}
                 <div className="flex gap-2 md:gap-4 px-1">
                      {lowerRight.map((tooth) => (
-                        <MemoizedToothSVG 
+                        <MemoizedToothSVG
                             key={tooth.tooth_number}
                             tooth={tooth}
                             toothNumber={tooth.tooth_number}

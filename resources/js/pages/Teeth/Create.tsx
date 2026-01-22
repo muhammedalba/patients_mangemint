@@ -1,6 +1,5 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
-import { FormSelect } from '@/components/FormSelect';
 import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Patient } from '@/types';
@@ -12,7 +11,7 @@ export default function CreateTeeth({
     patients,
     patient_id,
 }: {
-    patients: any[];
+    patients: Patient[];
     patient_id?: number;
 }) {
     const { data, setData, post, processing, errors, reset } = useForm<{

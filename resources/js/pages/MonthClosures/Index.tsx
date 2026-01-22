@@ -1,28 +1,39 @@
 import { DynamicTable } from '@/components/DynamicTable';
 import Pagination from '@/components/Pagination';
+import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import {
+    BreadcrumbItem,
+    MonthClosures,
+    PageProps,
+    PaginatedData,
+} from '@/types';
+import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
-type MonthClosures = {
-    id: number;
-    year: number;
-    month: number;
-    closed_at: string;
-};
-export default function Index() {
-    const { closures, flash } = usePage<any>().props;
-    console.log(closures);
-    const [showToast, setShowToast] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+export default function Index({
+    closures,
+    filters,
+}: PageProps<{
+    closures: PaginatedData<MonthClosures>;
+    filters: { search?: string };
+}>) {
+    const [search, setSearch] = useState(filters.search || '');
+    const [perPage] = useState(10);
     const handleDelete = (id: number) => {
-        if (confirm('Delete this month closure?')) {
-            router.delete(route('month-closures.destroy', id));
-        }
+        router.delete(route('month-closures.destroy', id));
+    };
+    const handleSearch = (val: string) => {
+        const newValue = val;
+        setSearch(newValue);
+        router.get(
+            '/month-closures',
+            { search: val, perPage },
+            { preserveState: true, preserveScroll: true },
+        );
     };
     const columns: ColumnDef<MonthClosures>[] = [
         { accessorKey: 'id', header: 'المعرف' },
@@ -67,32 +78,29 @@ export default function Index() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="إغلاق الشهر" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                {showToast && (
-                    <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                        {flash?.success || flash?.error}
-                    </div>
-                )}
-                <div className="mb-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold"> إغلاق الشهر</h1>
-                    {showToast && (
-                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                            {flash?.success || flash?.error}
-                        </div>
-                    )}
-                    <a
-                        href={route('month-closures.close')}
-                        className="btn btn-primary rounded-2xl p-4 text-white border bg-blue-600"
-                    >
-                        إغلاق الشهر
-                    </a>
-                </div>
+                <div>
+                    <h1 className="mb-4 text-2xl font-bold"> إغلاق الشهر</h1>
+
+                    <SearchBar
+                        value={search}
+                        onChange={handleSearch}
+                        showSearch={true}
+                        showButton={true}
+                        buttonLabel="إضافة إغلاق شهر"
+                        buttonRoute="month-closures.close"
+                    />
                 <section className="p-4">
                     <DynamicTable data={closures?.data} columns={columns} />
                 </section>
-
+                </div>
 
                 <div className="mt-4">
-                    <Pagination links={closures.links} />
+                    <Pagination
+                        links={closures.links}
+                        search={search}
+                        perPage={perPage}
+                        baseRoute="/month-closures"
+                    />
                 </div>
             </div>
         </AppLayout>

@@ -4,42 +4,26 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
-import { PaginatedData, type BreadcrumbItem } from '@/types';
+import { PaginatedData, Procedure, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
-interface Procedure {
-    id: number;
-    name: string;
-    description: string | null;
-    cost: string;
-    tooth_number: string;
-}
-interface ProcedureResponse {
-    data: Procedure[];
-}
 
 export default function Index(filters: { search?: string }) {
     const { procedures, auth } = usePage<{
-        procedures: PaginatedData<ProcedureResponse>;
+        procedures: PaginatedData<Procedure>;
         auth: { user: { roles: string[] } };
         filters: { search?: string };
     }>().props;
-    const { props } = usePage<{
-        flash: { success?: string; error?: string };
-        filters: { search?: string };
-    }>();
-    console.log(procedures, 'procedures');
     const [search, setSearch] = useState(filters.search || '');
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
     const [isLoading, setIsLoading] = useState(true);
-    const [showToast, setShowToast] = useState(false);
-    const [perPage, setPerPage] = useState(10);
+    const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -50,7 +34,7 @@ export default function Index(filters: { search?: string }) {
         );
     };
 
-    const columns: ColumnDef<any>[] = [
+    const columns: ColumnDef<Procedure>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         {
             id: 'patient_name',
@@ -122,13 +106,6 @@ export default function Index(filters: { search?: string }) {
 
         return () => clearTimeout(handler);
     }, [search]);
-    useEffect(() => {
-        if (props.flash?.success) {
-            setShowToast(true);
-            const timer = setTimeout(() => setShowToast(false), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [props.flash]);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -144,12 +121,6 @@ export default function Index(filters: { search?: string }) {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 text-right">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">الإجراءات</h1>
-                    {showToast && (
-                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                            {props.flash?.success || props.flash?.error}
-                        </div>
-                    )}
-
                     <SearchBar
                         value={search}
                         onChange={handleSearch}

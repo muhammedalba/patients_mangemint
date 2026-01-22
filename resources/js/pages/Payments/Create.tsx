@@ -1,5 +1,5 @@
 import { BreadcrumbItem, PageProps, Patient } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -7,25 +7,26 @@ import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
+import { useAppToast } from '@/utils/toast';
 
 interface CreateProps extends PageProps {
     patients: Patient[];
     patientId?: number;
 }
 
-const Create: React.FC<CreateProps> = ({ auth, patients, patientId }) => {
+export default function CreatePayment() {
+    const { patients, patientId} = usePage<CreateProps>().props;
     const { data, setData, post, errors, processing } = useForm({
         patient_id: patientId ? patientId.toString() : '',
         amount: '',
-        payment_date: '',
+        payment_date: new Date().toISOString().split('T')[0],
         paid_at: '',
         notes: '',
     });
 
     const [selectedPatientName, setSelectedPatientName] = useState('');
-    const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
-        patientId ?? null,
-    );
+    const [, setSelectedPatientId] = useState<number | null>(patientId ?? null);
+    const { success, error } = useAppToast();
 
     useEffect(() => {
         if (patients.length === 1) {
@@ -44,7 +45,20 @@ const Create: React.FC<CreateProps> = ({ auth, patients, patientId }) => {
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        post(route('payments.store'));
+        post(route('payments.store'), {
+            onSuccess: () => {
+            success(
+                'تم حفظ الدفعة بنجاح',
+                'تمت إضافة الدفعة إلى جدول الدفعات'
+            );
+        },
+        onError: () => {
+            error(
+                'فشل حفظ الدفعة',
+                'يرجى التحقق من البيانات المدخلة'
+            );
+        },
+        });
     }
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -94,7 +108,6 @@ const Create: React.FC<CreateProps> = ({ auth, patients, patientId }) => {
                             type="date"
                             value={data.payment_date}
                             onChange={(val) => setData('payment_date', val)}
-                            placeholder="ادخل تاريخ الدفعة"
                             error={errors.payment_date}
                         />
 
@@ -127,6 +140,4 @@ const Create: React.FC<CreateProps> = ({ auth, patients, patientId }) => {
             </div>
         </AppLayout>
     );
-};
-
-export default Create;
+}

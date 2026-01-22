@@ -4,30 +4,34 @@ import { FormSelect } from '@/components/FormSelect';
 import { FormTextArea } from '@/components/FormTextArea';
 import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
-import {
-    BreadcrumbItem,
-    PageProps,
-    Patient,
-    ServiceCategory,
-    User,
-} from '@/types';
+import { BreadcrumbItem, PageProps, Patient, User } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Create({
     patients,
     doctors,
-    services,
 }: PageProps<{
     patients: Patient[];
     doctors: User[];
-    services: ServiceCategory[];
 }>) {
-    const { data, setData, post, errors, processing } = useForm({
+    const { data, setData, post, errors, processing } = useForm<{
+        patient_id: string | null;
+        service_id: string | null;
+        user_id: number | null;
+        date: string;
+        start_time: string;
+        notes: string;
+        duration_slots: number;
+        status: string;
+        category: string;
+        name: string;
+    }>({
         patient_id: null,
-        service_id: '',
+        service_id: null,
         user_id: null,
         date: '',
         start_time: '',
@@ -37,14 +41,14 @@ export default function Create({
         category: '',
         name: '',
     });
-    console.log(errors);
 
     const [availableAppointments, setAvailableAppointments] = useState<
         { start: string; end: string }[]
     >([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [, setIsLoading] = useState(false);
     const [selectedPatientName, setSelectedPatientName] = useState('');
-    const [selectedPatientId, setSelectedPatientId] = useState<number | null>();
+    const [, setSelectedPatientId] = useState<number | null>();
+    const { success, error } = useAppToast();
 
     const handlePatientSelect = (patient: Patient) => {
         setSelectedPatientId(patient.id);
@@ -58,14 +62,16 @@ export default function Create({
             setSelectedPatientName(patient.name);
             setData('patient_id', patient.id.toString());
         }
-    }, [patients]);
+    }, [patients, setData]);
 
-    const fetchAvailableAppointments = async () => {
+    const fetchAvailableAppointments = useCallback(async () => {
         if (!data.date) {
             setAvailableAppointments([]);
             return;
         }
+
         setIsLoading(true);
+
         try {
             const response = await axios.get(
                 route('appointments.availableSlots'),
@@ -76,27 +82,42 @@ export default function Create({
                     },
                 },
             );
-            console.log(response.data);
 
-            setAvailableAppointments(response.data?.available_appointments);
+            setAvailableAppointments(
+                response.data?.available_appointments ?? [],
+            );
         } catch (err) {
             console.error(err);
             setAvailableAppointments([]);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [data.date, data.duration_slots]);
 
     useEffect(() => {
         fetchAvailableAppointments();
+
         return () => {
             setData('start_time', '');
         };
-    }, [data.date, data.duration_slots, setData]);
+    }, [fetchAvailableAppointments, setData]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('appointments.store'));
+        post(route('appointments.store'), {
+            onSuccess: () => {
+            success(
+                'تم حفظ الموعد بنجاح',
+                'تمت إضافة الموعد إلى جدول المواعيد'
+            );
+        },
+        onError: () => {
+            error(
+                'فشل حفظ الموعد',
+                'يرجى التحقق من البيانات المدخلة'
+            );
+        },
+        });
     };
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -108,7 +129,6 @@ export default function Create({
             href: route('appointments.create'),
         },
     ];
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="إضافة موعد " />
@@ -132,10 +152,12 @@ export default function Create({
                         <FormSelect
                             label="اسم الطبيب"
                             name="user_id"
-                            value={data.user_id ?? ''}
-                            onChange={(val) => setData('user_id', Number(val))}
+                            value={String(data.user_id ?? '')}
+                            onChange={(val) =>
+                                setData('user_id', val ? Number(val) : null)
+                            }
                             options={doctors.map((doctor) => ({
-                                value: doctor.id, // number
+                                value: doctor.id.toString(),
                                 label: doctor.name,
                             }))}
                             error={errors.user_id}
@@ -154,9 +176,10 @@ export default function Create({
                             label="توقيت الموعد"
                             name="start_time"
                             value={data.start_time}
-                            onChange={(val: string) =>
-                                setData('start_time', val)
-                            }
+                            onChange={(val) => {
+                                if (Array.isArray(val)) return;
+                                setData('start_time', val);
+                            }}
                             options={[
                                 { value: '', label: 'اختر الوقت' },
                                 ...(availableAppointments?.map((slot) => ({
@@ -171,7 +194,10 @@ export default function Create({
                             label="حالة الموعد"
                             name="status"
                             value={data.status}
-                            onChange={(val: string) => setData('status', val)}
+                            onChange={(val) => {
+                                if (Array.isArray(val)) return;
+                                setData('status', val);
+                            }}
                             options={[
                                 { value: 'scheduled', label: 'Scheduled' },
                                 { value: 'completed', label: 'Completed' },
@@ -184,7 +210,6 @@ export default function Create({
                             label="مدة الموعد (عدد الـ slots)"
                             type="number"
                             name="duration_slots"
-                            min={1}
                             value={String(data.duration_slots)}
                             onChange={(val: string) =>
                                 setData('duration_slots', Number(val))

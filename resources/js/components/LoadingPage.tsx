@@ -15,9 +15,9 @@ export default function LoadingPage() {
       </style>
 
       <img
-        src="zirconLogo.png"
+        src="/zirconLogo.png"
         alt="Clinic Logo"
-        loading="eager"            
+        loading="eager"
         className="opacity-80"
         style={{
           animation: "wave 2.2s ease-in-out infinite",

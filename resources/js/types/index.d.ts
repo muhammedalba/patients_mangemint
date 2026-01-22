@@ -2,7 +2,19 @@ export type User = {
     id: number;
     name: string;
     email: string;
+    password?: string;
     phone?: string;
+    roles: UserRole[];
+};
+
+export type UserRole = {
+    id: number;
+    name: string;
+    pivot: {
+        model_type: string;
+        model_id: number;
+        role_id: number;
+    };
 };
 
 export type ToothStatus =
@@ -16,21 +28,15 @@ export type ToothStatus =
 export interface Tooth {
     id: number;
     patient_id: number;
-    tooth_number: string;
-    status: ToothStatus;
-    notes: string | null;
-    procedures?: Procedure[];
+    tooth_number: number;
+    status: string;
 }
 
 export type Patient = {
     id: number;
     name: string;
-    email: string;
+    email?: string;
     phone?: string;
-    address?: string;
-    notes?: string;
-    teeth: Tooth[];
-    procedures: Procedure[];
     birth_date: string;
     gender: 'male' | 'female' | 'other';
     marital_status: 'single' | 'married' | 'divorced' | 'widowed';
@@ -42,7 +48,7 @@ export type Procedure = {
     description?: string;
     cost: number;
     duration_minutes: number;
-    teeth: Tooth;
+    tooth: Tooth;
     tooth_id: number;
     patient: Patient;
     patient_id: number;
@@ -82,29 +88,28 @@ export type PageProps<
     };
 };
 
+export type PaginationLink = {
+    url: string | null;
+    label: string;
+    active: boolean;
+};
+
 export type PaginatedData<T> = {
     data: T[];
-    links: {
-        first: string;
-        last: string;
-        prev: string | null;
-        next: string | null;
-    };
-    meta: {
-        current_page: number;
-        from: number;
-        last_page: number;
-        path: string;
-        per_page: number;
-        to: number;
-        total: number;
-        links: {
-            url: string | null;
-            label: string;
-            active: boolean;
-        }[];
-    };
+    current_page: number;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    first_page_url: string;
+    next_page_url: string | null;
+    prev_page_url: string | null;
+    path: string;
+    per_page: number;
+    to: number;
+    total: number;
+    links: PaginationLink[];
 };
+
 // BreadcrumbItem type
 export type BreadcrumbItem = {
     title: string;
@@ -114,33 +119,107 @@ export type BreadcrumbItem = {
 export type MedicalRecord = {
     id: number;
     patient_id: number;
-    details: string;
-    date: string;
-    attachments?: string;
-    patient?: Patient;
-    procedure_id?: number;
-    procedure?: Procedure;
-    doctor_id?: number;
-    doctor?: User;
+    doctor_id: number;
+    created_at: Date;
+    attachments?: File[];
+    images?: File[];
+    deleted_attachments?: File[];
+    deleted_images?: File[];
+    chief_complaint?: string;
+    present_illness_history?: string;
+    past_dental_history?: string;
+    has_cardiovascular_disease?: boolean;
+    has_hypertension?: boolean;
+    has_respiratory_disease?: boolean;
+    has_gastrointestinal_disease?: boolean;
+    has_neural_disease?: boolean;
+    has_hepatic_disease?: boolean;
+    has_renal_disease?: boolean;
+    has_endocrine_disease?: boolean;
+    has_diabetes?: boolean;
+    medical_disease_details?: string;
+    allergic_to?: string;
+    current_medications?: string;
+    hospitalized_or_operated?: boolean;
+    hospital_details?: string;
+    abnormal_bleeding_history?: boolean;
+    is_pregnant?: boolean;
+    pregnancy_trimester?: string;
+    clinical_notes?: string;
 };
-
 export type Service = {
     id: number;
     name: string;
     description?: string;
     price: number;
     category: string;
+    category_id: string;
 };
 
 export type ServiceCategory = {
     id: number;
     name: string;
+    description: string;
     services: Service[];
 };
 export type patientDetails = {
     id: number;
     name: string;
     birth_date: string;
+    gender: 'male' | 'female' | 'other';
+    marital_status: 'single' | 'married' | 'divorced' | 'widowed';
+    medical_record: MedicalRecord;
+    financial_summary: FinancialSummary;
     procedures: Procedure[];
     teeth: Tooth[];
+};
+
+type AppointmentSlot = {
+    start: string;
+    end: string;
+    duration_minutes: number;
+    slots: number;
+};
+
+type Expense = {
+    id: number;
+    amount: number;
+    category: ExpenseCategory;
+    description: string;
+    payment_method: string;
+    expense_date: string;
+    expense_category_id: number;
+    created_at: string;
+};
+
+type ExpenseCategory = {
+    id: number;
+    name: string;
+    type: string;
+};
+
+type MonthClosures = {
+    id: number;
+    year: number;
+    month: number;
+    closed_at: string;
+};
+
+export type Payment = {
+    id: number;
+    patient_id: number;
+    amount: number;
+    payment_date: string;
+    paid_at: string;
+    notes: string;
+    patient?: Patient;
+};
+
+export type FinancialSummary = {
+    discount_amount: number;
+    remaining_balance: number;
+    total_payments: number;
+    total_procedures: number;
+    total_procedures_after_discount: number;
+    total_procedures_cost: number;
 };

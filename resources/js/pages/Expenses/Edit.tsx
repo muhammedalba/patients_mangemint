@@ -2,26 +2,51 @@ import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import {
+    BreadcrumbItem,
+    Expense,
+    ExpenseCategory
+} from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
+export type PageProps = {
+    expense: Expense;
+    categories: ExpenseCategory[];
+};
+
 export default function Edit() {
-    const { expense, categories,flash } = usePage<any>().props;
+    const { expense, categories } = usePage<PageProps>().props;
 
     const { data, setData, post, processing, errors } = useForm({
-        amount: expense.amount || '',
+        amount: expense.amount !== null ? String(expense.amount) : '',
         description: expense.description || '',
-        expense_category_id: expense.expense_category_id || '',
+        expense_category_id: expense?.expense_category_id
+            ? String(expense.expense_category_id)
+            : '',
         payment_method: expense.payment_method || '',
         expense_date: expense.expense_date || '',
         _method: 'PATCH',
     });
+    const { success, error } = useAppToast();
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('expenses.update', expense.id));
+        post(route('expenses.update', expense.id), {
+            onSuccess: () => {
+            success(
+                'تم تعديل المصروف بنجاح',
+            );
+        },
+        onError: () => {
+            error(
+                'فشل تعديل المصروف',
+                'يرجى التحقق من البيانات المدخلة'
+            );
+        },
+    });
     };
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'المصروف', href: route('expenses.index') },
@@ -33,12 +58,7 @@ export default function Edit() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`  تعديل المصروف: ${expense.name}`} />
-            {flash?.error && (
-                    <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
-                        {flash.error}
-                    </div>
-                )}
+            <Head title={`  تعديل المصروف:`} />
             <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
                 <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
                     تعديل المصروف
@@ -51,7 +71,7 @@ export default function Edit() {
                             name="amount"
                             value={data.amount}
                             onChange={(val) => setData('amount', val)}
-                            placeholder="Enter amount"
+                            placeholder="أدخل المبلغ المصروف"
                             error={errors.amount}
                         />
 
@@ -60,12 +80,15 @@ export default function Edit() {
                             name="expense_category_id"
                             value={data.expense_category_id}
                             onChange={(val) =>
-                                setData('expense_category_id', val)
+                                setData(
+                                    'expense_category_id',
+                                    Array.isArray(val) ? '' : val,
+                                )
                             }
                             options={[
                                 { value: '', label: '' },
-                                ...categories.map((c: any) => ({
-                                    value: c.id,
+                                ...categories.map((c) => ({
+                                    value: String(c.id),
                                     label: c.name,
                                 })),
                             ]}
@@ -76,7 +99,12 @@ export default function Edit() {
                             label="طريقة الدفع "
                             name="payment_method"
                             value={data.payment_method}
-                            onChange={(val) => setData('payment_method', val)}
+                            onChange={(val) =>
+                                setData(
+                                    'payment_method',
+                                    Array.isArray(val) ? '' : val,
+                                )
+                            }
                             options={[
                                 { value: 'cash', label: 'نقداً' },
                                 { value: 'card', label: 'بطاقة' },

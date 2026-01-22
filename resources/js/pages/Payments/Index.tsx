@@ -4,28 +4,20 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, PageProps } from '@/types';
-import { Payment } from '@/types/payment';
+import { BreadcrumbItem, PaginatedData, Payment } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import React, { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-interface IndexProps extends PageProps {
-    payments: {
-        data: Payment[];
-    };
-}
 
-const Index: React.FC<IndexProps> = () => {
-    const { payments, flash, filters } = usePage<{
-        payments: any[];
+export default function Index() {
+    const { payments, filters } = usePage<{
+        payments: PaginatedData<Payment>;
         auth: { user: { roles: string[] } };
-        flash: { success?: string; error?: string };
         filters: { search?: string };
     }>().props;
     console.log(payments, 'payments');
     console.log(filters, 'filters');
-    console.log(flash, 'flash');
     const handleDelete = (id: number) => {
         router.delete(route('payments.destroy', id));
     };
@@ -66,10 +58,9 @@ const Index: React.FC<IndexProps> = () => {
             },
         },
     ];
-    const [showToast, setShowToast] = useState(false);
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(true);
-    const [perPage, setPerPage] = useState(10);
+    const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -79,13 +70,6 @@ const Index: React.FC<IndexProps> = () => {
             { preserveState: true, preserveScroll: true },
         );
     };
-    useEffect(() => {
-        if (flash?.success) {
-            setShowToast(true);
-            const timer = setTimeout(() => setShowToast(false), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [flash]);
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -117,19 +101,7 @@ const Index: React.FC<IndexProps> = () => {
             <Head title="الدفعات" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
-                    {showToast && (
-                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                            {flash?.success || flash?.error}
-                        </div>
-                    )}
-
-                    <h1 className="mb-4 text-2xl font-bold">الدفعات</h1>
-                    {showToast && (
-                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                            {flash?.success || flash?.error}
-                        </div>
-                    )}
-
+                   <h1 className="mb-4 text-2xl font-bold">الدفعات</h1>
                     <SearchBar
                         value={search}
                         onChange={handleSearch}
@@ -138,13 +110,12 @@ const Index: React.FC<IndexProps> = () => {
                         buttonLabel="إضافة دفعة"
                         buttonRoute="payments.create"
                     />
-
                     <section className="p-4">
                         <DynamicTable data={payments?.data} columns={columns} />
                     </section>
                 </div>
                 <Pagination
-                    links={payments?.links}
+                    links={payments.links}
                     search={search}
                     perPage={perPage}
                     baseRoute="/payments"
@@ -153,5 +124,3 @@ const Index: React.FC<IndexProps> = () => {
         </AppLayout>
     );
 };
-
-export default Index;

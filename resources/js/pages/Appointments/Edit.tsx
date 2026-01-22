@@ -7,12 +7,14 @@ import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
 import {
     Appointment,
+    AppointmentSlot,
     BreadcrumbItem,
     PageProps,
     Patient,
     Procedure,
     User,
 } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -21,9 +23,7 @@ import { route } from 'ziggy-js';
 export default function Edit({
     appointment,
     patients,
-    patient,
     doctors,
-    services,
 }: PageProps<{
     appointment: Appointment;
     patients: Patient[];
@@ -34,7 +34,6 @@ export default function Edit({
     const { data, setData, put, errors, processing } = useForm({
         patient_id: String(appointment.patient_id),
         user_id: String(appointment.user_id),
-        //service_id: String(appointment.service_id),
         date: appointment.date,
         start_time: appointment.start_time,
         duration_slots: appointment.duration_slots,
@@ -43,17 +42,14 @@ export default function Edit({
     });
 
     const [isLoading, setIsLoading] = useState(false);
-    const [availableAppointments, setAvailableAppointments] = useState<any[]>(
+    const [availableAppointments, setAvailableAppointments] = useState<AppointmentSlot[]>(
         [],
     );
+    const { success, error } = useAppToast();
 
-    console.log(errors, 'errors');
-
-    // جلب الأوقات المتاحة عند تغيير التاريخ أو مدة الحجز
     const fetchAvailableSlots = async () => {
-        // لا ترسل الطلب إذا لم يتم تحديد التاريخ
         if (!data.date) {
-            setAvailableAppointments([]); // أفرغ القائمة إذا كان التاريخ فارغًا
+            setAvailableAppointments([]);
             return;
         }
         setIsLoading(true);
@@ -82,7 +78,19 @@ export default function Edit({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(route('appointments.update', appointment.id));
+        put(route('appointments.update', appointment.id), {
+            onSuccess: () => {
+            success(
+                'تم تعديل الموعد بنجاح',
+            );
+        },
+        onError: () => {
+            error(
+                'فشل تعديل الموعد',
+                'يرجى التحقق من البيانات المدخلة'
+            );
+        },
+        });
     };
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'المواعيد', href: route('appointments.index') },
@@ -126,7 +134,12 @@ export default function Edit({
                             label="اسم الطبيب"
                             name="user_id"
                             value={data.user_id}
-                            onChange={(val: string) => setData('user_id', val)}
+                            onChange={(val) =>
+                                setData(
+                                    'user_id',
+                                    Array.isArray(val) ? '' : val,
+                                )
+                            }
                             options={doctors.map((doctor) => ({
                                 value: String(doctor.id),
                                 label: doctor.name,
@@ -147,8 +160,11 @@ export default function Edit({
                             label="توقيت الموعد"
                             name="start_time"
                             value={data.start_time}
-                            onChange={(val: string) =>
-                                setData('start_time', val)
+                            onChange={(val) =>
+                                setData(
+                                    'start_time',
+                                    Array.isArray(val) ? '' : val,
+                                )
                             }
                             options={[
                                 { value: '', label: 'اختر الوقت' },
@@ -164,7 +180,12 @@ export default function Edit({
                             label="حالة الموعد"
                             name="status"
                             value={data.status}
-                            onChange={(val: string) => setData('status', val)}
+                            onChange={(val) =>
+                                setData(
+                                    'status',
+                                    Array.isArray(val) ? 'scheduled' : val,
+                                )
+                            }
                             options={[
                                 { value: 'scheduled', label: 'Scheduled' },
                                 { value: 'completed', label: 'Completed' },
@@ -177,7 +198,6 @@ export default function Edit({
                             label="مدة الموعد (عدد الـ slots)"
                             type="number"
                             name="duration_slots"
-                            min={1}
                             value={String(data.duration_slots)}
                             onChange={(val: string) =>
                                 setData('duration_slots', Number(val))
@@ -205,8 +225,8 @@ export default function Edit({
                         </Link>
                         <FormButton
                             processing={processing}
-                            label="تحديث"
-                            loadingLabel="جارِ التحديث ..."
+                            label="تعديل"
+                            loadingLabel="جارِ التعديل ..."
                         />
                     </div>
                 </form>

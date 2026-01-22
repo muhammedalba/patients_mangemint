@@ -3,18 +3,31 @@ import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+
 export default function Create() {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         name: '',
         type: '',
     });
+    const { success, error } = useAppToast();
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('expense-categories.store'), { onSuccess: () => reset() });
+        post(route('expense-categories.store'), {
+            onSuccess: () => {
+                success(
+                    'تم حفظ فئة المصروف بنجاح',
+                    'تمت إضافة فئة المصروف إلى جدول الفئات المصاريف',
+                );
+            },
+            onError: () => {
+                error('فشل حفظ فئة المصروف', 'يرجى التحقق من البيانات المدخلة');
+            },
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -49,7 +62,12 @@ export default function Create() {
                             label="نوع الفئة"
                             name="type"
                             value={data.type}
-                            onChange={(val) => setData('type', val)}
+                            onChange={(val) =>
+                                setData(
+                                    'type',
+                                    Array.isArray(val) ? (val[0] ?? '') : val,
+                                )
+                            }
                             options={[
                                 { value: 'fixed', label: 'ثابت' },
                                 { value: 'variable', label: 'متغير' },

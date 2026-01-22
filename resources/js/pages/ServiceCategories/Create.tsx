@@ -1,35 +1,44 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, ServiceCategory } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
-interface ServiceCategoryFormData {
-    name: string;
-    description: string;
-}
-
 export default function CreateServiceCategory() {
     const { serviceCategory } = usePage<{
-        serviceCategory: any;
+        serviceCategory: ServiceCategory;
         auth: { user: { roles: string[] } };
-        flash: { success?: string; error?: string };
         filters: { search?: string };
     }>().props;
     console.log(serviceCategory, 'serviceCategory');
 
-    const { data, setData, post, processing, errors, reset } =
-        useForm<ServiceCategoryFormData>({
-            name: '',
-            description: '',
-        });
+    const { data, setData, post, processing, errors } = useForm<{
+        name: string;
+        description: string;
+    }>({
+        name: '',
+        description: '',
+    });
+    const { success, error } = useAppToast();
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('service-categories.store'), {
-            onSuccess: () => reset(),
+        post(route('service-categories.store'),{
+            onSuccess: () => {
+            success(
+                'تم حفظ فئة الخدمة الطبية بنجاح',
+                'تمت إضافة فئة الخدمة إلى جدول فئات الخدمات الطبية'
+            );
+        },
+        onError: () => {
+            error(
+                'فشل حفظ فئة الخدمة الطبية',
+                'يرجى التحقق من البيانات المدخلة'
+            );
+        },
         });
     };
 
@@ -58,7 +67,7 @@ export default function CreateServiceCategory() {
                             type="text"
                             name="name"
                             value={data.name}
-                           onChange={(val) => setData('name', val)}
+                            onChange={(val) => setData('name', val)}
                             placeholder="اسم الخدمة "
                             error={errors.name}
                         />

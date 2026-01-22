@@ -1,4 +1,9 @@
-export default function FinancialSummary({ summary }) {
+import { FinancialSummary }  from "@/types";
+
+interface FinancialSummaryProps {
+  summary: FinancialSummary;
+}
+export default function FinancialSummaryForm ({ summary }: FinancialSummaryProps) {
   const rows = [
     { label: 'إجمالي تكلفة الإجراءات', value: summary.total_procedures_cost },
     { label: 'عدد الإجراءات', value: summary.total_procedures },

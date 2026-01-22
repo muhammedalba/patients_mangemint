@@ -1,75 +1,58 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
-import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { BreadcrumbItem, User } from '@/types';
+import { useAppToast } from '@/utils/toast';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
-interface User {
-    id?: number | string;
-    name: string;
-    email: string;
-    password?: string;
-    phone?: string;
-    roles?: string[];
-}
-// interface Errors {
-//     [key: string]: string;
-// }
-
 export default function EditUser({ user }: { user: User }) {
-    const { props } = usePage<{
-        flash: { success?: string; error?: string };
-    }>();
-    console.log(props, 'user-edit');
-    console.log(user, 'user-user');
-    const { data, setData, post, processing, errors } = useForm({
-        _method: 'put',
-        name: user.name || '',
-        email: user.email || '',
+    const { data, setData, put, processing, errors } = useForm<{
+        name: string;
+        email: string;
+        password: string;
+        phone: string;
+        roles: string[];
+    }>({
+        name: user.name ?? '',
+        email: user.email ?? '',
         password: '',
-        phone: user.phone || '',
-        roles: user.roles || [],
+        phone: user.phone ?? '',
+        roles: (user.roles ?? []) as unknown as string[],
     });
 
-    const [submitted, setSubmitted] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [, setIsLoading] = useState(false);
+    const { success, error } = useAppToast();
 
-    // جميع الأدوار الممكنة في النظام
     const availableRoles = [
         { key: 'admin', label: 'مدير' },
         { key: 'doctor', label: 'طبيب' },
         { key: 'receptionist', label: 'استقبال' },
     ];
 
-    // التبديل بين إضافة/إزالة الدور
     const toggleRole = (role: string) => {
         setData(
             'roles',
             data.roles.includes(role)
-                ? data.roles.filter((r) => r !== role) // إزالة
-                : [...data.roles, role], // إضافة
+                ? data.roles.filter((r) => r !== role)
+                : [...data.roles, role],
         );
     };
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        try {
-            post(route('users.update', user.id), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setSubmitted(true);
-                    setTimeout(() => setSubmitted(false), 2500);
-                },
-            });
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
+        put(route('users.update', user.id), {
+            onSuccess: () => {
+                success(
+                    'تم تعديل المستخدم بنجاح',
+                );
+            },
+            onError: () => {
+                error('فشل تعديل المستخدم', 'يرجى التحقق من البيانات المدخلة');
+            },
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -79,7 +62,7 @@ export default function EditUser({ user }: { user: User }) {
             href: route('users.edit', user.id),
         },
     ];
-    if (isLoading) return <LoadingPage />;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={` تعديل المستخدم : ${user.name}`} />

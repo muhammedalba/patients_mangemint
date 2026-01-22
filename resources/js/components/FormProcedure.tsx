@@ -1,49 +1,68 @@
-import { Procedure } from '@/types';
+import { patientDetails, Procedure, ServiceCategory } from '@/types';
 import { Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
-type FormProcedureProps = {
-    selectedTooth: any;
+interface ProcedureFormData {
+    name: string;
+    description: string;
+    processing_date: string;
+    status: string;
+    cost: string;
+    duration_minutes: number;
+    follow_up_days: number;
+    patient_id: number;
+    tooth_id: number;
+    service_id?: number;
+}
+
+type FormProcedureProps = Readonly <
+{
+    patient: patientDetails;
+    services_category: ServiceCategory[];
     toothId: number;
     onClose?: () => void;
-    onCreated: (procedure: Procedure) => void;
-};
+    onCreated: (procedure:Procedure) => void;
+}>;
+
 
 export default function FormProcedure({
     patient,
-    selectedTooth,
     services_category,
     toothId,
-    toothNumber,
     onClose,
     onCreated,
 }: FormProcedureProps) {
-    const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        description: '',
-        processing_date: new Date().toISOString().slice(0, 10),
-        status: 'planned',
-        cost: '',
-        duration_minutes: 1,
-        follow_up_days: 0,
-        patient_id: patient.id,
-        tooth_id: toothId ?? null,
-    });
+   const { data, setData, post, processing } = useForm<ProcedureFormData>({
+    name: '',
+    description: '',
+    processing_date: new Date().toISOString().slice(0, 10),
+    status: 'planned',
+    cost: '',
+    duration_minutes: 1,
+    follow_up_days: 0,
+    patient_id: patient.id,
+    tooth_id: toothId,
+});
 
     const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    const optimisticProcedure = {
-        id: `temp-${Date.now()}`,
+    const optimisticProcedure : Procedure = {
+        id: Date.now(),
         name: data.name,
-        cost: data.cost,
+        cost: Number(data.cost),
+        duration_minutes: data.duration_minutes,
+        tooth: patient.teeth.find(t => t.id === toothId)!,
+        patient: patient,
+        patient_id: patient.id,
         status: data.status,
-        tooth_id: data.tooth_id,
-        processing_date: new Date().toISOString(),
+        tooth_id: data.tooth_id ?? undefined,
+       processing_date: new Date(data.processing_date),
+       follow_up_days: data.follow_up_days,
     };
 
-    onCreated?.(optimisticProcedure);
+    onCreated(optimisticProcedure);
 
     post(route('procedures.store'), {
         preserveScroll: true,
@@ -61,9 +80,6 @@ export default function FormProcedure({
             onSubmit={handleSubmit}
             className="space-y-6 rounded bg-white p-6 shadow"
         >
-            <h2 className="text-lg font-bold text-gray-700">
-                إضافة إجراء للسن رقم {toothNumber}
-            </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
                 {services_category.map((category) => (
                     <div key={category.id}>

@@ -3,27 +3,26 @@ import { FormInput } from '@/components/FormInput';
 import { FormRoles } from '@/components/FormRoles';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
-type UserFormData = {
-    name: string;
-    email: string;
-    password: string;
-    phone: string;
-    roles: string[];
-};
-
 export default function CreateUser() {
-    const { data, setData, post, processing, errors, reset } =
-        useForm<UserFormData>({
-            name: '',
-            email: '',
-            password: '',
-            phone: '',
-            roles: [],
-        });
+    const { data, setData, post, processing, errors } = useForm<{
+        name: string;
+        email: string;
+        password: string;
+        phone: string;
+        roles: string[];
+    }>({
+        name: '',
+        email: '',
+        password: '',
+        phone: '',
+        roles: [],
+    });
+    const { success, error } = useAppToast();
 
     const availableRoles = [
         { key: 'admin', label: 'مدير' },
@@ -43,13 +42,24 @@ export default function CreateUser() {
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         post(route('users.store'), {
-            onSuccess: () => reset('password'),
+            onSuccess: () => {
+            success(
+                'تم حفظ المستخدم بنجاح',
+                'تمت إضافة المستخدم إلى جدول المستخدمين'
+            );
+        },
+        onError: () => {
+            error(
+                'فشل حفظ المستخدم',
+                'يرجى التحقق من البيانات المدخلة'
+            );
+        },
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'المستخدمون', href: route('users.index')},
-        { title: 'إضافة مستخدم', href: route('users.create')},
+        { title: 'المستخدمون', href: route('users.index') },
+        { title: 'إضافة مستخدم', href: route('users.create') },
     ];
 
     return (
@@ -86,9 +96,7 @@ export default function CreateUser() {
                             name="password"
                             type="password"
                             value={data.password}
-                            onChange={(val) =>
-                                setData('password', val)
-                            }
+                            onChange={(val) => setData('password', val)}
                             placeholder="كلمة المرور"
                             error={errors.password}
                         />

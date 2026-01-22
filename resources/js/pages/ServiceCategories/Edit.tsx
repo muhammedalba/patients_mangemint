@@ -1,40 +1,53 @@
-
-
-
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { BreadcrumbItem, PageProps, Service, ServiceCategory } from '@/types';
+import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
 import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem, Service } from '@/types';
+import { useAppToast } from '@/utils/toast';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import { FormInput } from '@/components/FormInput';
-import { FormButton } from '@/components/FormButton';
 
 export default function EditServiceCategory({
-    category
+    category,
 }: {
     category: Service;
 }) {
-        const { data, setData, patch, processing, errors } = useForm<{
-            name: string;
-            description: string;
+    const { data, setData, patch, processing, errors } = useForm<{
+        name: string;
+        description: string;
+    }>({
+        name: category.name || '',
+        description: category.description || '',
+    });
+    const { success, error } = useAppToast();
 
-        }>({
-            name: category.name || '',
-            description: category.description || '',
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        patch(route('service-categories.update', category.id), {
+            onSuccess: () => {
+            success(
+                'تم تعديل فئة الخدمة الطبية بنجاح',
+            );
+        },
+        onError: () => {
+            error(
+                'فشل تعديل فئة الخدمة الطبية',
+                'يرجى التحقق من البيانات المدخلة'
+            );
+        },
         });
-
-        const handleSubmit = (e: FormEvent) => {
-            e.preventDefault();
-            patch(route('service-categories.update', category.id));
-        };
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
-            { title: 'فئات تصنيف المعالجات', href: route('service-categories.index') },
-            {
-                title: `تعديل فئة تصنيف المعالجة: ${category.name}`,
-                href: route('service-categories.edit', category.id),
-            },
-        ];
+        {
+            title: 'فئات تصنيف المعالجات',
+            href: route('service-categories.index'),
+        },
+        {
+            title: `تعديل فئة تصنيف المعالجة: ${category.name}`,
+            href: route('service-categories.edit', category.id),
+        },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -46,24 +59,26 @@ export default function EditServiceCategory({
                 <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <FormInput
-                                            label="اسم الخدمة الطبية"
-                                            name="name"
-                                            type="text"
-                                            value={data.name}
-                                            onChange={(val) => setData('name', val)}
-                                            placeholder="اسم الخدمة"
-                                            error={errors.name}
-                                        />
+                            label="اسم الخدمة الطبية"
+                            name="name"
+                            type="text"
+                            value={data.name}
+                            onChange={(val) => setData('name', val)}
+                            placeholder="اسم الخدمة"
+                            error={errors.name}
+                        />
 
-                                        <FormInput
-                        label="الوصف"
-                        type="textarea"
-                        name="description"
-                        value={data.description}
-                        onChange={(val: string) => setData('description', val)}
-                        placeholder="وصف الخدمة"
-                        error={errors.description}
-                    />
+                        <FormInput
+                            label="الوصف"
+                            type="textarea"
+                            name="description"
+                            value={data.description}
+                            onChange={(val: string) =>
+                                setData('description', val)
+                            }
+                            placeholder="وصف الخدمة"
+                            error={errors.description}
+                        />
                     </div>
                     <div className="flex items-center justify-end space-x-2">
                         <Link
@@ -80,7 +95,7 @@ export default function EditServiceCategory({
                         />
                     </div>
                 </form>
-                </div>
+            </div>
         </AppLayout>
     );
 }

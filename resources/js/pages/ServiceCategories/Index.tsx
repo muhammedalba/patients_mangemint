@@ -4,17 +4,16 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
-import { PaginatedData, type BreadcrumbItem } from '@/types';
+import { PaginatedData, ServiceCategory, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { serviceCategories, auth, flash, filters } = usePage<{
-        serviceCategories: PaginatedData<any>;
+    const { serviceCategories, auth, filters } = usePage<{
+        serviceCategories: PaginatedData<ServiceCategory>;
         auth: { user: { roles: string[] } };
-        flash: { success?: string; error?: string };
         filters: { search?: string };
     }>().props;
 
@@ -22,23 +21,14 @@ export default function Index() {
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
-    const [showToast, setShowToast] = useState(false);
     console.log(serviceCategories, 'serviceCategories');
-
-    useEffect(() => {
-        if (flash?.success) {
-            setShowToast(true);
-            const timer = setTimeout(() => setShowToast(false), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [flash]);
 
     const handleDelete = (id: number): void => {
         router.delete(route('service-categories.destroy', id));
     };
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(false);
-    const [perPage, setPerPage] = useState(10);
+    const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -66,7 +56,7 @@ export default function Index() {
         return () => clearTimeout(handler);
     }, [search]);
 
-    const columns: ColumnDef<any>[] = [
+    const columns: ColumnDef<ServiceCategory>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'name', accessorKey: 'name', header: 'اسم الفئة' },
         {
@@ -108,11 +98,7 @@ export default function Index() {
                     <h1 className="mb-4 text-2xl font-bold">
                         فئات الخدمات الطبية
                     </h1>
-                    {showToast && (
-                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                            {flash?.success || flash?.error}
-                        </div>
-                    )}
+
                     <SearchBar
                         value={search}
                         onChange={handleSearch}

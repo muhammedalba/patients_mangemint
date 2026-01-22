@@ -12,11 +12,10 @@ import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { patients, auth, flash, filters, genders, marital_statuses } =
+    const { patients, auth, filters, genders, marital_statuses } =
         usePage<{
             patients: PaginatedData<Patient>;
             auth: { user: { roles: string[] } };
-            flash: { success?: string; error?: string };
             filters: { search?: string };
         }>().props;
     console.log(patients, 'patients');
@@ -27,15 +26,6 @@ export default function Index() {
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
-    const [showToast, setShowToast] = useState(false);
-
-    useEffect(() => {
-        if (flash?.success) {
-            setShowToast(true);
-            const timer = setTimeout(() => setShowToast(false), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [flash]);
 
     const handleDelete = (id: number): void => {
         router.delete(route('patients.destroy', id));
@@ -44,7 +34,7 @@ export default function Index() {
     const [isLoading, setIsLoading] = useState(true);
     const getAgeFromBirthDate = (birthDate: string): number =>
         new Date().getFullYear() - new Date(birthDate).getFullYear();
-    const [perPage, setPerPage] = useState(10);
+    const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -182,11 +172,6 @@ export default function Index() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">المرضى</h1>
-                    {showToast && (
-                        <div className="animate-fade-in fixed top-4 right-4 z-50 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                            {flash?.success || flash?.error}
-                        </div>
-                    )}
 
                     <SearchBar
                         value={search}

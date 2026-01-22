@@ -3,7 +3,6 @@ import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
-import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import { Appointment, BreadcrumbItem, PageProps, PaginatedData } from '@/types';
 import { Head, router } from '@inertiajs/react';
@@ -11,18 +10,6 @@ import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
-const StatusBadge = ({ status }: { status: Appointment['status'] }) => {
-    const statusClasses = {
-        scheduled: 'bg-blue-500',
-        completed: 'bg-green-500',
-        canceled: 'bg-red-500',
-    };
-    return (
-        <Badge className={`${statusClasses[status]} text-white`}>
-            {status}
-        </Badge>
-    );
-};
 
 export default function Index({
     appointments,
@@ -36,7 +23,7 @@ export default function Index({
 
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [perPage, setPerPage] = useState(10);
+    const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -64,7 +51,7 @@ export default function Index({
         return () => clearTimeout(handler);
     }, [search]);
 
-    const columns: ColumnDef<any>[] = [
+    const columns: ColumnDef<Appointment>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'patient', accessorKey: 'patient.name', header: 'اسم المريض' },
         { id: 'doctor', accessorKey: 'doctor.name', header: 'اسم الطبيب' },

@@ -3,46 +3,22 @@ import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { BreadcrumbItem, Patient, Service, ServiceCategory } from '@/types';
+import { useAppToast } from '@/utils/toast';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent, useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
-interface Tooth {
-    id: number;
-    name: string;
-    tooth_number: string;
-}
-
-interface Patient {
-    id: number;
-    name: string;
-}
-
-interface Service {
-    id: number;
-    name: string;
-    price: number;
-}
-
-interface ServiceCategory {
-    id: number;
-    name: string;
-    services: Service[];
-}
-
 export default function CreateProcedure({
-    teeth,
     patient_id,
     patients,
     services_category,
 }: {
-    teeth: Tooth[];
     patient_id?: number;
     patients: Patient[];
     services_category: ServiceCategory[];
 }) {
-    const { data, setData, post, processing, errors, reset } = useForm<{
+    const { data, setData, post, processing, errors } = useForm<{
         name: string;
         description: string;
         status: string;
@@ -59,19 +35,18 @@ export default function CreateProcedure({
         tooth_id: '',
         patient_id: patient_id?.toString() || '',
         category: '',
-        processing_date: new Date().toISOString().split('T')[0], // تاريخ اليوم افتراضيًا
+        processing_date: new Date().toISOString().split('T')[0],
     });
     console.log('errors', errors);
     console.log('patients', patients);
 
-    const [selectedTreatment, setSelectedTreatment] = useState<Service | null>(
-        null,
-    );
-    const [isLoading, setIsLoading] = useState(false);
+    const [selectedTreatment] = useState<Service | null>(null);
+    const [, setIsLoading] = useState(false);
     const [selectedPatientName, setSelectedPatientName] = useState('');
-    const [selectedPatientId, setSelectedPatientId] = useState<number | null>(
-            patient_id ?? null,
-        );
+    const [, setSelectedPatientId] = useState<number | null>(
+        patient_id ?? null,
+    );
+    const { success, error } = useAppToast();
 
     const handleServiceSelect = (service: { name: string; price: number }) => {
         setData('name', service.name);
@@ -85,22 +60,28 @@ export default function CreateProcedure({
     };
 
     useEffect(() => {
-      if (patients.length === 1) {
-        const patient = patients[0];
-        setSelectedPatientId(patient.id);
-        setSelectedPatientName(patient.name);
-        setData('patient_id', patient.id.toString());
-      }
+        if (patients.length === 1) {
+            const patient = patients[0];
+            setSelectedPatientId(patient.id);
+            setSelectedPatientName(patient.name);
+            setData('patient_id', patient.id.toString());
+        }
     }, [patients]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        console.log(data);
 
-        router.post(route('procedures.store'), data, {
-            onSuccess: () => reset(),
-            onFinish: () => setIsLoading(false),
+        post(route('procedures.store'), {
+            onSuccess: () => {
+                success(
+                    'تم حفظ الإجراء بنجاح',
+                    'تمت إضافة الإجراء إلى جدول الإجراءات',
+                );
+            },
+            onError: () => {
+                error('فشل حفظ الإجراء', 'يرجى التحقق من البيانات المدخلة');
+            },
         });
     };
 
@@ -117,7 +98,7 @@ export default function CreateProcedure({
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                     <h2 className='text-xl text-gray-700'>فئات المعالجات:</h2>
+                    <h2 className="text-xl text-gray-700">فئات المعالجات:</h2>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-6">
                         {services_category.map((category) => (
                             <FormSelect
@@ -146,38 +127,38 @@ export default function CreateProcedure({
                     </div>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <FormInput
-                        label=" اسم الإجراء"
-                        name="name"
-                        value={data.name}
-                        onChange={(e) => setData('name', e)}
-                        placeholder="الاسم الإجراء"
-                        error={errors.name}
-                    />
-
-                    {selectedTreatment && (
-                        <FormInput
-                            label=" المعالجة المختارة"
-                            name="treatment_name"
-                            value={selectedTreatment.name}
+                            label=" اسم الإجراء"
+                            name="name"
+                            value={data.name}
                             onChange={(e) => setData('name', e)}
-                            placeholder="المعالجة المختارة"
+                            placeholder="الاسم الإجراء"
+                            error={errors.name}
                         />
-                    )}
 
-                    <FormInput
-                        label=" كلفة الإجراء"
-                        name="cost"
-                        value={data.cost}
-                        onChange={(e) => setData('cost', e)}
-                        placeholder="كلفة الإجراء"
-                    />
-<FormInput
-                        label=" وصف الإجراء"
-                        name="description"
-                        value={data.description}
-                        onChange={(e) => setData('description', e)}
-                        placeholder="وصف الإجراء"
-                    />
+                        {selectedTreatment && (
+                            <FormInput
+                                label=" المعالجة المختارة"
+                                name="treatment_name"
+                                value={selectedTreatment.name}
+                                onChange={(e) => setData('name', e)}
+                                placeholder="المعالجة المختارة"
+                            />
+                        )}
+
+                        <FormInput
+                            label=" كلفة الإجراء"
+                            name="cost"
+                            value={data.cost}
+                            onChange={(e) => setData('cost', e)}
+                            placeholder="كلفة الإجراء"
+                        />
+                        <FormInput
+                            label=" وصف الإجراء"
+                            name="description"
+                            value={data.description}
+                            onChange={(e) => setData('description', e)}
+                            placeholder="وصف الإجراء"
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -200,6 +181,7 @@ export default function CreateProcedure({
                             onChange={(e) => setData('processing_date', e)}
                             error={errors.processing_date}
                         />
+
                         <FormSelect
                             label="الحالة"
                             name="status"

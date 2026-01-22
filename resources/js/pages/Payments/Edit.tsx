@@ -1,29 +1,41 @@
-import { BreadcrumbItem, PageProps, Patient } from '@/types';
+import { BreadcrumbItem, PageProps, Patient, Payment } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import React from 'react';
-
 import { FormInput } from '@/components/FormInput';
 import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
-import { Payment } from '@/types/payment';
 import { route } from 'ziggy-js';
 import { FormButton } from '@/components/FormButton';
+import { useAppToast } from '@/utils/toast';
 
 interface EditProps extends PageProps {
     payment: Payment;
     patients: Patient[];
 }
 
-const Edit: React.FC<EditProps> = ({ auth, payment, patients }) => {
+const Edit: React.FC<EditProps> = ({ payment, patients }) => {
     const { data, setData, put, errors, processing } = useForm({
         ...payment,
 
         patient_id: String(payment.patient_id),
     });
+    const { success, error } = useAppToast();
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        put(route('payments.update', payment.id));
+        put(route('payments.update', payment.id), {
+            onSuccess: () => {
+            success(
+                'تم تعديل الدفعة بنجاح',
+            );
+        },
+        onError: () => {
+            error(
+                'فشل تعديل الدفعة',
+                'يرجى التحقق من البيانات المدخلة'
+            );
+        },
+        });
     }
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -66,8 +78,8 @@ const Edit: React.FC<EditProps> = ({ auth, payment, patients }) => {
                             label=" قيمة الدفعة"
                             name="amount"
                             type="number"
-                            value={data.amount}
-                            onChange={(val) => setData('amount', val)}
+                            value={data.amount.toString()}
+                            onChange={(val) => setData('amount', Number(val))}
                             error={errors.amount}
                         />
                         <FormInput

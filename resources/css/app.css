@@ -275,6 +275,10 @@
     stroke: black
 }
 
+.tooth-surgery-vertical {
+    fill: black;
+    stroke: black;
+}
 
 .tooth-panel {
     position: fixed;
@@ -326,21 +330,28 @@
     transform-origin: center;
 }
 
-/* الرقم – افتراضي (فك علوي) */
+/* يقلب الفك السفلي فقط */
+.lower-jaw {
+    transform: scaleY(-1);
+}
+
+/* الرقم الافتراضي */
 .tooth-number {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     font-size: 10px;
     color: #4b5563;
-    z-index: 0;
-    top: 0;
+    z-index: 10;
+    top: -28px;
+    /* فوق الفك العلوي */
 }
 
-/* الفك السفلي → الرقم تحت السن */
-.lower .tooth-number {
+/* نصلّح اتجاه الرقم فقط */
+.lower-jaw .tooth-number {
     top: auto;
-    bottom: 0;
+    top: -28px;
+    transform: translateX(-50%) scaleY(-1);
 }
 
 .dental-chart {
@@ -354,30 +365,4 @@
 .row {
     display: flex;
     justify-content: center;
-}
-
-/* الخطوط */
-.divider {
-    position: absolute;
-    background-color: #9ca3af;
-    /* رمادي طبي */
-    pointer-events: none;
-}
-
-/* خط عمودي */
-.divider.vertical {
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 2px;
-    transform: translateX(-50%);
-}
-
-/* خط أفقي */
-.divider.horizontal {
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 2px;
-    transform: translateY(-50%);
 }

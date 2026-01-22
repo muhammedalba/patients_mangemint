@@ -2,15 +2,20 @@ import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, ExpenseCategory } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
+type PageProps = {
+    categories: ExpenseCategory[];
+};
 export default function Create() {
-    const { categories } = usePage<any>().props;
+    const { categories } = usePage<PageProps>().props;
+    const { success, error } = useAppToast();
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         amount: '',
         description: '',
         expense_category_id: '',
@@ -20,7 +25,20 @@ export default function Create() {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        post(route('expenses.store'), { onSuccess: () => reset() });
+        post(route('expenses.store'), {
+            onSuccess: () => {
+            success(
+                'تم حفظ المصروف بنجاح',
+                'تمت إضافة المصروف إلى جدول المصاريف'
+            );
+        },
+        onError: () => {
+            error(
+                'فشل حفظ المصروف',
+                'يرجى التحقق من البيانات المدخلة'
+            );
+        },
+        });
     };
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -54,8 +72,11 @@ export default function Create() {
                             label=" فئة المصروف"
                             name="expense_category_id"
                             value={data.expense_category_id}
-                            onChange={(val: string) =>
-                                setData('expense_category_id', val)
+                            onChange={(val) =>
+                                setData(
+                                    'expense_category_id',
+                                    Array.isArray(val) ? '' : val,
+                                )
                             }
                             options={categories.map((category) => ({
                                 value: String(category.id),
@@ -68,7 +89,12 @@ export default function Create() {
                             label="طريقة الدفع"
                             name="payment_method"
                             value={data.payment_method}
-                            onChange={(val) => setData('payment_method', val)}
+                            onChange={(val) =>
+                                setData(
+                                    'payment_method',
+                                    Array.isArray(val) ? '' : val,
+                                )
+                            }
                             options={[
                                 { value: 'cash', label: 'نقداً' },
                                 { value: 'card', label: 'بطاقة' },

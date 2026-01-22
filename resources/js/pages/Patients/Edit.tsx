@@ -1,16 +1,15 @@
+import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import LoadingPage from '@/components/LoadingPage';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Patient, type BreadcrumbItem } from '@/types';
+import { useAppToast } from '@/utils/toast';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { route } from 'ziggy-js';
 
-export default function EditPatient({ genders, marital_statuses, patient }) {
-    console.log(genders);
-    console.log(marital_statuses);
-
+export default function EditPatient({ patient }: { patient: Patient }) {
     const { data, setData, patch, processing, errors } = useForm({
         name: patient.name || '',
         email: patient.email || '',
@@ -20,17 +19,21 @@ export default function EditPatient({ genders, marital_statuses, patient }) {
         marital_status: patient.marital_status || '',
     });
     const [isLoading, setIsLoading] = useState(false);
+    const { success, error } = useAppToast();
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        try {
-            patch(route('patients.update', patient.id));
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
+        patch(route('patients.update', patient.id), {
+            onSuccess: () => {
+                success(
+                    'تم تعديل بيانات المريض بنجاح',
+                );
+            },
+            onError: () => {
+                error('فشل تعديل بيانات المريض', 'يرجى التحقق من البيانات المدخلة');
+            },
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -62,15 +65,6 @@ export default function EditPatient({ genders, marital_statuses, patient }) {
                         />
 
                         <FormInput
-                            label=" البريد الإلكتروني "
-                            name="name"
-                            value={data.email}
-                            onChange={(val) => setData('email', val)}
-                            placeholder=" البريد الإلكتروني"
-                            error={errors.email}
-                        />
-
-                        <FormInput
                             label=" تاريخ الميلاد"
                             name="birth_date"
                             type="date"
@@ -95,7 +89,12 @@ export default function EditPatient({ genders, marital_statuses, patient }) {
                                 label="الجنس"
                                 name="gender"
                                 value={data.gender}
-                                onChange={(val) => setData('gender', val)}
+                                onChange={(val) => {
+                                    const value = Array.isArray(val)
+                                        ? val[0]
+                                        : val;
+                                    setData('gender', value);
+                                }}
                                 options={[
                                     { value: 'male', label: 'ذكر' },
                                     { value: 'female', label: 'أنثى' },
@@ -107,32 +106,36 @@ export default function EditPatient({ genders, marital_statuses, patient }) {
                                 label="الحالة الاجتماعية"
                                 name="marital_status"
                                 value={data.marital_status}
-                                onChange={(val) =>
-                                    setData('marital_status', val)
-                                }
+                                onChange={(val) => {
+                                    const value = Array.isArray(val)
+                                        ? val[0]
+                                        : val;
+                                    setData('marital_status', value);
+                                }}
                                 options={[
                                     { value: 'single', label: 'عازب' },
                                     { value: 'married', label: 'متزوج' },
                                     { value: 'divorced', label: 'مطلق' },
-                                    { value: 'widow', label: 'أرمل' },
+                                    { value: 'widowed', label: 'أرمل' },
                                 ]}
                                 error={errors.marital_status}
                             />
                         </div>
                     </div>
 
-                    <div className="mt-6 text-right">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className={`rounded-lg px-6 py-2 font-semibold text-white transition-all duration-200 ${
-                                processing
-                                    ? 'cursor-not-allowed bg-blue-400'
-                                    : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
+                    <div className="flex items-center justify-end space-x-2">
+                        <Link
+                            href={route('patients.index')}
+                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
                         >
-                            {processing ? 'جارِ الحفظ ...' : ' حفظ '}
-                        </button>
+                            إنهاء
+                        </Link>
+
+                        <FormButton
+                            processing={processing}
+                            label="حفظ"
+                            loadingLabel="جارِ الحفظ ..."
+                        />
                     </div>
                 </form>
             </div>
