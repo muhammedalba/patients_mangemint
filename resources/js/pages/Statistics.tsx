@@ -1,3 +1,4 @@
+import React from 'react';
 import AppLayout from '@/layouts/app-layout';
 import { Appointment, BreadcrumbItem, PageProps } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
@@ -25,7 +26,8 @@ import {
 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ClockDisplay } from '@/components/ClockDisplay';
+
+const ClockDisplay = React.lazy(() => import('@/components/ClockDisplay').then((module) => ({ default: module.ClockDisplay })));
 
 const Breadcrumbs: BreadcrumbItem[] = [
     {

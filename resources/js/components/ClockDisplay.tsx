@@ -37,7 +37,7 @@ export function ClockDisplay() {
                 <CalendarDays className="h-5 w-5" />
                 <span className="text-lg font-medium">{dateString}</span>
             </div>
-            <h1 className="text-5xl font-bold tracking-tight md:text-7xl font-mono tabular-nums text-white">
+            <h1 className="text-xl font-bold tracking-tight md:text-4xl font-mono tabular-nums text-white">
                 {timeString}
             </h1>
         </>

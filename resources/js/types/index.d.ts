@@ -5,6 +5,7 @@ export type User = {
     password?: string;
     phone?: string;
     roles: UserRole[];
+    avatar?: string;
 };
 
 export type UserRole = {
@@ -232,7 +233,7 @@ export type FinancialSummary = {
 export type NavItem = {
     title: string;
     href: string | ReturnType<typeof dashboard>;
-    icon?: React.ElementType;
+    icon?: import('react').ComponentType<import('lucide-react').LucideProps>;
     color?: string;
     roles?: Role[];
 };
