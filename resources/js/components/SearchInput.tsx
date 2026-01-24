@@ -1,4 +1,5 @@
 import { Patient } from "@/types";
+import { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 interface SearchInputProps {
   label: string;
@@ -10,6 +11,7 @@ interface SearchInputProps {
   placeholder?: string;
   error?: string;
   disabled?: boolean;
+  icon?:LucideIcon
 }
 
 export function SearchInput({
@@ -22,11 +24,12 @@ export function SearchInput({
   placeholder,
   error,
   disabled,
+    icon,
 }: SearchInputProps) {
   const [filtered, setFiltered] = useState<Patient[]>([]);
   const [showList, setShowList] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
+const IconComponent = icon;
   // فلترة أثناء الكتابة
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -63,8 +66,18 @@ export function SearchInput({
   }, []);
 
   return (
-    <div className="relative" ref={containerRef}>
-      <label className="mb-2 block text-gray-700">{label}</label>
+    <div className=" group relative  w-full" ref={containerRef}>
+                 <label
+                htmlFor={name}
+                className={`absolute right-2 flex items-center gap-x-2 bg-white px-1 text-sm text-gray-400 transition-all duration-300 ${value ? 'top-[-0.7rem] text-xs text-blue-700' : 'top-1/4 text-sm text-gray-400'} `}
+            >
+                {IconComponent && (
+                    <span className="mr-1 inline-block ">
+                        <IconComponent size={18} className='text-blue-600 ' />
+                    </span>
+                )}
+                {label}
+            </label>
 
       <input
         type="text"
@@ -73,9 +86,7 @@ export function SearchInput({
         onChange={handleInputChange}
         placeholder={placeholder}
         disabled={disabled}
-        className={`w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-          error ? "border-red-500" : "border-gray-300"
-        }`}
+       className={`peer w-full rounded-xl border border-gray-300 bg-white px-10 py-3 text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none`}
         autoComplete="off"
       />
 

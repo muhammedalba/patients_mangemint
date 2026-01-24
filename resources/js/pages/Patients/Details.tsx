@@ -218,7 +218,7 @@ export default function Show() {
                                 <span className="flex items-center gap-1">
                                     <Calendar className="h-4 w-4" /> التسجيل:{' '}
                                     {new Date(
-                                        patient.medical_record.created_at,
+                                        patient?.medical_record?.created_at,
                                     ).toLocaleDateString()}
                                 </span>
                             </div>

@@ -1,52 +1,67 @@
+import { LucideIcon } from "lucide-react";
+
 interface FormSelectProps<T extends string> {
-  label: string;
-  name: string;
-  value: T | T[]; // allow array for multiple
-  onChange: (value: T | T[]) => void;
-  options: { value: T; label: string }[];
-  error?: string;
-  multiple?: boolean;
+    label: string;
+    name: string;
+    value: T | T[]; // allow array for multiple
+    onChange: (value: T | T[]) => void;
+    options: { value: T; label: string }[];
+    error?: string;
+    multiple?: boolean;
+    icon?:LucideIcon;
 }
 
 export function FormSelect<T extends string>({
-  label,
-  name,
-  value,
-  onChange,
-  options,
-  error,
-  multiple = false,
+    label,
+    name,
+    value,
+    onChange,
+    options,
+    error,
+    multiple = false,
+    icon,
 }: FormSelectProps<T>) {
-  return (
-    <div>
-      <label htmlFor={name} className="mb-2 block text-gray-700">
-        {label}
-      </label>
-      <select
-        id={name}
-        name={name}
-        multiple={multiple}
-        value={value}
-        onChange={(e) => {
-          if (multiple) {
-            const selected = Array.from(e.target.selectedOptions).map(
-              (opt) => opt.value as T
-            );
-            onChange(selected);
-          } else {
-            onChange(e.target.value as T);
-          }
-        }}
-        className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-      >
-        {!multiple && <option value="">{label}</option>}
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
-    </div>
-  );
+    const IconComponent = icon;
+    return (
+        <div className="group relative w-full h-fit">
+            <label
+                htmlFor={name}
+                className={`pointer-events-none absolute right-2 rounded-2xl p-1 flex items-center gap-x-2 bg-white px-1 text-sm text-gray-400 transition-all duration-300 ${value || name == 'start_time' ? '-top-4 text-xs text-blue-700' : 'top-1/5 text-sm text-gray-400'} `}
+            >
+                {IconComponent && (
+                    <span className="mr-1 inline-block text-blue-400">
+                       <IconComponent size={16} />
+                    </span>
+                )}
+                {label}
+            </label>
+
+            <select
+                id={name}
+                name={name}
+                multiple={multiple}
+                value={value}
+                onChange={(e) => {
+                    if (multiple) {
+                        const selected = Array.from(
+                            e.target.selectedOptions,
+                        ).map((opt) => opt.value as T);
+                        onChange(selected);
+                    } else {
+                        onChange(e.target.value as T);
+                    }
+                }}
+                className={`peer w-full appearance-none rounded-xl border border-gray-300 bg-white px-3 py-3 text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none`}
+            >
+                {/* {!multiple && <option value="">{label}</option>} */}
+                {options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                    </option>
+                ))}
+            </select>
+
+            {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+        </div>
+    );
 }

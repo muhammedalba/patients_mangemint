@@ -5,6 +5,7 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, Procedure, type BreadcrumbItem } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
@@ -19,6 +20,7 @@ export default function Index(filters: { search?: string }) {
     }>().props;
     const [search, setSearch] = useState(filters.search || '');
     const canDeleteRoles = ['doctor', 'admin'];
+     const { success, error } = useAppToast();
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
@@ -87,7 +89,14 @@ export default function Index(filters: { search?: string }) {
         },
     ];
     const handleDelete = (id: number): void => {
-        router.delete(route('procedures.destroy', id));
+        router.delete(route('procedures.destroy', id),{
+            onSuccess: () => {
+                success('تم حذف الإجراء بنجاح');
+            },
+            onError: () => {
+                error('فشل حذف الإجراء', 'يرجى المحاولة مرة أخرى لاحقًا');
+            },
+        });
     };
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -121,6 +130,8 @@ export default function Index(filters: { search?: string }) {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 text-right">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">الإجراءات</h1>
+                 <section className="p-4">
+
                     <SearchBar
                         value={search}
                         onChange={handleSearch}
@@ -128,9 +139,10 @@ export default function Index(filters: { search?: string }) {
                         showButton={true}
                         buttonLabel="إضافة إجراء"
                         buttonRoute="procedures.create"
+                        className='mb-7'
                     />
 
-                    <section className="p-4">
+
                         <DynamicTable
                             data={[...procedures.data]}
                             columns={columns}

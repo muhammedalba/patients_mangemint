@@ -23,7 +23,7 @@ class ProcedureService
 
     public function update(Procedure $procedure, ProcedureData $data): Procedure
     {
-
+     
         return $this->repo->update($procedure, $data->toArray());
     }
 

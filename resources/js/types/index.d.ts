@@ -26,9 +26,9 @@ export type ToothStatus =
     | 'implant';
 
 export interface Tooth {
-    id: number;
+    id: string;
     patient_id: number;
-    tooth_number: number;
+    tooth_number: string;
     status: string;
 }
 
@@ -38,8 +38,8 @@ export type Patient = {
     email?: string;
     phone?: string;
     birth_date: string;
-    gender: 'male' | 'female' | 'other';
-    marital_status: 'single' | 'married' | 'divorced' | 'widowed';
+    gender: 'male' | 'female';
+    marital_status: 'single' | 'married' ;
 };
 
 export type Procedure = {
@@ -53,8 +53,10 @@ export type Procedure = {
     patient: Patient;
     patient_id: number;
     status: string;
-    processing_date: Date;
+    processing_date: string;
     follow_up_days: number;
+    category?: string;
+    service_id?: number;
 };
 
 export type Appointment = {
@@ -70,6 +72,10 @@ export type Appointment = {
     doctor?: User;
     start_time: string;
     end_time: string;
+    service?: {
+        id: number;
+        name: string;
+    };
 };
 
 export type PageProps<

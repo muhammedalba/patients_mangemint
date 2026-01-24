@@ -1,7 +1,9 @@
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { Appointment, BreadcrumbItem, PageProps } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState, useMemo } from 'react';
+import type { LucideIcon } from "lucide-react";
+
 import {
     Card,
     CardContent,
@@ -32,8 +34,11 @@ const Breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+
+type StatisticsProps = PageProps<{ stats: { appointmentsToday: Appointment[]; }; }>;
 export default function Statistics() {
-    const { stats } = usePage().props as any;
+const { stats } = usePage<StatisticsProps>().props;
+
     const [now, setNow] = useState(new Date());
 
     useEffect(() => {
@@ -65,15 +70,15 @@ export default function Statistics() {
     return (
         <AppLayout breadcrumbs={Breadcrumbs}>
              <Head title="جدول اليوم" />
-            
+
             <div className="flex min-h-screen flex-1 flex-col gap-6 bg-slate-50/50 p-6 pt-2 font-sans">
-                
+
                 {/* Hero Clock Section */}
                 <div className="relative overflow-hidden rounded-3xl bg-slate-900 p-8 text-white shadow-lg ring-1 ring-slate-900/5">
                      {/* Abstract Background Decoration */}
                     <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
                     <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-teal-500/10 blur-3xl" />
-                    
+
                     <div className="relative z-10 flex flex-col items-center justify-center gap-2 text-center md:flex-row md:justify-between md:text-right">
                         <div>
                             <div className="flex items-center gap-2 text-indigo-300 mb-1">
@@ -84,7 +89,7 @@ export default function Statistics() {
                                 {timeString}
                             </h1>
                         </div>
-                        
+
                         <div className="mt-4 flex items-center gap-4 md:mt-0">
                            <div className="text-center rounded-2xl bg-white/10 p-4 backdrop-blur-sm ring-1 ring-white/20">
                                 <div className="text-3xl font-bold">{stats.appointmentsToday?.length || 0}</div>
@@ -116,7 +121,7 @@ export default function Statistics() {
     );
 }
 
-function PremiumAppointmentsTable({ appointments }: { appointments: any[] }) {
+function PremiumAppointmentsTable({ appointments }: { appointments: Appointment[] }) {
     if (!appointments || appointments.length === 0) {
         return (
              <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -133,7 +138,7 @@ function PremiumAppointmentsTable({ appointments }: { appointments: any[] }) {
         <Table>
             <TableHeader className="bg-slate-50/80">
                 <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[180px] text-right font-semibold text-slate-600">الوقت</TableHead>
+                    <TableHead className="w-45 text-right font-semibold text-slate-600">الوقت</TableHead>
                     <TableHead className="text-right font-semibold text-slate-600">المريض</TableHead>
                     <TableHead className="text-right font-semibold text-slate-600">الطبيب</TableHead>
                     <TableHead className="text-right font-semibold text-slate-600">الخدمة</TableHead>
@@ -171,7 +176,7 @@ function PremiumAppointmentsTable({ appointments }: { appointments: any[] }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-    const config: Record<string, { icon: any, style: string, label: string }> = {
+    const config: Record<string, { icon: LucideIcon, style: string, label: string }> = {
         confirmed: { icon: CheckCircle2, style: "bg-emerald-100 text-emerald-700 border-emerald-200", label: "مؤكد" },
         completed: { icon: CheckCircle2, style: "bg-blue-100 text-blue-700 border-blue-200", label: "مكتمل" },
         cancelled: { icon: XCircle, style: "bg-rose-100 text-rose-700 border-rose-200", label: "ملغى" },

@@ -60,11 +60,11 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             PatientSeeder::class,
-            ToothSeeder::class,
-            ServiceCategorySeeder::class,
-            ServiceSeeder::class,
-            ProcedureSeeder::class,
-            MedicalRecordSeeder::class,
+            // ToothSeeder::class,
+            // ServiceCategorySeeder::class,
+            // ServiceSeeder::class,
+            // ProcedureSeeder::class,
+            // MedicalRecordSeeder::class,
         ]);
     }
 }

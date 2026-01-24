@@ -6,18 +6,27 @@ import LoadingPage from '@/components/LoadingPage';
 import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
 import {
+    CalendarDays,
+    CheckCircle,
+    ClipboardList,
+    Clock,
+    Stethoscope,
+    Timer,
+    User,
+} from 'lucide-react';
+import {
     Appointment,
     AppointmentSlot,
     BreadcrumbItem,
     PageProps,
     Patient,
     Procedure,
-    User,
+
 } from '@/types';
 import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Edit({
@@ -28,7 +37,7 @@ export default function Edit({
     appointment: Appointment;
     patients: Patient[];
     patient: Patient;
-    doctors: User[];
+    doctors: any[];
     services: Procedure[];
 }>) {
     const { data, setData, put, errors, processing } = useForm({
@@ -42,12 +51,12 @@ export default function Edit({
     });
 
     const [isLoading, setIsLoading] = useState(false);
-    const [availableAppointments, setAvailableAppointments] = useState<AppointmentSlot[]>(
-        [],
-    );
+    const [availableAppointments, setAvailableAppointments] = useState<
+        AppointmentSlot[]
+    >([]);
     const { success, error } = useAppToast();
 
-    const fetchAvailableSlots = async () => {
+    const fetchAvailableSlots = useCallback(async () => {
         if (!data.date) {
             setAvailableAppointments([]);
             return;
@@ -70,28 +79,24 @@ export default function Edit({
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [data.date, data.duration_slots]);
 
     useEffect(() => {
         fetchAvailableSlots();
-    }, [data.date, data.duration_slots]);
+    }, [fetchAvailableSlots]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         put(route('appointments.update', appointment.id), {
             onSuccess: () => {
-            success(
-                'تم تعديل الموعد بنجاح',
-            );
-        },
-        onError: () => {
-            error(
-                'فشل تعديل الموعد',
-                'يرجى التحقق من البيانات المدخلة'
-            );
-        },
+                success('تم تعديل الموعد بنجاح');
+            },
+            onError: () => {
+                error('فشل تعديل الموعد', 'يرجى التحقق من البيانات المدخلة');
+            },
         });
     };
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'المواعيد', href: route('appointments.index') },
         {
@@ -114,7 +119,7 @@ export default function Edit({
                 <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <SearchInput
-                            label="اسم المريض"
+                            label="ابحث باسم المريض..."
                             name="patient_id"
                             value={
                                 patients.find(
@@ -126,7 +131,8 @@ export default function Edit({
                             onSelect={(patient) =>
                                 setData('patient_id', patient.id.toString())
                             }
-                            placeholder="ابحث باسم المريض..."
+
+                            icon={User}
                             error={errors.patient_id}
                         />
 
@@ -144,6 +150,7 @@ export default function Edit({
                                 value: String(doctor.id),
                                 label: doctor.name,
                             }))}
+                            icon={Stethoscope}
                             error={errors.user_id}
                         />
 
@@ -154,6 +161,7 @@ export default function Edit({
                             value={data.date}
                             onChange={(val) => setData('date', val)}
                             error={errors.date}
+                            icon={CalendarDays}
                         />
 
                         <FormSelect
@@ -173,6 +181,7 @@ export default function Edit({
                                     label: `${slot.start} - ${slot.end}`,
                                 })) ?? []),
                             ]}
+                            icon={Clock}
                             error={errors.start_time}
                         />
 
@@ -191,6 +200,7 @@ export default function Edit({
                                 { value: 'completed', label: 'Completed' },
                                 { value: 'canceled', label: 'Canceled' },
                             ]}
+                            icon={ClipboardList}
                             error={errors.status}
                         />
 
@@ -202,6 +212,7 @@ export default function Edit({
                             onChange={(val: string) =>
                                 setData('duration_slots', Number(val))
                             }
+                            icon={Timer}
                             error={errors.duration_slots}
                         />
 
@@ -213,6 +224,7 @@ export default function Edit({
                             placeholder="الملاحظات"
                             error={errors.notes}
                             rows={4}
+                            icon={CheckCircle}
                         />
                     </div>
 

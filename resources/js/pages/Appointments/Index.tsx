@@ -5,6 +5,7 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { Appointment, BreadcrumbItem, PageProps, PaginatedData } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
@@ -24,6 +25,7 @@ export default function Index({
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [perPage] = useState(10);
+      const { success, error } = useAppToast();
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -87,7 +89,14 @@ export default function Index({
     ];
 
     const handleDelete = (id: number) => {
-        router.delete(route('appointments.destroy', id));
+        router.delete(route('appointments.destroy', id),{
+            onSuccess: () => {
+                success('تم حذف الموعد بنجاح');
+            },
+            onError: () => {
+                error('فشل حذف الموعد، يرجى المحاولة مرة أخرى لاحقًا');
+            },
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -113,8 +122,8 @@ export default function Index({
                     buttonRoute="appointments.create"
                 />
             </div>
-
             <section className="p-4">
+
                 <DynamicTable data={[...appointments.data]} columns={columns} />
             </section>
 

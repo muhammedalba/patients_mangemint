@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { ClipboardClock, PhoneCall, User } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
@@ -65,6 +66,7 @@ export default function CreatePatient() {
                             value={data.name}
                             onChange={(val) => setData('name', val)}
                             placeholder="الاسم الكامل"
+                            icon={User}
                             error={errors.name}
                         />
 
@@ -75,6 +77,7 @@ export default function CreatePatient() {
                             value={data.phone ?? ''}
                             onChange={(val) => setData('phone', val)}
                             placeholder="رقم الهاتف"
+                            icon={PhoneCall}
                             error={errors.phone}
                         />
 
@@ -84,6 +87,7 @@ export default function CreatePatient() {
                             type="date"
                             value={data.birth_date}
                             onChange={(val) => setData('birth_date', val)}
+                            icon={ClipboardClock}
                             error={errors.birth_date}
                         />
 
@@ -99,6 +103,7 @@ export default function CreatePatient() {
                                 { value: 'male', label: 'ذكر' },
                                 { value: 'female', label: 'أنثى' },
                             ]}
+                            icon={User}
                             error={errors.gender}
                         />
 
@@ -116,6 +121,7 @@ export default function CreatePatient() {
                                 { value: 'divorced', label: 'مطلق' },
                                 { value: 'widow', label: 'أرمل' },
                             ]}
+                            icon={User}
                             error={errors.marital_status}
                         />
                     </div>

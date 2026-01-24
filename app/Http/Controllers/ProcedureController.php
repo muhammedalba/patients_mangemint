@@ -74,17 +74,20 @@ class ProcedureController extends Controller
         // ensure we have the relations loaded via service to mirror repository behavior with patient
         // $procedure = $this->service->find($procedure->id) ?? $procedure;
 
+        $patient=Patient::select('id','name')->find($procedure->patient_id);
+
         $teeth = Tooth::select('id', 'tooth_number', 'patient_id')
             ->where('patient_id', $procedure->patient_id)
             ->get();
 
-        $services_category = ServiceCategory::with('services:category_id,id,name')
+        $services_category = ServiceCategory::with('services:category_id,id,name,price')
             ->select('id', 'name')->latest('name')
             ->get();
 
         return Inertia::render('Procedures/Edit', [
             'procedure' => $procedure,
             'teeth' => $teeth,
+            'patient' => $patient,
             'services_category' => $services_category,
         ]);
     }
@@ -96,12 +99,11 @@ class ProcedureController extends Controller
         $data = ProcedureData::fromValidated($request->validated());
 
 
+   
+        
         $this->service->update($procedure, $data);
-
-        $tooth = Tooth::select('tooth_number', 'id', 'patient_id')->find($data->tooth_id);
-
         return redirect()
-            ->route('patients.details', $tooth->patient_id)
+            ->route('patients.details', $procedure->patient_id)
             ->with('success', 'Procedure updated successfully.');
     }
 

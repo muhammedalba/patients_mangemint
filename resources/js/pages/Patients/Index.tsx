@@ -6,18 +6,21 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem, type Patient } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { patients, auth, filters, genders, marital_statuses } =
-        usePage<{
-            patients: PaginatedData<Patient>;
-            auth: { user: { roles: string[] } };
-            filters: { search?: string };
-        }>().props;
+    const { patients, auth, filters, genders, marital_statuses } = usePage<{
+        patients: PaginatedData<Patient>;
+        auth: { user: { roles: string[] } };
+        filters: { search?: string };
+    }>().props;
+    const { success, error } = useAppToast();
+
+    
     console.log(patients, 'patients');
     console.log(genders, 'genders');
     console.log(marital_statuses, 'marital_statuses');
@@ -28,7 +31,14 @@ export default function Index() {
     );
 
     const handleDelete = (id: number): void => {
-        router.delete(route('patients.destroy', id));
+        router.delete(route('patients.destroy', id), {
+            onSuccess: () => {
+                success('تم حذف المريض بنجاح');
+            },
+            onError: () => {
+                error('فشل حذف المريض', 'يرجى المحاولة مرة أخرى لاحقًا');
+            },
+        });
     };
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
@@ -172,23 +182,29 @@ export default function Index() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">المرضى</h1>
-
-                    <SearchBar
-                        value={search}
-                        onChange={handleSearch}
-                        showSearch={true}
-                        showButton={true}
-                        buttonLabel="إضافة مريض"
-                        buttonRoute="patients.create"
-                    />
                     <section className="p-4">
+                        <SearchBar
+                            value={search}
+                            onChange={handleSearch}
+                            showSearch={true}
+                            showButton={true}
+                            buttonLabel="إضافة مريض"
+                            buttonRoute="patients.create"
+                            className='mb-7'
+                        />
+
                         <DynamicTable
                             data={[...patients.data]}
                             columns={columns}
                         />
                     </section>
 
-                    <Pagination links={patients.links} search={search} perPage={perPage} baseRoute='/patients'/>
+                    <Pagination
+                        links={patients.links}
+                        search={search}
+                        perPage={perPage}
+                        baseRoute="/patients"
+                    />
                 </div>
             </div>
         </AppLayout>
