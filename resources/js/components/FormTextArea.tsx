@@ -29,7 +29,7 @@ export function FormTextArea({
         <div className={`relative ${className}`}>
             <label
                 htmlFor={name}
-                className={`absolute right-2 flex items-center gap-x-2 rounded-2xl bg-white px-3 py-1 text-sm text-gray-400 transition-all duration-300 ${value ? '-top-4 text-xs text-blue-700' : 'top-4 text-sm text-gray-400'} `}
+                className={`pointer-events-none absolute right-2 flex items-center gap-x-2 rounded-2xl bg-white px-3 py-1 text-sm text-gray-400 transition-all duration-500 ${value ? '-top-4 text-xs text-blue-700 w-fit' : 'top-4 text-sm text-gray-400 w-1/2' } `}
             >
                 {IconComponent && (
                     <IconComponent className="mr-2 inline h-4 text-blue-500" />

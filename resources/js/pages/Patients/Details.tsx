@@ -72,7 +72,7 @@ export default function Show() {
     const teethMap = useMemo(() => {
         const map = new Map<number, number>();
         patient?.teeth?.forEach((tooth: Tooth) => {
-            map.set(tooth.id, tooth.tooth_number);
+            map.set(Number(tooth.id), Number(tooth.tooth_number));
         });
         return map;
     }, [patient?.teeth]);
@@ -171,7 +171,7 @@ export default function Show() {
         const tooth = patient.teeth.find(
             (t) => String(t.tooth_number) === String(toothNumber),
         );
-        return tooth?.id ?? 0;
+        return (Number(tooth?.id)) ?? 0;
     }
 
     function addProcedureOptimistic(procedure: Procedure) {

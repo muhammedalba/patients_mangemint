@@ -1,4 +1,4 @@
-import { patientDetails, Procedure, ServiceCategory } from '@/types';
+import {  patientDetails, Procedure, ServiceCategory } from '@/types';
 import { Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
@@ -53,12 +53,12 @@ export default function FormProcedure({
         name: data.name,
         cost: Number(data.cost),
         duration_minutes: data.duration_minutes,
-        tooth: patient.teeth.find(t => t.id === toothId)!,
+        tooth: patient.teeth.find(t => t.id.toString() === toothId.toString())!,
         patient: patient,
         patient_id: patient.id,
         status: data.status,
         tooth_id: data.tooth_id ?? undefined,
-       processing_date: new Date(data.processing_date),
+       processing_date: new Date(data.processing_date).toISOString(),
        follow_up_days: data.follow_up_days,
     };
 

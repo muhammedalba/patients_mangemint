@@ -1,5 +1,8 @@
+import { memo } from 'react';
 import { Link as InertiaLink } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import { Pencil, Eye, Trash2 } from 'lucide-react';
+
 import ConfirmDialog from './ConfirmDialog';
 import { IconTooltip } from './IconToolTip';
 
@@ -19,7 +22,7 @@ interface TableActionsProps {
     onDelete?: (id: number) => void;
 }
 
-export default function TableActions({
+function TableActions({
     item,
     routes,
     showEdit = true,
@@ -29,42 +32,60 @@ export default function TableActions({
     onDelete,
 }: TableActionsProps) {
     return (
-        <div className="flex gap-2 px-2 py-1 text-center">
+        <div className="flex items-start gap-2 px-2 py-1">
+            
+            {/* Edit */}
             {showEdit && routes.edit && (
                 <IconTooltip label="تعديل">
                     <InertiaLink
                         href={route(routes.edit, item.id)}
-                        className="text-xs font-bold text-gray-700"
+                        className="rounded-md p-1.5 text-slate-600 transition
+                                   hover:bg-indigo-50 hover:text-indigo-600
+                                   focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        aria-label="Edit"
                     >
-                        <i className="material-icons">edit</i>
+                        <Pencil className=" text-blue-400 hover:text-blue-600 transition-colors" size={20} />
                     </InertiaLink>
                 </IconTooltip>
             )}
 
+            {/* View */}
             {showView && routes.view && (
                 <IconTooltip label="عرض">
                     <InertiaLink
                         href={route(routes.view, item.id)}
-                        className="text-xs font-bold text-blue-500"
+                        className="rounded-md p-1.5 text-slate-600 transition
+                                   hover:bg-sky-50 hover:text-sky-600
+                                   focus:outline-none focus:ring-2 focus:ring-sky-300"
+                        aria-label="View"
                     >
-                        <i className="material-icons">visibility</i>
+                        <Eye className=" text-green-400 hover:text-green-600 transition-colors" size={20} />
                     </InertiaLink>
                 </IconTooltip>
             )}
 
-            {showDelete && routes.delete && (
+            {/* Delete */}
+            {showDelete && routes.delete && onDelete && (
                 <ConfirmDialog
                     title="تأكيد الحذف"
                     description={confirmMessage}
                     onConfirm={() => onDelete(item.id)}
                 >
-                    <button className="cursor-pointer text-xs font-bold text-red-500">
-                        <IconTooltip label="حذف">
-                            <i className="material-icons">delete</i>
-                        </IconTooltip>
-                    </button>
+                    <IconTooltip label="حذف">
+                        <button
+                            type="button"
+                            className="rounded-md p-1.5 text-rose-600 transition
+                                       hover:bg-rose-50 hover:text-rose-700
+                                       focus:outline-none focus:ring-2 focus:ring-rose-300"
+                            aria-label="Delete"
+                        >
+                            <Trash2 size={20} />
+                        </button>
+                    </IconTooltip>
                 </ConfirmDialog>
             )}
         </div>
     );
 }
+
+export default memo(TableActions);

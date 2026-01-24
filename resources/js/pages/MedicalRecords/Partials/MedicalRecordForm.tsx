@@ -1,43 +1,21 @@
-import { FormButton } from '@/components/FormButton';
-import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
-import { FormTextArea } from '@/components/FormTextArea';
-import InputError from '@/components/input-error';
 import { SearchInput } from '@/components/SearchInput';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { MedicalRecord, Patient, User } from '@/types';
 import { useAppToast } from '@/utils/toast';
-import { Tab } from '@headlessui/react';
-import { Link, useForm } from '@inertiajs/react';
-import {
-    Activity,
-    AlertCircle,
-    Baby,
-    ClipboardList,
-    FileText,
-    Heart,
-    Image as ImageIcon,
-    Paperclip,
-    Pill,
-    Stethoscope,
-    User as UserIcon,
-    X,
-} from 'lucide-react';
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import { useForm, router } from '@inertiajs/react';
+import { Stethoscope, User as UserIcon } from 'lucide-react';
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
+import { DentalHistoryTab } from './DentalHistoryTab';
+import { FilesTab } from './FilesTab';
+import { FormFooter } from './FormFooter';
+import { GeneralHealthTab } from './GeneralHealthTab';
+import { MedicationsTab } from './MedicationsTab';
+import { tabs } from './MedicalRecordFormConfig';
+
 
 interface Props {
     patients: Patient[];
@@ -52,8 +30,6 @@ export default function MedicalRecordForm({
     medicalRecord,
     submitLabel = 'حفظ السجل',
 }: Props) {
-    console.log(patients);
-
     const { data, setData, post, errors, processing } = useForm({
         _method: medicalRecord ? 'PUT' : 'POST',
         patient_id: medicalRecord?.patient_id || '',
@@ -90,18 +66,18 @@ export default function MedicalRecordForm({
         clinical_notes: medicalRecord?.clinical_notes || '',
     });
 
-    const [existingAttachments, setExistingAttachments] = useState(
+    const [existingAttachments, setExistingAttachments] = useState<any[]>(
         medicalRecord?.attachments || [],
     );
-    const [existingImages, setExistingImages] = useState(
+    const [existingImages, setExistingImages] = useState<any[]>(
         medicalRecord?.images || [],
     );
     const [selectedPatientName, setSelectedPatientName] = useState('');
 
-    const ImagesErrors = Object.entries(errors)
+    const imagesErrors = Object.entries(errors)
         .filter(([key]) => key.startsWith('images.'))
         .map(([, value]) => value);
-    const AttachmentsErrors = Object.entries(errors)
+    const attachmentsErrors = Object.entries(errors)
         .filter(([key]) => key.startsWith('attachments.'))
         .map(([, value]) => value);
 
@@ -115,14 +91,13 @@ export default function MedicalRecordForm({
 
     useEffect(() => {
         if (medicalRecord && patients.length > 0) {
-            // find the patient name from patients list
             const patient = patients.find(
                 (p) => p.id === medicalRecord.patient_id,
             );
             setData('patient_id', medicalRecord.patient_id.toString());
             setSelectedPatientName(patient?.name || '');
         }
-        if (!medicalRecord && patients.length == 1) {
+        if (!medicalRecord && patients.length === 1) {
             setData('patient_id', patients[0].id.toString());
             setSelectedPatientName(patients[0]?.name || '');
         }
@@ -139,7 +114,6 @@ export default function MedicalRecordForm({
 
         post(url, {
             forceFormData: true,
-
             onSuccess: () => {
                 success(
                     medicalRecord
@@ -147,77 +121,56 @@ export default function MedicalRecordForm({
                         : 'تم إنشاء السجل الطبي بنجاح',
                 );
             },
-
             onError: () => {
                 error('فشل حفظ السجل الطبي', 'يرجى التحقق من البيانات المدخلة');
             },
         });
     }
 
-    const handleDeleteAttachment = (attachment: File) => {
-        setData('deleted_attachments', [
-            ...data.deleted_attachments,
-            attachment,
-        ]);
-        setExistingAttachments((prev) =>
-            prev.filter((att) => att !== attachment),
-        );
+    const handleDeleteAttachment = (attachment: any) => {
+        if (medicalRecord) {
+            router.delete(route('medical-records.delete-file', medicalRecord.id), {
+                data: { path: attachment, type: 'attachments' },
+                preserveScroll: true,
+                onSuccess: () => {
+                    setExistingAttachments((prev) =>
+                        prev.filter((att) => att !== attachment),
+                    );
+                },
+            });
+        } else {
+            setData('deleted_attachments', [
+                ...data.deleted_attachments,
+                attachment,
+            ]);
+            setExistingAttachments((prev) =>
+                prev.filter((att) => att !== attachment),
+            );
+        }
     };
 
-    const handleDeleteImage = (image: File) => {
-        setData('deleted_images', [...data.deleted_images, image]);
-        setExistingImages((prev) => prev.filter((img) => img !== image));
+    const handleDeleteImage = (image: any) => {
+        if (medicalRecord) {
+            router.delete(route('medical-records.delete-file', medicalRecord.id), {
+                data: { path: image, type: 'images' },
+                preserveScroll: true,
+                onSuccess: () => {
+                    setExistingImages((prev) =>
+                        prev.filter((img) => img !== image),
+                    );
+                },
+            });
+        } else {
+            setData('deleted_images', [...data.deleted_images, image]);
+            setExistingImages((prev) => prev.filter((img) => img !== image));
+        }
     };
-
-    // --- Configurations ---
-    const tabs = [
-        { name: 'التاريخ السني', icon: Stethoscope, id: 'dental' },
-        { name: 'الصحة العامة', icon: Heart, id: 'health' },
-        { name: 'أدوية وحساسية', icon: Pill, id: 'meds' },
-        { name: 'ملاحظات وملفات', icon: FileText, id: 'files' },
-    ];
-
-    const generalHealthChecks = [
-        { key: 'has_diabetes', label: 'السكري', icon: Activity },
-        { key: 'has_hypertension', label: 'ضغط الدم', icon: Activity },
-        {
-            key: 'has_cardiovascular_disease',
-            label: 'أمراض القلب',
-            icon: Heart,
-        },
-        {
-            key: 'has_respiratory_disease',
-            label: 'أمراض تنفسية',
-            icon: Activity,
-        },
-        {
-            key: 'has_gastrointestinal_disease',
-            label: 'أمراض هضمية',
-            icon: Activity,
-        },
-        { key: 'has_neural_disease', label: 'أمراض عصبية', icon: Activity },
-        { key: 'has_hepatic_disease', label: 'أمراض الكبد', icon: Activity },
-        { key: 'has_renal_disease', label: 'أمراض الكلى', icon: Activity },
-        { key: 'has_endocrine_disease', label: 'الغدد الصماء', icon: Activity },
-        {
-            key: 'abnormal_bleeding_history',
-            label: 'نزيف غير طبيعي',
-            icon: AlertCircle,
-        },
-        {
-            key: 'hospitalized_or_operated',
-            label: 'عمليات سابقة',
-            icon: Activity,
-        },
-    ];
-    console.log(errors);
 
     return (
         <form
             onSubmit={handleSubmit}
             className="mx-auto max-w-6xl gap-6 font-sans"
         >
-            {/* Header / Meta Info */}
             <Card className="mb-6 border-slate-200 shadow-sm">
                 <CardHeader className="pb-4">
                     <CardTitle className="flex items-center gap-2 text-xl font-bold text-slate-800">
@@ -256,10 +209,9 @@ export default function MedicalRecordForm({
                 </CardContent>
             </Card>
 
-            <Tab.Group>
+            <TabGroup>
                 <div className="flex flex-col gap-6 md:flex-row md:items-start">
-                    {/* Sidebar Tabs (Vertical on Desktop, Horizontal Scroll on Mobile) */}
-                    <Tab.List className="flex w-full shrink-0 flex-row gap-2 overflow-x-auto rounded-xl bg-white p-2 shadow-sm ring-1 ring-slate-200 md:w-64 md:flex-col">
+                    <TabList className="flex w-full shrink-0 flex-row gap-2 overflow-x-auto rounded-xl bg-white p-2 shadow-sm ring-1 ring-slate-200 md:w-64 md:flex-col">
                         {tabs.map((tab) => (
                             <Tab as={Fragment} key={tab.name}>
                                 {({ selected }) => (
@@ -289,471 +241,54 @@ export default function MedicalRecordForm({
                                 )}
                             </Tab>
                         ))}
-                    </Tab.List>
+                    </TabList>
 
-                    {/* Panels */}
-                    <Tab.Panels className="flex-1">
-                        {/* 1. Dental History */}
-                        <Tab.Panel className="space-y-6 focus:outline-none">
-                            <Card className="border-slate-200 shadow-sm">
-                                <CardHeader>
-                                    <CardTitle>الشكوى والتاريخ السني</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    <FormTextArea
-                                        label="الشكوى الرئيسية (Chief Complaint)"
-                                        name="chief_complaint"
-                                        icon={ClipboardList}
-                                        value={data.chief_complaint.toString()}
-                                        onChange={(val) =>
-                                            setData('chief_complaint', val)
-                                        }
-                                        error={errors.chief_complaint}
-                                        placeholder="ألم شديد في الجهة اليمنى، حساسية، إلخ..."
-                                        rows={4}
-                                        className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
-                                    />
-                                    <Separator />
-                                    <div className="space-y-2">
-                                        <FormTextArea
-                                            label="تاريخ المرض الحالي"
-                                            name="present_illness_history"
-                                            icon={ClipboardList}
-                                            value={data.present_illness_history}
-                                            onChange={(val) =>
-                                                setData(
-                                                    'present_illness_history',
-                                                    val,
-                                                )
-                                            }
-                                            error={
-                                                errors.present_illness_history
-                                            }
-                                            rows={4}
-                                            className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <FormTextArea
-                                            label="التاريخ السني السابق (Past Dental History)"
-                                            placeholder="علاجات سابقة، قلع، تقويم..."
-                                            name="past_dental_history"
-                                            icon={ClipboardList}
-                                            value={data.past_dental_history}
-                                            onChange={(val) =>
-                                                setData(
-                                                    'past_dental_history',
-                                                    val,
-                                                )
-                                            }
-                                            error={errors.past_dental_history}
-                                            rows={4}
-                                            className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
-                                        />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Tab.Panel>
+                    <TabPanels className="flex-1">
+                        <TabPanel className="space-y-6 focus:outline-none">
+                            <DentalHistoryTab
+                                data={data}
+                                setData={setData as any}
+                                errors={errors as any}
+                            />
+                        </TabPanel>
 
-                        {/* 2. General Health */}
-                        <Tab.Panel className="space-y-6 focus:outline-none">
-                            <Card className="border-slate-200 shadow-sm">
-                                <CardHeader>
-                                    <CardTitle>الحالة الصحية العامة</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                        {generalHealthChecks.map((item) => (
-                                            <div
-                                                key={item.key}
-                                                className={cn(
-                                                    'flex items-center gap-3 rounded-lg border p-4 transition-all',
-                                                    data[
-                                                        item.key as keyof typeof data
-                                                    ]
-                                                        ? 'border-teal-200 bg-teal-50/50'
-                                                        : 'border-slate-200 bg-white hover:bg-slate-50',
-                                                )}
-                                            >
-                                                <Checkbox
-                                                    id={item.key}
-                                                    checked={Boolean(
-                                                        data[
-                                                            item.key as keyof typeof data
-                                                        ],
-                                                    )}
-                                                    onCheckedChange={(
-                                                        checked,
-                                                    ) =>
-                                                        setData(
-                                                            item.key as keyof typeof data,
-                                                            Boolean(checked),
-                                                        )
-                                                    }
-                                                    className="data-[state=checked]:border-teal-600 data-[state=checked]:bg-teal-600"
-                                                />
-                                                <div className="flex items-center gap-2">
-                                                    <item.icon
-                                                        className={cn(
-                                                            'h-4 w-4',
-                                                            data[
-                                                                item.key as keyof typeof data
-                                                            ]
-                                                                ? 'text-teal-600'
-                                                                : 'text-slate-400',
-                                                        )}
-                                                    />
-                                                    <Label
-                                                        htmlFor={item.key}
-                                                        className="cursor-pointer font-medium text-slate-700"
-                                                    >
-                                                        {item.label}
-                                                    </Label>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                        <TabPanel className="space-y-6 focus:outline-none">
+                            <GeneralHealthTab
+                                data={data}
+                                setData={setData as any}
+                                errors={errors as any}
+                            />
+                        </TabPanel>
 
-                                    <div className="mt-8 space-y-4">
-                                        {data.hospitalized_or_operated && (
-                                            <div className="rounded-lg border border-orange-100 bg-orange-50 p-4">
-                                                <FormInput
-                                                    label=" تفاصيل العمليات/المستشفى"
-                                                    name="hospital_details"
-                                                    type="text"
-                                                    // icon={}
-                                                    value={String(
-                                                        data.hospital_details,
-                                                    )}
-                                                    onChange={(val) =>
-                                                        setData(
-                                                            'hospital_details',
-                                                            val,
-                                                        )
-                                                    }
-                                                    error={
-                                                        errors.hospital_details
-                                                    }
-                                                />
-                                            </div>
-                                        )}
+                        <TabPanel className="space-y-6 focus:outline-none">
+                            <MedicationsTab
+                                data={data}
+                                setData={setData as any}
+                                errors={errors as any}
+                            />
+                        </TabPanel>
 
-                                        <div className="space-y-2">
-                                            <FormTextArea
-                                                label="أي تفاصيل إضافية عن الحالة الصحية..."
-                                                name="medical_disease_details"
-                                                icon={ClipboardList}
-                                                value={
-                                                    data.medical_disease_details
-                                                }
-                                                onChange={(val) =>
-                                                    setData(
-                                                        'medical_disease_details',
-                                                        val,
-                                                    )
-                                                }
-                                                error={
-                                                    errors.medical_disease_details
-                                                }
-                                                rows={4}
-                                                className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Pregnancy Section */}
-                                    <div className="mt-6 rounded-lg border border-pink-100 bg-pink-50/30 p-4">
-                                        <div className="mb-4 flex items-center gap-2">
-                                            <Checkbox
-                                                id="is_pregnant"
-                                                checked={data.is_pregnant}
-                                                onCheckedChange={(c) =>
-                                                    setData(
-                                                        'is_pregnant',
-                                                        Boolean(c),
-                                                    )
-                                                }
-                                                className="data-[state=checked]:border-pink-500 data-[state=checked]:bg-pink-500"
-                                            />
-                                            <Baby className="h-5 w-5 text-pink-500" />
-                                            <Label
-                                                htmlFor="is_pregnant"
-                                                className="font-medium text-pink-900"
-                                            >
-                                                مريضة حامل
-                                            </Label>
-                                        </div>
-
-                                        {data.is_pregnant && (
-                                            <div className="w-full max-w-xs">
-                                                <Label className="mb-1.5 block text-xs text-pink-700">
-                                                    مرحلة الحمل
-                                                </Label>
-                                                <Select
-                                                    value={
-                                                        data.pregnancy_trimester
-                                                    }
-                                                    onValueChange={(val) =>
-                                                        setData(
-                                                            'pregnancy_trimester',
-                                                            val,
-                                                        )
-                                                    }
-                                                >
-                                                    <SelectTrigger className="border-pink-200 text-pink-800">
-                                                        <SelectValue placeholder="اختر المرحلة" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="I">
-                                                            الثلث الأول (I)
-                                                        </SelectItem>
-                                                        <SelectItem value="II">
-                                                            الثلث الثاني (II)
-                                                        </SelectItem>
-                                                        <SelectItem value="III">
-                                                            الثلث الثالث (III)
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Tab.Panel>
-
-                        {/* 3. Meds & Clinical Notes */}
-                        <Tab.Panel className="space-y-6 focus:outline-none">
-                            <Card className="border-slate-200 shadow-sm">
-                                <CardHeader>
-                                    <CardTitle className="mb-2 block">
-                                        الأدوية والملاحظات
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-6">
-                                    <div className="space-y-2">
-                                        <FormInput
-                                            label="حساسية (Allergies)"
-                                            name="allergic_to"
-                                            type="text"
-                                            // icon={}
-                                            value={String(data.allergic_to)}
-                                            onChange={(val) =>
-                                                setData('allergic_to', val)
-                                            }
-                                            error={errors.allergic_to}
-                                            placeholder="بنسلين، مخدر موضعي، لاتكس..."
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <FormTextArea
-                                            label="الأدوية الحالية (Current Medications)"
-                                            name="current_medications"
-                                            icon={ClipboardList}
-                                            value={data.current_medications}
-                                            onChange={(val) =>
-                                                setData(
-                                                    'current_medications',
-                                                    val,
-                                                )
-                                            }
-                                            error={errors.current_medications}
-                                            rows={4}
-                                            className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
-                                        />
-                                    </div>
-                                    <Separator />
-                                    <div className="space-y-2">
-                                        <FormTextArea
-                                            label="    ملاحظات سريرية (Clinical Notes) "
-                                            name="clinical_notes"
-                                            icon={ClipboardList}
-                                            value={data.clinical_notes}
-                                            onChange={(val) =>
-                                                setData('clinical_notes', val)
-                                            }
-                                            error={errors.clinical_notes}
-                                            rows={4}
-                                            className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
-                                        />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Tab.Panel>
-
-                        {/* 4. Files */}
-                        <Tab.Panel className="space-y-6 focus:outline-none">
-                            <Card className="border-slate-200 shadow-sm">
-                                <CardHeader>
-                                    <CardTitle>المرفقات والوسائط</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-8">
-                                    {/* Images */}
-                                    <div className="space-y-4">
-                                        <Label className="flex items-center gap-2">
-                                            <ImageIcon className="h-4 w-4" />
-                                            صور الأشعة والحالة
-                                        </Label>
-                                        {ImagesErrors.map((err, i) => (
-                                            <InputError
-                                                message={err}
-                                                key={i}
-                                                className="mt-1"
-                                            />
-                                        ))}
-                                        <div className="rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center transition-colors hover:bg-slate-100">
-                                            <Input
-                                                type="file"
-                                                multiple
-                                                accept="image/*"
-                                                className="hidden"
-                                                id="image-upload"
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'images',
-                                                        Array.from(
-                                                            e.target.files ||
-                                                                [],
-                                                        ),
-                                                    )
-                                                }
-                                            />
-
-                                            <Label
-                                                htmlFor="image-upload"
-                                                className="block cursor-pointer"
-                                            >
-                                                <div className="flex flex-col items-center gap-2 text-slate-500">
-                                                    <div className="rounded-full bg-white p-2 shadow-sm">
-                                                        <ImageIcon className="h-6 w-6 text-teal-600" />
-                                                    </div>
-                                                    <span className="text-sm">
-                                                        اضغط لرفع صور (JPG, PNG)
-                                                    </span>
-                                                </div>
-                                            </Label>
-                                        </div>
-
-                                        {/* Existing Images Gallery */}
-                                        {(existingImages.length > 0 ||
-                                            data.images.length > 0) && (
-                                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                                                {existingImages.map(
-                                                    (img, i) => (
-                                                        <div
-                                                            key={i}
-                                                            className="group relative aspect-square overflow-hidden rounded-lg bg-black/5"
-                                                        >
-                                                            <img
-                                                                alt="update Attachment"
-                                                                src={`/storage/${img}`}
-                                                                className="h-full w-full object-cover"
-                                                            />
-                                                            <button
-                                                                title="Delete Image"
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    handleDeleteImage(
-                                                                        img,
-                                                                    )
-                                                                }
-                                                                className="absolute top-2 right-2 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
-                                                            >
-                                                                <X className="h-3 w-3" />
-                                                            </button>
-                                                        </div>
-                                                    ),
-                                                )}
-                                                {/* Preview newly added images if we had URL.createObjectURL logic, skipping for brevity */}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <Separator />
-
-                                    {/* Attachments */}
-                                    <div className="space-y-4">
-                                        <Label className="flex items-center gap-2">
-                                            <Paperclip className="h-4 w-4" />
-                                            مستندات أخرى
-                                        </Label>
-                                        <Input
-                                            type="file"
-                                            multiple
-                                            onChange={(e) =>
-                                                setData(
-                                                    'attachments',
-                                                    Array.from(
-                                                        e.target.files || [],
-                                                    ),
-                                                )
-                                            }
-                                            className="w-full"
-                                        />
-                                        {AttachmentsErrors.map((err, i) => (
-                                            <InputError
-                                                message={err}
-                                                key={i}
-                                                className="mt-1"
-                                            />
-                                        ))}
-
-                                        {existingAttachments.length > 0 && (
-                                            <div className="flex flex-col gap-2">
-                                                {existingAttachments.map(
-                                                    (file, i) => (
-                                                        <div
-                                                            key={i}
-                                                            className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-3 py-2 text-sm"
-                                                        >
-                                                            <div className="flex items-center gap-2 truncate">
-                                                                <FileText className="h-4 w-4 text-slate-400" />
-                                                                <a
-                                                                    href={`/storage/${file}`}
-                                                                    target="_blank"
-                                                                    className="max-w-50 truncate text-blue-600 hover:underline"
-                                                                >
-                                                                    {file?.name}
-                                                                </a>
-                                                            </div>
-                                                            <button
-                                                                type="button"
-                                                                title="Delete Attachment"
-                                                                onClick={() =>
-                                                                    handleDeleteAttachment(
-                                                                        file,
-                                                                    )
-                                                                }
-                                                                className="rounded p-1 text-red-500 hover:bg-red-50"
-                                                            >
-                                                                <X className="h-4 w-4" />
-                                                            </button>
-                                                        </div>
-                                                    ),
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Tab.Panel>
-                    </Tab.Panels>
+                        <TabPanel className="space-y-6 focus:outline-none">
+                            <FilesTab
+                                data={data}
+                                setData={setData as any}
+                                existingImages={existingImages}
+                                existingAttachments={existingAttachments}
+                                onDeleteImage={handleDeleteImage}
+                                onDeleteAttachment={handleDeleteAttachment}
+                                imagesErrors={imagesErrors}
+                                attachmentsErrors={attachmentsErrors}
+                                isEdit={!!medicalRecord}
+                            />
+                        </TabPanel>
+                    </TabPanels>
                 </div>
-            </Tab.Group>
+            </TabGroup>
 
-            {/* Footer Actions */}
-            <div className="sticky bottom-4 z-50 mt-8 flex items-center justify-end gap-3 rounded-lg bg-white/80 p-4 shadow-lg ring-1 ring-slate-900/5 backdrop-blur">
-                <Link href={route('medical-records.index')}>
-                    <Button variant="ghost" type="button">
-                        إلغاء
-                    </Button>
-                </Link>
-                <FormButton
-                    processing={processing}
-                    label={submitLabel}
-                    loadingLabel="جارِ الحفظ..."
-                />
-            </div>
+            <FormFooter
+                processing={processing}
+                submitLabel={submitLabel}
+            />
         </form>
     );
 }

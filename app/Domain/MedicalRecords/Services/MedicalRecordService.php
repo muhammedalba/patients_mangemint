@@ -59,12 +59,33 @@ class MedicalRecordService
 
     public function delete(MedicalRecord $medicalRecord): void
     {
-        // @dd($medicalRecord->images);
         DB::transaction(function () use ($medicalRecord) {
             $this->deleteFiles($medicalRecord->attachments ?? []);
             $this->deleteFiles($medicalRecord->images ?? []);
             $this->repository->delete($medicalRecord);
         });
+    }
+
+    public function deleteSingleFile(MedicalRecord $medicalRecord, string $path, string $type): void
+    {
+        if (!in_array($type, ['images', 'attachments'], true)) {
+            throw new \InvalidArgumentException('Invalid file type.');
+        }
+
+        $files = $medicalRecord->$type ?? [];
+
+        if (!in_array($path, $files, true)) {
+            return;
+        }
+
+        $this->deleteFiles([$path]);
+
+        $newFiles = collect($files)
+            ->reject(fn($f) => $f === $path)
+            ->values()
+            ->all();
+
+        $medicalRecord->update([$type => $newFiles]);
     }
 
     /**

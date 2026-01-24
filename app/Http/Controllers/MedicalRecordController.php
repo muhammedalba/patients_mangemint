@@ -112,6 +112,22 @@ class MedicalRecordController extends Controller
         return redirect()->route('medical-records.index')->with('success', 'Medical record deleted successfully.');
     }
 
+    public function deleteFile(Request $request, MedicalRecord $medicalRecord): RedirectResponse
+    {
+        $request->validate([
+            'path' => 'required|string',
+            'type' => 'required|string|in:images,attachments',
+        ]);
+
+        $this->service->deleteSingleFile(
+            $medicalRecord,
+            $request->input('path'),
+            $request->input('type')
+        );
+
+        return back()->with('success', 'File deleted successfully.');
+    }
+
     public function download(MedicalRecord $medicalRecord)
     {
         $medicalRecord->load('patient:id,name', 'doctor:id,name');

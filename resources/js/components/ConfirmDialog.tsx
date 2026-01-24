@@ -33,11 +33,11 @@ export default function ConfirmDialog({
                 </DialogHeader>
                 <DialogFooter className="flex justify-end gap-2">
                     <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">الغاء</Button>
                     </DialogClose>
                     <DialogClose asChild>
                         <Button onClick={onConfirm} variant="destructive">
-                            Confirm
+                            تأكيد
                         </Button>
                     </DialogClose>
                 </DialogFooter>

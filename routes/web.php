@@ -139,6 +139,7 @@
             Route::get('{medicalRecord}/edit', 'edit')->name('edit');
             Route::put('{medicalRecord}', 'update')->name('update');
             Route::delete('{medicalRecord}', 'destroy')->name('destroy');
+            Route::delete('{medicalRecord}/files', 'deleteFile')->name('delete-file');
             Route::get('{medicalRecord}/download', 'download')->name('download');
         });
 

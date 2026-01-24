@@ -39,8 +39,8 @@ export type Patient = {
     email?: string;
     phone?: string;
     birth_date: string;
-    gender: 'male' | 'female';
-    marital_status: 'single' | 'married' ;
+    gender: 'male' | 'female'| 'other';
+    marital_status: 'single' | 'married' | 'divorced' | 'widowed';
 };
 
 export type Procedure = {
