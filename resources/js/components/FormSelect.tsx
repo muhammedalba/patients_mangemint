@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import InputError from "./input-error";
 
 interface FormSelectProps<T extends string> {
     label: string;
@@ -23,7 +24,7 @@ export function FormSelect<T extends string>({
 }: FormSelectProps<T>) {
     const IconComponent = icon;
     return (
-        <div className="group relative w-full h-fit">
+        <div className="group m-2  relative w-full h-fit">
             <label
                 htmlFor={name}
                 className={`pointer-events-none absolute right-2 rounded-2xl p-1 flex items-center gap-x-2 bg-white px-1 text-sm text-gray-400 transition-all duration-300 ${value || name == 'start_time' ? '-top-4 text-xs text-blue-700' : 'top-1/5 text-sm text-gray-400'} `}
@@ -61,7 +62,7 @@ export function FormSelect<T extends string>({
                 ))}
             </select>
 
-            {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+            <InputError message={error} className="mt-1" />
         </div>
     );
 }

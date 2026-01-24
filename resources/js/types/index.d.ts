@@ -229,3 +229,10 @@ export type FinancialSummary = {
     total_procedures_after_discount: number;
     total_procedures_cost: number;
 };
+export type NavItem = {
+    title: string;
+    href: string | ReturnType<typeof dashboard>;
+    icon?: React.ElementType;
+    color?: string;
+    roles?: Role[];
+};

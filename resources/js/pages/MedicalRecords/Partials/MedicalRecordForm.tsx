@@ -1,3 +1,9 @@
+import { FormButton } from '@/components/FormButton';
+import { FormInput } from '@/components/FormInput';
+import { FormSelect } from '@/components/FormSelect';
+import { FormTextArea } from '@/components/FormTextArea';
+import InputError from '@/components/input-error';
+import { SearchInput } from '@/components/SearchInput';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -20,17 +26,17 @@ import {
     Activity,
     AlertCircle,
     Baby,
+    ClipboardList,
     FileText,
     Heart,
     Image as ImageIcon,
     Paperclip,
     Pill,
-    Save,
     Stethoscope,
     User as UserIcon,
     X,
 } from 'lucide-react';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 interface Props {
@@ -46,6 +52,8 @@ export default function MedicalRecordForm({
     medicalRecord,
     submitLabel = 'حفظ السجل',
 }: Props) {
+    console.log(patients);
+
     const { data, setData, post, errors, processing } = useForm({
         _method: medicalRecord ? 'PUT' : 'POST',
         patient_id: medicalRecord?.patient_id || '',
@@ -88,16 +96,37 @@ export default function MedicalRecordForm({
     const [existingImages, setExistingImages] = useState(
         medicalRecord?.images || [],
     );
+    const [selectedPatientName, setSelectedPatientName] = useState('');
 
-    const selectedPatient = patients.find(
-        (p) => String(p.id) === String(data.patient_id),
+    const ImagesErrors = Object.entries(errors)
+        .filter(([key]) => key.startsWith('images.'))
+        .map(([, value]) => value);
+    const AttachmentsErrors = Object.entries(errors)
+        .filter(([key]) => key.startsWith('attachments.'))
+        .map(([, value]) => value);
+
+    const handlePatientSelect = useCallback(
+        (patient: Patient) => {
+            setSelectedPatientName(patient.name);
+            setData('patient_id', patient.id.toString());
+        },
+        [setData],
     );
 
     useEffect(() => {
-        if (!medicalRecord && patients.length === 1) {
-            setData('patient_id', patients[0].id);
+        if (medicalRecord && patients.length > 0) {
+            // find the patient name from patients list
+            const patient = patients.find(
+                (p) => p.id === medicalRecord.patient_id,
+            );
+            setData('patient_id', medicalRecord.patient_id.toString());
+            setSelectedPatientName(patient?.name || '');
         }
-    }, [patients]);
+        if (!medicalRecord && patients.length == 1) {
+            setData('patient_id', patients[0].id.toString());
+            setSelectedPatientName(patients[0]?.name || '');
+        }
+    }, [patients, medicalRecord, setData]);
 
     const { success, error } = useAppToast();
 
@@ -181,6 +210,7 @@ export default function MedicalRecordForm({
             icon: Activity,
         },
     ];
+    console.log(errors);
 
     return (
         <form
@@ -197,57 +227,31 @@ export default function MedicalRecordForm({
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="patient_id" className="mb-2 block">
-                                المريض
-                            </Label>
-                            <Input
-                                id="patient_id"
-                                value={
-                                    selectedPatient
-                                        ? selectedPatient.name
-                                        : 'يرجى تحديد المريض من القائمة الرئيسية'
-                                }
-                                readOnly
-                                className="bg-slate-50 font-medium text-slate-700"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="doctor_id" className="mb-2 block">
-                                الطبيب المعالج
-                            </Label>
-                            <Select
-                                value={String(data.doctor_id)}
-                                onValueChange={(val) =>
-                                    setData('doctor_id', val)
-                                }
-                            >
-                                <SelectTrigger
-                                    className={cn(
-                                        errors.doctor_id
-                                            ? 'border-red-500'
-                                            : '',
-                                    )}
-                                >
-                                    <SelectValue placeholder="اختر الطبيب" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {doctors.map((d) => (
-                                        <SelectItem
-                                            key={d.id}
-                                            value={String(d.id)}
-                                        >
-                                            {d.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.doctor_id && (
-                                <p className="text-sm text-red-500">
-                                    {errors.doctor_id}
-                                </p>
-                            )}
-                        </div>
+                        <SearchInput
+                            label="ابحث عن المريض..."
+                            name="patient_id"
+                            icon={UserIcon}
+                            value={selectedPatientName}
+                            onChange={setSelectedPatientName}
+                            options={patients}
+                            onSelect={handlePatientSelect}
+                            error={errors.patient_id}
+                        />
+                        <FormSelect
+                            label="اسم الطبيب"
+                            name="doctor_id"
+                            icon={Stethoscope}
+                            value={String(data.doctor_id ?? '')}
+                            onChange={(val) =>
+                                setData('doctor_id', val.toString())
+                            }
+                            options={doctors.map((doctor) => ({
+                                key: doctor.id.toString(),
+                                value: doctor.id.toString(),
+                                label: doctor.name,
+                            }))}
+                            error={errors.doctor_id}
+                        />
                     </div>
                 </CardContent>
             </Card>
@@ -296,64 +300,55 @@ export default function MedicalRecordForm({
                                     <CardTitle>الشكوى والتاريخ السني</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
-                                    <div className="space-y-2">
-                                        <Label
-                                            htmlFor="chief_complaint"
-                                            className="mb-2 block text-teal-800"
-                                        >
-                                            الشكوى الرئيسية (Chief Complaint)
-                                        </Label>
-                                        <textarea
-                                            id="chief_complaint"
-                                            value={data.chief_complaint}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'chief_complaint',
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="min-h-[100px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:outline-none"
-                                            placeholder="ألم شديد في الجهة اليمنى، حساسية، إلخ..."
-                                        />
-                                    </div>
+                                    <FormTextArea
+                                        label="الشكوى الرئيسية (Chief Complaint)"
+                                        name="chief_complaint"
+                                        icon={ClipboardList}
+                                        value={data.chief_complaint.toString()}
+                                        onChange={(val) =>
+                                            setData('chief_complaint', val)
+                                        }
+                                        error={errors.chief_complaint}
+                                        placeholder="ألم شديد في الجهة اليمنى، حساسية، إلخ..."
+                                        rows={4}
+                                        className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                                    />
                                     <Separator />
                                     <div className="space-y-2">
-                                        <Label
-                                            htmlFor="present_illness"
-                                            className="mb-2 block"
-                                        >
-                                            تاريخ المرض الحالي
-                                        </Label>
-                                        <textarea
-                                            id="present_illness"
+                                        <FormTextArea
+                                            label="تاريخ المرض الحالي"
+                                            name="present_illness_history"
+                                            icon={ClipboardList}
                                             value={data.present_illness_history}
-                                            onChange={(e) =>
+                                            onChange={(val) =>
                                                 setData(
                                                     'present_illness_history',
-                                                    e.target.value,
+                                                    val,
                                                 )
                                             }
-                                            className="min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                                            error={
+                                                errors.present_illness_history
+                                            }
+                                            rows={4}
+                                            className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label
-                                            htmlFor="past_dental"
-                                            className="mb-2 block"
-                                        >
-                                            التاريخ السني السابق
-                                        </Label>
-                                        <textarea
-                                            id="past_dental"
+                                        <FormTextArea
+                                            label="التاريخ السني السابق (Past Dental History)"
+                                            placeholder="علاجات سابقة، قلع، تقويم..."
+                                            name="past_dental_history"
+                                            icon={ClipboardList}
                                             value={data.past_dental_history}
-                                            onChange={(e) =>
+                                            onChange={(val) =>
                                                 setData(
                                                     'past_dental_history',
-                                                    e.target.value,
+                                                    val,
                                                 )
                                             }
-                                            className="min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
-                                            placeholder="علاجات سابقة، قلع، تقويم..."
+                                            error={errors.past_dental_history}
+                                            rows={4}
+                                            className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
                                         />
                                     </div>
                                 </CardContent>
@@ -422,43 +417,46 @@ export default function MedicalRecordForm({
                                     <div className="mt-8 space-y-4">
                                         {data.hospitalized_or_operated && (
                                             <div className="rounded-lg border border-orange-100 bg-orange-50 p-4">
-                                                <Label
-                                                    htmlFor="hospital_details"
-                                                    className="mb-2 block text-orange-800"
-                                                >
-                                                    تفاصيل العمليات/المستشفى
-                                                </Label>
-                                                <Input
-                                                    value={
-                                                        data.hospital_details
-                                                    }
-                                                    onChange={(e) =>
+                                                <FormInput
+                                                    label=" تفاصيل العمليات/المستشفى"
+                                                    name="hospital_details"
+                                                    type="text"
+                                                    // icon={}
+                                                    value={String(
+                                                        data.hospital_details,
+                                                    )}
+                                                    onChange={(val) =>
                                                         setData(
                                                             'hospital_details',
-                                                            e.target.value,
+                                                            val,
                                                         )
                                                     }
-                                                    className="bg-white"
+                                                    error={
+                                                        errors.hospital_details
+                                                    }
                                                 />
                                             </div>
                                         )}
 
                                         <div className="space-y-2">
-                                            <Label className="mb-2 block">
-                                                تفاصيل طبية أخرى
-                                            </Label>
-                                            <textarea
+                                            <FormTextArea
+                                                label="أي تفاصيل إضافية عن الحالة الصحية..."
+                                                name="medical_disease_details"
+                                                icon={ClipboardList}
                                                 value={
                                                     data.medical_disease_details
                                                 }
-                                                onChange={(e) =>
+                                                onChange={(val) =>
                                                     setData(
                                                         'medical_disease_details',
-                                                        e.target.value,
+                                                        val,
                                                     )
                                                 }
-                                                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
-                                                placeholder="أي تفاصيل إضافية عن الحالة الصحية..."
+                                                error={
+                                                    errors.medical_disease_details
+                                                }
+                                                rows={4}
+                                                className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
                                             />
                                         </div>
                                     </div>
@@ -534,52 +532,49 @@ export default function MedicalRecordForm({
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <div className="space-y-2">
-                                        <Label className="flex items-center gap-1 text-rose-600">
-                                            <AlertCircle className="h-4 w-4" />
-                                            حساسية (Allergies)
-                                        </Label>
-                                        <Input
-                                            value={data.allergic_to}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'allergic_to',
-                                                    e.target.value,
-                                                )
+                                        <FormInput
+                                            label="حساسية (Allergies)"
+                                            name="allergic_to"
+                                            type="text"
+                                            // icon={}
+                                            value={String(data.allergic_to)}
+                                            onChange={(val) =>
+                                                setData('allergic_to', val)
                                             }
-                                            className="border-rose-100 bg-rose-50/50 focus:border-rose-300 focus:ring-rose-200"
+                                            error={errors.allergic_to}
                                             placeholder="بنسلين، مخدر موضعي، لاتكس..."
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="mb-2 block">
-                                            الأدوية الحالية
-                                        </Label>
-                                        <textarea
+                                        <FormTextArea
+                                            label="الأدوية الحالية (Current Medications)"
+                                            name="current_medications"
+                                            icon={ClipboardList}
                                             value={data.current_medications}
-                                            onChange={(e) =>
+                                            onChange={(val) =>
                                                 setData(
                                                     'current_medications',
-                                                    e.target.value,
+                                                    val,
                                                 )
                                             }
-                                            className="min-h-[80px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                                            error={errors.current_medications}
+                                            rows={4}
+                                            className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
                                         />
                                     </div>
                                     <Separator />
                                     <div className="space-y-2">
-                                        <Label className="flex items-center gap-2">
-                                            <FileText className="h-4 w-4 text-slate-500" />
-                                            ملاحظات سريرية (Clinical Notes)
-                                        </Label>
-                                        <textarea
+                                        <FormTextArea
+                                            label="    ملاحظات سريرية (Clinical Notes) "
+                                            name="clinical_notes"
+                                            icon={ClipboardList}
                                             value={data.clinical_notes}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'clinical_notes',
-                                                    e.target.value,
-                                                )
+                                            onChange={(val) =>
+                                                setData('clinical_notes', val)
                                             }
-                                            className="min-h-[150px] w-full rounded-md border border-slate-200 bg-amber-50/30 px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                                            error={errors.clinical_notes}
+                                            rows={4}
+                                            className="min-h-20 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none"
                                         />
                                     </div>
                                 </CardContent>
@@ -599,6 +594,13 @@ export default function MedicalRecordForm({
                                             <ImageIcon className="h-4 w-4" />
                                             صور الأشعة والحالة
                                         </Label>
+                                        {ImagesErrors.map((err, i) => (
+                                            <InputError
+                                                message={err}
+                                                key={i}
+                                                className="mt-1"
+                                            />
+                                        ))}
                                         <div className="rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center transition-colors hover:bg-slate-100">
                                             <Input
                                                 type="file"
@@ -616,6 +618,7 @@ export default function MedicalRecordForm({
                                                     )
                                                 }
                                             />
+
                                             <Label
                                                 htmlFor="image-upload"
                                                 className="block cursor-pointer"
@@ -635,31 +638,32 @@ export default function MedicalRecordForm({
                                         {(existingImages.length > 0 ||
                                             data.images.length > 0) && (
                                             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                                                {existingImages.map((img) => (
-                                                    <div
-                                                        key={
-                                                            img.name +
-                                                            img.lastModified
-                                                        }
-                                                        className="group relative aspect-square overflow-hidden rounded-lg bg-black/5"
-                                                    >
-                                                        <img
-                                                            src={`/storage/${img}`}
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                handleDeleteImage(
-                                                                    img,
-                                                                )
-                                                            }
-                                                            className="absolute top-2 right-2 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
+                                                {existingImages.map(
+                                                    (img, i) => (
+                                                        <div
+                                                            key={i}
+                                                            className="group relative aspect-square overflow-hidden rounded-lg bg-black/5"
                                                         >
-                                                            <X className="h-3 w-3" />
-                                                        </button>
-                                                    </div>
-                                                ))}
+                                                            <img
+                                                                alt="update Attachment"
+                                                                src={`/storage/${img}`}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                            <button
+                                                                title="Delete Image"
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleDeleteImage(
+                                                                        img,
+                                                                    )
+                                                                }
+                                                                className="absolute top-2 right-2 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
+                                                            >
+                                                                <X className="h-3 w-3" />
+                                                            </button>
+                                                        </div>
+                                                    ),
+                                                )}
                                                 {/* Preview newly added images if we had URL.createObjectURL logic, skipping for brevity */}
                                             </div>
                                         )}
@@ -686,16 +690,20 @@ export default function MedicalRecordForm({
                                             }
                                             className="w-full"
                                         />
+                                        {AttachmentsErrors.map((err, i) => (
+                                            <InputError
+                                                message={err}
+                                                key={i}
+                                                className="mt-1"
+                                            />
+                                        ))}
 
                                         {existingAttachments.length > 0 && (
                                             <div className="flex flex-col gap-2">
                                                 {existingAttachments.map(
-                                                    (file) => (
+                                                    (file, i) => (
                                                         <div
-                                                            key={
-                                                                file.name +
-                                                                file.lastModified
-                                                            }
+                                                            key={i}
                                                             className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-3 py-2 text-sm"
                                                         >
                                                             <div className="flex items-center gap-2 truncate">
@@ -703,17 +711,14 @@ export default function MedicalRecordForm({
                                                                 <a
                                                                     href={`/storage/${file}`}
                                                                     target="_blank"
-                                                                    className="max-w-[200px] truncate text-blue-600 hover:underline"
+                                                                    className="max-w-50 truncate text-blue-600 hover:underline"
                                                                 >
-                                                                    {file.name
-                                                                        .split(
-                                                                            '/',
-                                                                        )
-                                                                        .pop()}
+                                                                    {file?.name}
                                                                 </a>
                                                             </div>
                                                             <button
                                                                 type="button"
+                                                                title="Delete Attachment"
                                                                 onClick={() =>
                                                                     handleDeleteAttachment(
                                                                         file,
@@ -743,17 +748,11 @@ export default function MedicalRecordForm({
                         إلغاء
                     </Button>
                 </Link>
-                <Button
-                    disabled={processing}
-                    className="min-w-[120px] gap-2 bg-teal-600 hover:bg-teal-700"
-                >
-                    {processing ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    ) : (
-                        <Save className="h-4 w-4" />
-                    )}
-                    {submitLabel}
-                </Button>
+                <FormButton
+                    processing={processing}
+                    label={submitLabel}
+                    loadingLabel="جارِ الحفظ..."
+                />
             </div>
         </form>
     );

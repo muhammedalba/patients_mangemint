@@ -5,6 +5,7 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, ServiceCategory, type BreadcrumbItem } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
@@ -16,7 +17,7 @@ export default function Index() {
         auth: { user: { roles: string[] } };
         filters: { search?: string };
     }>().props;
-
+    const { success, error } = useAppToast();
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
@@ -24,7 +25,14 @@ export default function Index() {
     console.log(serviceCategories, 'serviceCategories');
 
     const handleDelete = (id: number): void => {
-        router.delete(route('service-categories.destroy', id));
+        router.delete(route('service-categories.destroy', id), {
+            onSuccess: () => {
+                success('تم حذف الفئة بنجاح');
+            },
+            onError: () => {
+                error('فشل حذف الفئة، يرجى المحاولة مرة أخرى لاحقًا');
+            },
+        });
     };
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(false);
@@ -98,16 +106,16 @@ export default function Index() {
                     <h1 className="mb-4 text-2xl font-bold">
                         فئات الخدمات الطبية
                     </h1>
-
-                    <SearchBar
-                        value={search}
-                        onChange={handleSearch}
-                        showSearch={true}
-                        showButton={true}
-                        buttonLabel="إضافة فئة"
-                        buttonRoute="service-categories.create"
-                    />
                     <section className="p-4">
+                        <SearchBar
+                            value={search}
+                            onChange={handleSearch}
+                            showSearch={true}
+                            showButton={true}
+                            buttonLabel="إضافة فئة"
+                            buttonRoute="service-categories.create"
+                        />
+
                         <DynamicTable
                             data={[...serviceCategories.data]}
                             columns={columns}

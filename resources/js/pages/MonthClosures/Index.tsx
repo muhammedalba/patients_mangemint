@@ -9,6 +9,7 @@ import {
     PageProps,
     PaginatedData,
 } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useState } from 'react';
@@ -23,8 +24,16 @@ export default function Index({
 }>) {
     const [search, setSearch] = useState(filters.search || '');
     const [perPage] = useState(10);
+    const { success, error } = useAppToast();
     const handleDelete = (id: number) => {
-        router.delete(route('month-closures.destroy', id));
+        router.delete(route('month-closures.destroy', id), {
+            onSuccess: () => {
+                success('تم حذف الموعد بنجاح');
+            },
+            onError: () => {
+                error('فشل حذف الموعد، يرجى المحاولة مرة أخرى لاحقًا');
+            },
+        });
     };
     const handleSearch = (val: string) => {
         const newValue = val;
@@ -80,18 +89,18 @@ export default function Index({
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold"> إغلاق الشهر</h1>
+                    <section className="p-4">
+                        <SearchBar
+                            value={search}
+                            onChange={handleSearch}
+                            showSearch={true}
+                            showButton={true}
+                            buttonLabel="إضافة إغلاق شهر"
+                            buttonRoute="month-closures.close"
+                        />
 
-                    <SearchBar
-                        value={search}
-                        onChange={handleSearch}
-                        showSearch={true}
-                        showButton={true}
-                        buttonLabel="إضافة إغلاق شهر"
-                        buttonRoute="month-closures.close"
-                    />
-                <section className="p-4">
-                    <DynamicTable data={closures?.data} columns={columns} />
-                </section>
+                        <DynamicTable data={closures?.data} columns={columns} />
+                    </section>
                 </div>
 
                 <div className="mt-4">

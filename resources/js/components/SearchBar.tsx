@@ -23,7 +23,7 @@ export function SearchBar({
 }: SearchBarProps) {
     return (
         <div
-            className={`${className} flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4`}
+            className={`${className} mb-4 flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4`}
         >
             {showButton && buttonRoute && (
                 <InertiaLink

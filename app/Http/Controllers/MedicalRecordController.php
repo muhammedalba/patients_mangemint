@@ -67,7 +67,7 @@ class MedicalRecordController extends Controller
 
         //return redirect()->route('medical-records.index')->with('success', 'Medical record created successfully.');
         return redirect()->route('patients.details', $data->patient_id)
-                 ->with('success', 'Medical record created successfully.');
+            ->with('success', 'Medical record created successfully.');
     }
 
 
@@ -80,6 +80,7 @@ class MedicalRecordController extends Controller
         $medicalRecord->load('patient:id,name', 'doctor:id,name');
         $doctors = User::whereHas('roles', fn($q) => $q->where('name', 'doctor'))->get();
         $patients = Patient::select('id', 'name')->latest('updated_at')->get();
+
 
 
         return Inertia::render('MedicalRecords/Edit', [

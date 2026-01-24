@@ -27,16 +27,12 @@ import {
     FaUserMd,
 } from 'react-icons/fa';
 import AppLogo from './app-logo';
+import { NavItem } from '@/types';
+import { useMemo } from 'react';
+import { filterNavByRole } from '@/utils/nav-permissions';
+ type Role = 'admin' | 'doctor' | 'receptionist';
 
-type Role = 'admin' | 'doctor' | 'reception';
 
-type NavItem = {
-    title: string;
-    href: string | ReturnType<typeof dashboard>;
-    icon?: React.ElementType;
-    color?: string;
-    roles?: Role[];
-};
 type PageAuthProps = {
     auth: {
         user: {
@@ -51,49 +47,49 @@ const mainNavItems: NavItem[] = [
         href: '/today',
         icon: FaChartPie,
         color: 'red',
-        roles: ['admin', 'doctor', 'reception'],
+        roles: ['admin', 'doctor', 'receptionist'],
     },
     {
         title: 'المستخدمون',
         href: '/users',
         icon: FaUserMd,
         color: 'blue',
-        roles: ['admin', 'doctor', 'reception'],
+        roles: ['admin', 'doctor'],
     },
     {
         title: 'المرضى',
         href: '/patients',
         icon: FaHospitalUser,
         color: 'green',
-        roles: ['admin', 'doctor', 'reception'],
+        roles: ['admin', 'doctor', 'receptionist'],
     },
     {
         title: 'المواعيد',
         href: '/appointments',
         icon: FaCalendarAlt,
         color: 'orange',
-        roles: ['admin', 'doctor', 'reception'],
+        roles: ['admin', 'doctor', 'receptionist'],
     },
     {
         title: 'الإجراءات',
         href: '/procedures',
         icon: FaSyringe,
         color: 'indigo',
-        roles: ['admin', 'doctor', 'reception'],
+        roles: ['admin', 'doctor', 'receptionist'],
     },
-        {
+    {
         title: 'الدفعات',
         href: '/payments',
         icon: FaMoneyBill,
         color: 'yellow',
-        roles: ['admin', 'doctor', 'reception'],
+        roles: ['admin', 'doctor', 'receptionist'],
     },
     {
         title: 'السجلات الطبية',
         href: '/medical-records',
         icon: FaFileMedical,
         color: 'violet',
-        roles: ['admin', 'doctor', 'reception'],
+        roles: ['admin', 'doctor', 'receptionist'],
     },
     {
         title: 'المصروفات',
@@ -114,20 +110,21 @@ const mainNavItems: NavItem[] = [
         href: '/services',
         icon: FaUserMd,
         color: 'green',
-        roles: ['admin', 'doctor'],
+        roles: ['admin', 'doctor', 'receptionist'],
     },
     {
         title: 'فئات الخدمات الطبية',
         href: '/service-categories',
         icon: FaLayerGroup,
         color: 'lime',
-        roles: ['admin', 'doctor'],
+        roles: ['admin', 'doctor', 'receptionist'],
     },
-        {
+    {
         title: 'الأسنان',
         href: '/teeth',
         icon: FaTooth,
         color: 'blue',
+        roles: ['admin', 'doctor', 'receptionist'],
     },
     {
         title: 'الإحصائيات',
@@ -148,12 +145,9 @@ const mainNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<PageAuthProps>().props;
 
-    const filteredNavItems = mainNavItems.filter((item) => {
-        if (!item.roles) return true;
-
-        return item.roles.some((role) => auth.user.roles.includes(role));
-    });
-
+    const filteredNavItems = useMemo(() => {
+        return filterNavByRole(mainNavItems, auth.user.roles );
+    }, [auth.user.roles]);
     return (
         <Sidebar collapsible="icon" variant="inset" dir="rtl">
             <SidebarHeader>

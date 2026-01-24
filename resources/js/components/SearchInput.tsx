@@ -1,13 +1,14 @@
 import { Patient } from "@/types";
 import { LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import InputError from "./input-error";
 interface SearchInputProps {
   label: string;
   name: string;
-  value: string; // النص الظاهر في الحقل (اسم المريض)
-  onChange: (val: string) => void; // لتحديث النص أثناء الكتابة أو بعد الاختيار
-  options: Patient[]; // قائمة المرضى
-  onSelect: (patient: Patient) => void; // يتم استدعاؤها عند اختيار مريض (لحفظ id خارجياً)
+  value: string;
+  onChange: (val: string) => void;
+  options: Patient[];
+  onSelect: (patient: Patient) => void;
   placeholder?: string;
   error?: string;
   disabled?: boolean;
@@ -66,10 +67,10 @@ const IconComponent = icon;
   }, []);
 
   return (
-    <div className=" group relative  w-full" ref={containerRef}>
+    <div className=" group relative m-2  w-full" ref={containerRef}>
                  <label
                 htmlFor={name}
-                className={`absolute right-2 flex items-center gap-x-2 bg-white px-1 text-sm text-gray-400 transition-all duration-300 ${value ? 'top-[-0.7rem] text-xs text-blue-700' : 'top-1/4 text-sm text-gray-400'} `}
+                className={`pointer-events-none absolute right-2 flex items-center gap-x-2 bg-white px-1 text-sm text-gray-400 transition-all duration-300 ${value ? 'top-[-0.7rem] text-xs text-blue-700' : 'top-1/4 text-sm text-gray-400'} `}
             >
                 {IconComponent && (
                     <span className="mr-1 inline-block ">
@@ -108,7 +109,7 @@ const IconComponent = icon;
         </ul>
       )}
 
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+       <InputError message={error} className="mt-1" />
     </div>
   );
 }

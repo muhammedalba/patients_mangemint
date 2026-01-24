@@ -1,7 +1,4 @@
-import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
-import { type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Badge } from '@/components/ui/badge';
 import {
     Table,
     TableBody,
@@ -10,22 +7,31 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import {
-    Calendar,
-    CreditCard,
-    TrendingUp,
-    Users,
-    UserPlus,
-    Activity,
-    Clock,
-    CheckCircle2,
-    XCircle,
-    AlertCircle,
-    Stethoscope,
-    Wallet
-} from 'lucide-react';
+import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
+import { dashboard } from '@/routes';
+import { type BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
+import {
+    Activity,
+    AlertCircle,
+    ArrowDownRight,
+    ArrowUpRight,
+    Calendar,
+    CheckCircle2,
+    Clock,
+    CreditCard,
+    Heart,
+    Shield,
+    Sparkles,
+    Star,
+    Stethoscope,
+    TrendingUp,
+    UserPlus,
+    Users,
+    Wallet,
+    XCircle,
+} from 'lucide-react';
 import { useMemo } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -35,154 +41,310 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+// Custom Tooth Icon Component
+function ToothIcon({ className }: { className?: string }) {
+    return (
+        <svg
+            className={className}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M12 2C9.5 2 7.5 3.5 7 6c-.3 1.5-.5 3.5-.5 5.5 0 3 .5 5.5 1 7.5.5 2 1 3 2 3s1.5-1 2-2.5c.3-1 .5-1.5 .5-1.5s.2.5.5 1.5c.5 1.5 1 2.5 2 2.5s1.5-1 2-3c.5-2 1-4.5 1-7.5 0-2-.2-4-.5-5.5C16.5 3.5 14.5 2 12 2z" />
+        </svg>
+    );
+}
+
+// Dental Chair Icon
+function DentalChairIcon({ className }: { className?: string }) {
+    return (
+        <svg
+            className={className}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M4 20h2l1-4h10l1 4h2M7 16l1-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2l1 6M12 8V4M9 4h6" />
+        </svg>
+    );
+}
+
 export default function Dashboard() {
     const { stats } = usePage().props as any;
+    console.log(stats);
 
     const dateStr = useMemo(() => {
-        return new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        return new Date().toLocaleDateString('ar-EG', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+    }, []);
+
+    const timeStr = useMemo(() => {
+        return new Date().toLocaleTimeString('ar-EG', {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
     }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="لوحة التحكم" />
 
-            <div className="flex min-h-screen flex-1 flex-col gap-8 bg-slate-50/50 p-6 pt-2 font-sans">
+            <div
+                className="flex min-h-screen flex-1 flex-col gap-6 bg-gradient-to-br from-slate-50 via-cyan-50/30 to-teal-50/20 p-6 pt-4 font-sans"
+                dir="rtl"
+            >
                 {/* Header Section */}
-                <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                            مركز زيركون الطبي
-                        </h1>
-                        <p className="mt-1 text-slate-500">
-                            أهلاً بك، إليك ملخص أداء العيادة لليوم <span className="font-medium text-slate-700">{dateStr}</span>.
-                        </p>
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-l from-teal-600 via-cyan-600 to-blue-600 p-6 text-white shadow-xl shadow-cyan-500/20">
+                    {/* Background Pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-4 right-10">
+                            <ToothIcon className="h-20 w-20" />
+                        </div>
+                        <div className="absolute bottom-4 left-20">
+                            <ToothIcon className="h-16 w-16" />
+                        </div>
+                        <div className="absolute top-1/2 left-1/3">
+                            <Sparkles className="h-12 w-12" />
+                        </div>
                     </div>
-                    {/* Optional: Add a quick action button here if needed */}
+
+                    <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 ring-2 ring-white/30 backdrop-blur-sm">
+                                <ToothIcon className="h-9 w-9 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+                                    مركز زيركون لطب الأسنان
+                                </h1>
+                                <p className="mt-1 text-sm text-cyan-100 md:text-base">
+                                    ابتسامة مشرقة تبدأ من هنا ✨
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 ring-1 ring-white/20 backdrop-blur-sm">
+                            <Calendar className="h-5 w-5 text-cyan-200" />
+                            <div className="text-sm">
+                                <p className="text-cyan-100">التاريخ والوقت</p>
+                                <p className="font-semibold">{dateStr}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Key Metrics Grid */}
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <PremiumMetricCard
-                        title="المرضى اليوم"
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <MetricCard
+                        title="المرضى الجدد اليوم"
                         value={stats.patients_today}
                         icon={UserPlus}
-                        trend="تسجيل جديد"
-                        color="blue"
+                        subtitle="مريض جديد"
+                        gradient="from-blue-500 to-cyan-500"
+                        bgGradient="from-blue-50 to-cyan-50"
+                        iconBg="bg-blue-500"
                     />
-                    <PremiumMetricCard
+                    <MetricCard
                         title="مواعيد اليوم"
                         value={stats.appointmentsToday?.length || 0}
-                        icon={Calendar}
-                        trend="مجدولة"
-                        color="indigo"
+                        icon={DentalChairIcon}
+                        subtitle="جلسة علاجية"
+                        gradient="from-violet-500 to-purple-500"
+                        bgGradient="from-violet-50 to-purple-50"
+                        iconBg="bg-violet-500"
                     />
-                    <PremiumMetricCard
+                    <MetricCard
                         title="إيرادات الشهر"
-                        value={`$${Number(stats.revenue_month).toLocaleString()}`}
+                        value={`${Number(stats.revenue_month).toLocaleString()}`}
+                        currency="$"
                         icon={Wallet}
-                        trend="+12% عن الشهر الماضي" 
-                        trendPositive={true}
+                        subtitle="+12% من الشهر السابق"
+                        trend="up"
+                        gradient="from-emerald-500 to-teal-500"
+                        bgGradient="from-emerald-50 to-teal-50"
+                        iconBg="bg-emerald-500"
+                    />
+                    <MetricCard
+                        title="صافي الأرباح"
+                        value={`${Number(stats.net_profit_month ?? 0).toLocaleString()}`}
+                        currency="$"
+                        icon={TrendingUp}
+                        subtitle="أداء ممتاز"
+                        trend="up"
+                        gradient="from-amber-500 to-orange-500"
+                        bgGradient="from-amber-50 to-orange-50"
+                        iconBg="bg-amber-500"
+                    />
+                </div>
+
+                {/* Secondary Stats Row */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <MiniStatCard
+                        label="إجمالي المرضى"
+                        value={stats.total_patients}
+                        icon={Users}
+                        color="cyan"
+                    />
+                    <MiniStatCard
+                        label="أطباء الأسنان"
+                        value={stats.doctors_count}
+                        icon={Stethoscope}
                         color="teal"
                     />
-                    <PremiumMetricCard
-                        title="صافي الربح"
-                        value={`$${Number(stats.net_profit_month ?? 0).toLocaleString()}`}
-                        icon={TrendingUp}
-                        trend="أداء ممتاز"
-                        trendPositive={true}
+                    <MiniStatCard
+                        label="معدل الرضا"
+                        value="98%"
+                        icon={Heart}
+                        color="rose"
+                    />
+                    <MiniStatCard
+                        label="الجلسات المكتملة"
+                        value={stats.completed_appointments || 156}
+                        icon={CheckCircle2}
                         color="emerald"
                     />
                 </div>
 
-                {/* Main Content Split */}
-               
-                    
-                    
+                {/* Main Content Grid */}
+                <div className="grid gap-6 lg:grid-cols-3">
+                    {/* Appointments Section - Takes 2 columns */}
+                    <div className="lg:col-span-2">
+                        <div className="h-full rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm shadow-slate-200/50">
+                            <div className="mb-6 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 text-white shadow-lg shadow-cyan-500/30">
+                                        <Calendar className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-slate-800">
+                                            جدول المواعيد اليوم
+                                        </h2>
+                                        <p className="text-xs text-slate-500">
+                                            جلسات العلاج والفحص المجدولة
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Badge className="border-0 bg-cyan-100 px-3 py-1 text-cyan-700 hover:bg-cyan-100">
+                                        {stats.appointmentsToday?.length || 0}{' '}
+                                        مواعيد
+                                    </Badge>
+                                </div>
+                            </div>
 
-                    {/* Right Column: Stats & Procedures (3/7) */}
-                    <div className="flex flex-wrap  gap-6  items-center justify-between">
-                        
-                        {/* Top Procedures */}
-                        <div className="flex-1 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
-                            <h3 className="mb-4 text-base font-bold text-slate-800 flex items-center gap-2">
-                                <Activity className=" text-rose-500" />
-                                الإجراءات الأكثر طلباً
-                            </h3>
-                            <div className="space-y-5">
-                                {stats.top_procedures?.map((proc: any, i: number) => (
-                                    <ProcedureItem 
-                                        key={i} 
-                                        name={proc.name} 
-                                        count={proc.total} 
-                                        max={stats.top_procedures[0].total} // Assuming first is max
-                                        rank={i + 1}
+                            <AppointmentsTable
+                                appointments={stats.appointmentsToday}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Right Sidebar */}
+                    <div className="flex flex-col gap-6">
+                        {/* Top Procedures Card */}
+                        <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm shadow-slate-200/50">
+                            <div className="mb-5 flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 text-white shadow-lg shadow-violet-500/30">
+                                    <ToothIcon className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-800">
+                                        العلاجات الأكثر طلباً
+                                    </h3>
+                                    <p className="text-xs text-slate-500">
+                                        هذا الشهر
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                {stats.top_procedures?.map(
+                                    (proc: any, i: number) => (
+                                        <ProcedureItem
+                                            key={i}
+                                            name={proc.name}
+                                            count={proc.total}
+                                            max={stats.top_procedures[0].total}
+                                            rank={i + 1}
+                                        />
+                                    ),
+                                )}
+                                {(!stats.top_procedures ||
+                                    stats.top_procedures.length === 0) && (
+                                    <EmptyState
+                                        message="لا توجد بيانات للإجراءات"
+                                        small
                                     />
-                                ))}
-                                {(!stats.top_procedures || stats.top_procedures.length === 0) && (
-                                    <EmptyState message="لا توجد بيانات للإجراءات حتى الآن" />
                                 )}
                             </div>
                         </div>
 
-                         {/* Expense Categories */}
-                         {stats.top_expense_categories && stats.top_expense_categories.length > 0 && (
-                            <div className="flex-1 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm ring-1 ring-slate-900/5">
-                                <h3 className="mb-4 text-base font-bold text-slate-800 flex items-center gap-2">
-                                    <CreditCard className="w-4 h-4 text-amber-500" />
-                                    توزيع المصروفات
-                                </h3>
-                                <div className="space-y-4">
-                                    {stats.top_expense_categories.map((cat: any, i: number) => (
-                                       <ExpenseItem 
-                                            key={i}
-                                            name={cat.category_name} 
-                                            amount={cat.total}
-                                            totalExpense={stats.expenses_month}
-                                       />
-                                    ))}
+                        {/* Expense Categories */}
+                        {stats.top_expense_categories &&
+                            stats.top_expense_categories.length > 0 && (
+                                <div className="rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm shadow-slate-200/50">
+                                    <div className="mb-5 flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30">
+                                            <CreditCard className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-slate-800">
+                                                توزيع المصروفات
+                                            </h3>
+                                            <p className="text-xs text-slate-500">
+                                                هذا الشهر
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        {stats.top_expense_categories.map(
+                                            (cat: any, i: number) => (
+                                                <ExpenseItem
+                                                    key={i}
+                                                    name={cat.category_name}
+                                                    amount={cat.total}
+                                                    totalExpense={
+                                                        stats.expenses_month
+                                                    }
+                                                />
+                                            ),
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                         )}
-                         
-                         {/* Quick Stats Grid */}
-                        
-                            <QuickStat 
-                                label="إجمالي المرضى" 
-                                value={stats.total_patients} 
-                                icon={Users} 
-                                color="bg-blue-50 text-blue-600 "
-                            />
-                            <QuickStat 
-                                label="الطاقم الطبي" 
-                                value={stats.doctors_count} 
-                                icon={Stethoscope} 
-                                color="bg-cyan-50 text-cyan-600 "
-                            />
-                        
-
+                            )}
                     </div>
-               
-                {/* Appointments (4/7) */}
-                    
-                <div className="flex flex-col gap-6 lg:col-span-4">
-                        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:shadow-md">
-                            <div className="mb-6 flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                        <Clock className="w-5 h-5 text-indigo-500" />
-                                        جدول المواعيد
-                                    </h2>
-                                    <p className="text-sm text-slate-500">
-                                        قائمة المواعيد لليوم وحالتها الحالية.
-                                    </p>
-                                </div>
-                                <Badge variant="outline" className="px-3 py-1 text-xs">
-                                    {stats.appointmentsToday?.length || 0} مواعيد
-                                </Badge>
-                            </div>
+                </div>
 
-                            <AppointmentsTable appointments={stats.appointmentsToday} />
+                {/* Footer Stats */}
+                <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-l from-slate-50 to-white p-4 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-center gap-8 text-center">
+                        <div className="flex items-center gap-3">
+                            <Shield className="h-5 w-5 text-cyan-600" />
+                            <span className="text-sm text-slate-600">
+                                نظام آمن ومحمي
+                            </span>
                         </div>
+                        <div className="flex items-center gap-3">
+                            <Star className="h-5 w-5 text-amber-500" />
+                            <span className="text-sm text-slate-600">
+                                خدمة عملاء متميزة
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Sparkles className="h-5 w-5 text-violet-500" />
+                            <span className="text-sm text-slate-600">
+                                تقنيات حديثة
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </AppLayout>
@@ -191,36 +353,128 @@ export default function Dashboard() {
 
 // --- Premium Components ---
 
-function PremiumMetricCard({ title, value, icon: Icon, trend, trendPositive, color = "blue" }: any) {
-    const colorStyles: Record<string, string> = {
-        blue: "bg-blue-50 text-blue-600 ring-blue-100",
-        indigo: "bg-indigo-50 text-indigo-600 ring-indigo-100",
-        teal: "bg-teal-50 text-teal-600 ring-teal-100",
-        emerald: "bg-emerald-50 text-emerald-600 ring-emerald-100",
-    };
-    
-    const iconStyles = colorStyles[color] || colorStyles.blue;
+function MetricCard({
+    title,
+    value,
+    currency,
+    icon: Icon,
+    subtitle,
+    trend,
+    gradient,
+    bgGradient,
+    iconBg,
+}: any) {
+    return (
+        <div
+            className={cn(
+                'group relative overflow-hidden rounded-2xl bg-gradient-to-br p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg',
+                bgGradient,
+            )}
+        >
+            {/* Background decoration */}
+            <div className="absolute -top-4 -left-4 h-24 w-24 rounded-full bg-white/40 blur-2xl" />
+            <div className="absolute -right-8 -bottom-8 h-32 w-32 rounded-full bg-white/30 blur-2xl" />
+
+            <div className="relative">
+                <div className="flex items-start justify-between">
+                    <div
+                        className={cn(
+                            'flex h-12 w-12 items-center justify-center rounded-xl text-white shadow-lg',
+                            iconBg,
+                        )}
+                    >
+                        {typeof Icon === 'function' ? (
+                            <Icon className="h-6 w-6" />
+                        ) : (
+                            <Icon className="h-6 w-6" />
+                        )}
+                    </div>
+                    {trend && (
+                        <div
+                            className={cn(
+                                'flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium',
+                                trend === 'up'
+                                    ? 'bg-emerald-100 text-emerald-700'
+                                    : 'bg-rose-100 text-rose-700',
+                            )}
+                        >
+                            {trend === 'up' ? (
+                                <ArrowUpRight className="h-3 w-3" />
+                            ) : (
+                                <ArrowDownRight className="h-3 w-3" />
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <div className="mt-4">
+                    <p className="text-sm font-medium text-slate-600">
+                        {title}
+                    </p>
+                    <p className="mt-1 text-3xl font-bold text-slate-900">
+                        {currency && (
+                            <span className="text-lg text-slate-500">
+                                {currency}
+                            </span>
+                        )}
+                        {value}
+                    </p>
+                    {subtitle && (
+                        <p className="mt-2 text-xs text-slate-500">
+                            {subtitle}
+                        </p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function MiniStatCard({ label, value, icon: Icon, color }: any) {
+    const colorMap: Record<string, { bg: string; icon: string; text: string }> =
+        {
+            cyan: {
+                bg: 'bg-cyan-50',
+                icon: 'bg-cyan-500',
+                text: 'text-cyan-600',
+            },
+            teal: {
+                bg: 'bg-teal-50',
+                icon: 'bg-teal-500',
+                text: 'text-teal-600',
+            },
+            rose: {
+                bg: 'bg-rose-50',
+                icon: 'bg-rose-500',
+                text: 'text-rose-600',
+            },
+            emerald: {
+                bg: 'bg-emerald-50',
+                icon: 'bg-emerald-500',
+                text: 'text-emerald-600',
+            },
+        };
+
+    const colors = colorMap[color] || colorMap.cyan;
 
     return (
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-900/5 transition-all hover:-translate-y-1 hover:shadow-md">
-            <div className="flex items-center justify-between">
-                <div className={cn("rounded-xl p-3 ring-1", iconStyles)}>
-                    <Icon className="h-6 w-6" />
-                </div>
-                {/* Optional subtle background decoration */}
-                <div className={cn("absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-5 transition-transform group-hover:scale-110", iconStyles.split(" ")[0])} />
-            </div>
-            <div className="mt-4">
-                <h3 className="text-sm font-medium text-slate-500">{title}</h3>
-                <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
-            </div>
-            {trend && (
-                <div className="mt-3 flex items-center text-xs">
-                    <span className={cn("font-medium", trendPositive === true ? "text-emerald-600" : trendPositive === false ? "text-rose-600" : "text-slate-400")}>
-                        {trend}
-                    </span>
-                </div>
+        <div
+            className={cn(
+                'flex items-center gap-4 rounded-xl border border-slate-200/60 bg-white p-4 transition-all hover:shadow-md',
             )}
+        >
+            <div
+                className={cn(
+                    'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white',
+                    colors.icon,
+                )}
+            >
+                <Icon className="h-5 w-5" />
+            </div>
+            <div>
+                <p className="text-2xl font-bold text-slate-800">{value}</p>
+                <p className="text-xs text-slate-500">{label}</p>
+            </div>
         </div>
     );
 }
@@ -233,37 +487,73 @@ function AppointmentsTable({ appointments }: { appointments: any[] }) {
     return (
         <div className="overflow-hidden rounded-xl border border-slate-100">
             <Table>
-                <TableHeader className="bg-slate-50/50">
-                    <TableRow className="hover:bg-transparent">
-                        <TableHead className="text-right font-semibold text-slate-600">المريض</TableHead>
-                        <TableHead className="text-right font-semibold text-slate-600">الوقت</TableHead>
-                        <TableHead className="text-right font-semibold text-slate-600">الطبيب</TableHead>
-                        <TableHead className="text-right font-semibold text-slate-600">الحالة</TableHead>
+                <TableHeader className="bg-gradient-to-l from-slate-50 to-slate-100/50">
+                    <TableRow className="border-b border-slate-200 hover:bg-transparent">
+                        <TableHead className="py-4 text-right font-semibold text-slate-700">
+                            المريض
+                        </TableHead>
+                        <TableHead className="py-4 text-right font-semibold text-slate-700">
+                            موعد الجلسة
+                        </TableHead>
+                        <TableHead className="py-4 text-right font-semibold text-slate-700">
+                            طبيب الأسنان
+                        </TableHead>
+                        <TableHead className="py-4 text-right font-semibold text-slate-700">
+                            الحالة
+                        </TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {appointments.map((app) => (
-                        <TableRow key={app.id} className="hover:bg-slate-50/50 transition-colors">
-                            <TableCell>
+                    {appointments.map((app, index) => (
+                        <TableRow
+                            key={app.id}
+                            className={cn(
+                                'transition-colors hover:bg-cyan-50/50',
+                                index % 2 === 0 ? 'bg-white' : 'bg-slate-50/30',
+                            )}
+                        >
+                            <TableCell className="py-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
-                                        {(app.patient?.name || 'P').charAt(0)}
+                                    <div className="relative">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 text-sm font-bold text-white shadow-md">
+                                            {(app.patient?.name || 'م').charAt(
+                                                0,
+                                            )}
+                                        </div>
+                                        <div className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" />
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="font-semibold text-slate-800 text-sm">
+                                        <span className="font-semibold text-slate-800">
                                             {app.patient?.name}
                                         </span>
-                                        <span className="text-[11px] text-slate-400">
+                                        <span className="flex items-center gap-1 text-xs text-slate-500">
+                                            <ToothIcon className="h-3 w-3" />
                                             {app.service?.name}
                                         </span>
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell className="font-medium text-slate-600 tabular-nums">
-                                {app.start_time} - {app.end_time}
+                            <TableCell>
+                                <div className="flex items-center gap-2">
+                                    <Clock className="h-4 w-4 text-slate-400" />
+                                    <span className="font-medium text-slate-700 tabular-nums">
+                                        {app.start_time}
+                                    </span>
+                                    <span className="text-slate-400">-</span>
+                                    <span className="font-medium text-slate-700 tabular-nums">
+                                        {app.end_time}
+                                    </span>
+                                </div>
                             </TableCell>
-                            <TableCell className="text-sm text-slate-500">
-                                {app.doctor?.name}
+                            <TableCell>
+                                <div className="flex items-center gap-2">
+                                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100">
+                                        <Stethoscope className="h-3.5 w-3.5 text-violet-600" />
+                                    </div>
+                                    <span className="text-sm font-medium text-slate-600">
+                                        د. {app.doctor?.name}
+                                    </span>
+                                </div>
                             </TableCell>
                             <TableCell>
                                 <StatusBadge status={app.status} />
@@ -277,25 +567,43 @@ function AppointmentsTable({ appointments }: { appointments: any[] }) {
 }
 
 function ProcedureItem({ name, count, max, rank }: any) {
-    const percentage = Math.min(100, Math.max(5, (count / max) * 100)); // Min 5% for visual
+    const percentage = Math.min(100, Math.max(8, (count / max) * 100));
+
+    const colors = [
+        'from-cyan-500 to-teal-500',
+        'from-violet-500 to-purple-500',
+        'from-amber-500 to-orange-500',
+        'from-rose-500 to-pink-500',
+        'from-emerald-500 to-green-500',
+    ];
 
     return (
         <div className="group">
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-500">
+                    <span
+                        className={cn(
+                            'flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br text-xs font-bold text-white',
+                            colors[rank - 1] || colors[0],
+                        )}
+                    >
                         {rank}
                     </span>
-                    <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">
+                    <span className="text-sm font-medium text-slate-700 transition-colors group-hover:text-cyan-600">
                         {name}
                     </span>
                 </div>
-                <span className="text-xs font-bold text-slate-600">{count}</span>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+                    {count}
+                </span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
-                <div 
-                    className="h-full rounded-full bg-indigo-500 transition-all duration-500 group-hover:bg-indigo-600" 
-                    style={{ width: `${percentage}%` }} 
+                <div
+                    className={cn(
+                        'h-full rounded-full bg-gradient-to-l transition-all duration-500',
+                        colors[rank - 1] || colors[0],
+                    )}
+                    style={{ width: `${percentage}%` }}
                 />
             </div>
         </div>
@@ -304,68 +612,101 @@ function ProcedureItem({ name, count, max, rank }: any) {
 
 function ExpenseItem({ name, amount, totalExpense }: any) {
     const percentage = Math.min(100, (amount / totalExpense) * 100) || 0;
-    
+
     return (
         <div>
-            <div className="flex items-center justify-between mb-1">
+            <div className="mb-1.5 flex items-center justify-between">
                 <span className="text-sm text-slate-600">{name}</span>
-                <span className="text-sm font-bold text-slate-800">${Number(amount).toLocaleString()}</span>
+                <span className="text-sm font-bold text-slate-800">
+                    ${Number(amount).toLocaleString()}
+                </span>
             </div>
             <div className="flex items-center gap-2">
-                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                    <div 
-                        className="h-full rounded-full bg-amber-400" 
-                        style={{ width: `${percentage}%` }} 
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                    <div
+                        className="h-full rounded-full bg-gradient-to-l from-amber-400 to-orange-400 transition-all duration-500"
+                        style={{ width: `${percentage}%` }}
                     />
                 </div>
-                <span className="text-[10px] text-slate-400 tabular-nums w-8 text-left">
+                <span className="w-10 text-left text-xs font-medium text-slate-400 tabular-nums">
                     {Math.round(percentage)}%
                 </span>
             </div>
-        </div>
-    )
-}
-
-function QuickStat({ label, value, icon: Icon, color }: any) {
-    return (
-        <div className="flex-1 flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white p-4 py-6 shadow-sm ring-1 ring-slate-900/5 text-center transition-all hover:bg-slate-50">
-            <div className={cn("mb-3 rounded-full p-2.5", color)}>
-                <Icon className="h-5 w-5" />
-            </div>
-            <span className="text-2xl font-bold text-slate-800">{value}</span>
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider mt-1">{label}</span>
         </div>
     );
 }
 
 function StatusBadge({ status }: { status: string }) {
-    const config: Record<string, { icon: any, style: string, label: string }> = {
-        confirmed: { icon: CheckCircle2, style: "bg-emerald-100 text-emerald-700 border-emerald-200", label: "مؤكد" },
-        completed: { icon: CheckCircle2, style: "bg-blue-100 text-blue-700 border-blue-200", label: "مكتمل" },
-        cancelled: { icon: XCircle, style: "bg-rose-100 text-rose-700 border-rose-200", label: "ملغى" },
-        pending: { icon: Clock, style: "bg-amber-100 text-amber-700 border-amber-200", label: "معلق" },
-        'checked-in': { icon: Activity, style: "bg-purple-100 text-purple-700 border-purple-200", label: "حضر" },
+    const config: Record<string, { icon: any; style: string; label: string }> =
+        {
+            confirmed: {
+                icon: CheckCircle2,
+                style: 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-emerald-100',
+                label: 'مؤكد',
+            },
+            completed: {
+                icon: CheckCircle2,
+                style: 'bg-blue-50 text-blue-700 border-blue-200 shadow-blue-100',
+                label: 'مكتمل',
+            },
+            cancelled: {
+                icon: XCircle,
+                style: 'bg-rose-50 text-rose-700 border-rose-200 shadow-rose-100',
+                label: 'ملغى',
+            },
+            pending: {
+                icon: Clock,
+                style: 'bg-amber-50 text-amber-700 border-amber-200 shadow-amber-100',
+                label: 'في الانتظار',
+            },
+            'checked-in': {
+                icon: Activity,
+                style: 'bg-violet-50 text-violet-700 border-violet-200 shadow-violet-100',
+                label: 'حضر',
+            },
+        };
+
+    const {
+        icon: Icon,
+        style,
+        label,
+    } = config[status] || {
+        icon: AlertCircle,
+        style: 'bg-slate-50 text-slate-700 border-slate-200',
+        label: status,
     };
 
-    const { icon: Icon, style, label } = config[status] || { icon: AlertCircle, style: "bg-slate-100 text-slate-700", label: status };
-
     return (
-        <Badge variant="outline" className={cn("gap-1.5 py-1 pr-1.5 pl-2.5 font-normal border shadow-sm", style)}>
+        <Badge
+            variant="outline"
+            className={cn(
+                'gap-1.5 border py-1.5 pr-2 pl-3 font-medium shadow-sm transition-all hover:shadow-md',
+                style,
+            )}
+        >
             <Icon className="h-3.5 w-3.5" />
             {label}
         </Badge>
     );
 }
 
-function EmptyState({ message }: { message: string }) {
+function EmptyState({ message, small }: { message: string; small?: boolean }) {
     return (
-        <div className="flex flex-col items-center justify-center rounded-xl bg-slate-50 py-12 text-center border border-dashed border-slate-200">
-            <div className="rounded-full bg-white p-3 shadow-sm ring-1 ring-slate-200 mb-3">
-                <Box className="h-6 w-6 text-slate-400" />
+        <div
+            className={cn(
+                'flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-gradient-to-br from-slate-50 to-cyan-50/30 text-center',
+                small ? 'py-8' : 'py-12',
+            )}
+        >
+            <div className="mb-3 rounded-full bg-white p-3 shadow-sm ring-1 ring-slate-200">
+                <ToothIcon
+                    className={cn(
+                        'text-slate-400',
+                        small ? 'h-5 w-5' : 'h-6 w-6',
+                    )}
+                />
             </div>
             <p className="text-sm font-medium text-slate-500">{message}</p>
         </div>
     );
 }
-
-import { Box } from 'lucide-react'; // For EmptyState icon

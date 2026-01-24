@@ -5,6 +5,7 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Expense, PaginatedData } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
@@ -16,9 +17,16 @@ type PageProps = {
 
 export default function Index() {
     const { expenses } = usePage<PageProps>().props;
-
+    const { success, error } = useAppToast();
     const handleDelete = (id: number) => {
-        router.delete(route('expenses.destroy', id));
+        router.delete(route('expenses.destroy', id), {
+            onSuccess: () => {
+                success('تم حذف مصروف بنجاح');
+            },
+            onError: () => {
+                error('فشل حذف مصروف، يرجى المحاولة مرة أخرى لاحقًا');
+            },
+        });
     };
     const columns: ColumnDef<Expense>[] = [
         { accessorKey: 'id', header: 'ID' },
@@ -99,16 +107,16 @@ export default function Index() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">المصروفات</h1>
-                    <SearchBar
-                        value={search}
-                        onChange={handleSearch}
-                        showSearch={true}
-                        showButton={true}
-                        buttonLabel="إضافة مصروف"
-                        buttonRoute="expenses.create"
-                    />
-
                     <section className="p-4">
+                        <SearchBar
+                            value={search}
+                            onChange={handleSearch}
+                            showSearch={true}
+                            showButton={true}
+                            buttonLabel="إضافة مصروف"
+                            buttonRoute="expenses.create"
+                        />
+
                         <DynamicTable data={expenses?.data} columns={columns} />
                     </section>
                 </div>

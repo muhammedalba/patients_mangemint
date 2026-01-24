@@ -102,6 +102,7 @@ export default function Index() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                    <h1 className="mb-4 text-2xl font-bold">الدفعات</h1>
+                     <section className="p-4">
                     <SearchBar
                         value={search}
                         onChange={handleSearch}
@@ -110,7 +111,7 @@ export default function Index() {
                         buttonLabel="إضافة دفعة"
                         buttonRoute="payments.create"
                     />
-                    <section className="p-4">
+
                         <DynamicTable data={payments?.data} columns={columns} />
                     </section>
                 </div>

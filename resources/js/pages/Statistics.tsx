@@ -1,7 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Appointment, BreadcrumbItem, PageProps } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { useEffect, useState, useMemo } from 'react';
 import type { LucideIcon } from "lucide-react";
 
 import {
@@ -23,9 +22,10 @@ import {
     CheckCircle2,
     XCircle,
     AlertCircle,
-    CalendarDays
+
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ClockDisplay } from '@/components/ClockDisplay';
 
 const Breadcrumbs: BreadcrumbItem[] = [
     {
@@ -38,34 +38,6 @@ const Breadcrumbs: BreadcrumbItem[] = [
 type StatisticsProps = PageProps<{ stats: { appointmentsToday: Appointment[]; }; }>;
 export default function Statistics() {
 const { stats } = usePage<StatisticsProps>().props;
-
-    const [now, setNow] = useState(new Date());
-
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setNow(new Date());
-        }, 1000);
-        return () => clearInterval(timer);
-    }, []);
-
-    // Time formatting for Syria/Egypt/Standard
-    const timeString = useMemo(() => {
-        return now.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true, // AM/PM
-        });
-    }, [now]);
-
-    const dateString = useMemo(() => {
-        return now.toLocaleDateString('ar-EG', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
-    }, [now]);
 
     return (
         <AppLayout breadcrumbs={Breadcrumbs}>
@@ -81,13 +53,8 @@ const { stats } = usePage<StatisticsProps>().props;
 
                     <div className="relative z-10 flex flex-col items-center justify-center gap-2 text-center md:flex-row md:justify-between md:text-right">
                         <div>
-                            <div className="flex items-center gap-2 text-indigo-300 mb-1">
-                                <CalendarDays className="h-5 w-5" />
-                                <span className="text-lg font-medium">{dateString}</span>
-                            </div>
-                            <h1 className="text-5xl font-bold tracking-tight md:text-7xl font-mono tabular-nums text-white">
-                                {timeString}
-                            </h1>
+                            <ClockDisplay />
+
                         </div>
 
                         <div className="mt-4 flex items-center gap-4 md:mt-0">

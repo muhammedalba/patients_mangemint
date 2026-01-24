@@ -1,12 +1,25 @@
-import { BreadcrumbItem, PageProps, Patient, Payment } from '@/types';
+import {
+    BreadcrumbItem,
+    PageProps,
+    Patient,
+    Payment,
+} from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import React from 'react';
+import { route } from 'ziggy-js';
+
+import AppLayout from '@/layouts/app-layout';
 import { FormInput } from '@/components/FormInput';
 import { SearchInput } from '@/components/SearchInput';
-import AppLayout from '@/layouts/app-layout';
-import { route } from 'ziggy-js';
 import { FormButton } from '@/components/FormButton';
 import { useAppToast } from '@/utils/toast';
+
+import {
+    User,
+    CreditCard,
+    CalendarDays,
+    FileText,
+} from 'lucide-react';
 
 interface EditProps extends PageProps {
     payment: Payment;
@@ -16,101 +29,133 @@ interface EditProps extends PageProps {
 const Edit: React.FC<EditProps> = ({ payment, patients }) => {
     const { data, setData, put, errors, processing } = useForm({
         ...payment,
-
         patient_id: String(payment.patient_id),
     });
+
     const { success, error } = useAppToast();
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+
         put(route('payments.update', payment.id), {
             onSuccess: () => {
-            success(
-                'تم تعديل الدفعة بنجاح',
-            );
-        },
-        onError: () => {
-            error(
-                'فشل تعديل الدفعة',
-                'يرجى التحقق من البيانات المدخلة'
-            );
-        },
+                success('تم تعديل الدفعة بنجاح');
+            },
+            onError: () => {
+                error(
+                    'فشل تعديل الدفعة',
+                    errors ? 'يرجى التحقق من البيانات المدخلة' : 'حدث خطأ غير متوقع.'
+                );
+            },
         });
     }
+
     const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'الدفعات',
-            href: route('payments.index'),
-        },
+        { title: 'الدفعات', href: route('payments.index') },
         {
             title: 'تعديل الدفعة',
             href: route('payments.edit', payment.id),
         },
     ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="تعديل الدفعة" />
-            <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-6 shadow-lg">
-                <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
-                    تعديل الدفعة
-                </h1>
 
-                <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <div className="mx-auto mt-6 max-w-full rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+                {/* Header */}
+                <div className="mb-8 text-center">
+                    <h1 className="text-2xl font-semibold text-gray-800">
+                        تعديل الدفعة
+                    </h1>
+                    <p className="mt-1 text-sm text-gray-500">
+                        تحديث بيانات الدفعة المسجلة للمريض
+                    </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        {/* Patient */}
                         <SearchInput
-                            label="اسم المريض"
+                            label="المريض"
                             name="patient_id"
                             value={
                                 patients.find(
-                                    (p) => p.id === Number(data.patient_id),
+                                    (p) =>
+                                        p.id ===
+                                        Number(data.patient_id),
                                 )?.name ?? ''
                             }
-                            onChange={(val) => setData('patient_id', val)}
+                            onChange={(val) =>
+                                setData('patient_id', val)
+                            }
                             options={patients}
                             onSelect={(patient) =>
-                                setData('patient_id', patient.id.toString())
+                                setData(
+                                    'patient_id',
+                                    patient.id.toString(),
+                                )
                             }
                             placeholder="ابحث باسم المريض..."
+                            icon={User}
                             error={errors.patient_id}
                         />
 
+                        {/* Amount */}
                         <FormInput
-                            label=" قيمة الدفعة"
+                            label="قيمة الدفعة"
                             name="amount"
                             type="number"
                             value={data.amount.toString()}
-                            onChange={(val) => setData('amount', Number(val))}
+                            onChange={(val) =>
+                                setData('amount', Number(val))
+                            }
+                            placeholder="مثال: 150 €"
+                            icon={CreditCard}
                             error={errors.amount}
                         />
+
+                        {/* Date */}
                         <FormInput
-                            label="تاريخ الموعد"
-                            name="date"
+                            label="تاريخ الدفعة"
+                            name="payment_date"
                             type="date"
                             value={data.payment_date}
-                            onChange={(val) => setData('payment_date', val)}
+                            onChange={(val) =>
+                                setData('payment_date', val)
+                            }
+                            icon={CalendarDays}
                             error={errors.payment_date}
                         />
+
+                        {/* Notes */}
                         <FormInput
-                            label="الملاحظات"
+                            label="ملاحظات"
                             name="notes"
                             type="text"
                             value={data.notes}
-                            onChange={(val) => setData('notes', val)}
-                            placeholder="الملاحظات"
+                            onChange={(val) =>
+                                setData('notes', val)
+                            }
+                            placeholder="ملاحظات إضافية (اختياري)"
+                            icon={FileText}
                             error={errors.notes}
                         />
                     </div>
-                    <div className="flex items-center justify-end space-x-2">
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-3">
                         <Link
                             href={route('payments.index')}
-                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                            className="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                         >
                             إلغاء
                         </Link>
+
                         <FormButton
                             processing={processing}
-                            label="تحديث"
-                            loadingLabel="جارِ التحديث ..."
+                            label="تحديث الدفعة"
+                            loadingLabel="جارِ التحديث..."
                         />
                     </div>
                 </form>

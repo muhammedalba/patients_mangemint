@@ -30,13 +30,14 @@ export function FormInput({
                 disabled={disabled}
                 type={type}
                 name={name}
+                placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 className={`peer w-full rounded-xl border border-gray-300 bg-white px-10 py-3 text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none`}
             />
             <label
                 htmlFor={name}
-                className={`pointer-events-none absolute right-2 flex items-center gap-x-2 rounded-2xl bg-white px-3 py-1 text-sm text-gray-400 transition-all duration-300 ${value || name == 'date' || name == 'birth_date' ? '-top-4 text-xs text-blue-700' : 'top-1/5 text-sm text-gray-400'} `}
+                className={`pointer-events-none absolute right-2 flex items-center gap-x-2 rounded-2xl bg-white px-3 py-1 text-sm text-gray-400 transition-all duration-300 ${value || type == 'date' || name == 'birth_date' ? '-top-4 text-xs text-blue-700' : 'top-1/5 text-sm text-gray-400'} `}
             >
                 {IconComponent && (
                     <span className="mr-1 inline-block">

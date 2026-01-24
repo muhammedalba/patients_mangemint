@@ -5,6 +5,7 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, ExpenseCategory, PaginatedData } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
@@ -16,10 +17,17 @@ type PageProps = {
 
 export default function Index() {
     const { categories } = usePage<PageProps>().props;
+    const { success, error } = useAppToast();
     const handleDelete = (id: number) => {
-        router.delete(route('expense-categories.destroy', id));
+        router.delete(route('expense-categories.destroy', id),{
+             onSuccess: () => {
+                success('تم حذف الفئة بنجاح');
+            },
+            onError: () => {
+                error('فشل حذف الفئة، يرجى المحاولة مرة أخرى لاحقًا');
+            },
+        });
     };
-    console.log(categories, 'cat');
     const columns: ColumnDef<ExpenseCategory>[] = [
         { accessorKey: 'id', header: 'المعرف' },
         { accessorKey: 'name', header: 'اسم الفئة' },
@@ -92,6 +100,8 @@ export default function Index() {
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">فئات المصروفات</h1>
+
+                    <section className="p-4">
                     <SearchBar
                         value={search}
                         onChange={handleSearch}
@@ -101,7 +111,7 @@ export default function Index() {
                         buttonRoute="expense-categories.create"
                     />
 
-                    <section className="p-4">
+
                         <DynamicTable
                             data={categories?.data}
                             columns={columns}

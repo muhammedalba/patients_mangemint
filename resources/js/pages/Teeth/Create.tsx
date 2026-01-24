@@ -1,19 +1,20 @@
 import { FormButton } from '@/components/FormButton';
 import { FormInput } from '@/components/FormInput';
+import { FormTextArea } from '@/components/FormTextArea';
 import { SearchInput } from '@/components/SearchInput';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, Patient } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import { BadgeQuestionMark, ClipboardList, DecimalsArrowRight, User2 } from 'lucide-react';
+import { FormEvent, useState, useCallback } from 'react';
 import { route } from 'ziggy-js';
 
-export default function CreateTeeth({
-    patients,
-    patient_id,
-}: {
+interface CreateTeethProps {
     patients: Patient[];
     patient_id?: number;
-}) {
+}
+
+export default function CreateTeeth({ patients, patient_id }: CreateTeethProps) {
     const { data, setData, post, processing, errors, reset } = useForm<{
         patient_id: string;
         tooth_number: string;
@@ -25,87 +26,105 @@ export default function CreateTeeth({
         status: '',
         notes: '',
     });
-    console.log(patients);
-    console.log(patient_id, 'patient_id');
+
     const [selectedPatientName, setSelectedPatientName] = useState('');
 
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        post(route('teeth.store'), {
-            onSuccess: () => reset(),
-        });
-    };
-    const handlePatientSelect = (patient: Patient) => {
-        setData('patient_id', patient.id.toString());
-    };
+    const handleSubmit = useCallback(
+        (e: FormEvent) => {
+            e.preventDefault();
+            post(route('teeth.store'), {
+                onSuccess: () => reset(),
+            });
+        },
+        [post, reset]
+    );
+
+    const handlePatientSelect = useCallback(
+        (patient: Patient) => {
+            setData('patient_id', patient.id.toString());
+            setSelectedPatientName(patient.name);
+        },
+        [setData]
+    );
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'الأسنان', href: route('teeth.index') },
-        { title: 'إضافة سن ', href: route('teeth.create') },
+        { title: 'إضافة سن', href: route('teeth.create') },
     ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="إضافة سن" />
-            <div className="mx-auto mt-4 w-5xl rounded-xl border border-gray-100 bg-white p-4 px-6 shadow-lg">
-                <h1 className="mb-2 text-center text-xl font-bold text-gray-700">
-                    إضافة سن جديد
-                </h1>
+            <div className="mx-auto mt-6 max-w-4xl rounded-2xl border border-slate-100 bg-white shadow-sm">
+                {/* Header */}
+                <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+                        <ClipboardList size={20} />
+                    </div>
+                    <div>
+                        <h1 className="text-lg font-semibold text-slate-800">إضافة سن جديد</h1>
+                        <p className="text-sm text-slate-500">
+                            أدخل بيانات السن وحالة المريض بدقة
+                        </p>
+                    </div>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6">
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <SearchInput
-                            label="اسم المريض"
+                            label="ابحث باسم المريض"
                             name="patient_id"
                             value={selectedPatientName}
-                            onChange={(val) => setSelectedPatientName(val)}
+                            onChange={setSelectedPatientName}
                             options={patients}
                             onSelect={handlePatientSelect}
-                            placeholder="ابحث باسم المريض..."
                             error={errors.patient_id}
+                            icon={User2}
                         />
 
                         <FormInput
                             label="رقم السن"
                             name="tooth_number"
                             value={data.tooth_number}
-                            onChange={(val: string) =>
-                                setData('tooth_number', val)
-                            }
-                            placeholder="رقم السن"
+                            onChange={(val: string) => setData('tooth_number', val)}
+                            icon={DecimalsArrowRight}
                             error={errors.tooth_number}
                         />
 
                         <FormInput
-                            label="الحالة"
+                            label="الحالة الحالية للسن"
                             name="status"
                             value={data.status}
                             onChange={(val: string) => setData('status', val)}
-                            placeholder="الحالة"
                             error={errors.status}
+                            icon={BadgeQuestionMark}
                         />
 
-                        <FormInput
-                            label="ملاحظات"
+                        <FormTextArea
+                            label="أدخل ملاحظات إضافية"
                             name="notes"
+                            icon={ClipboardList}
                             value={data.notes}
-                            onChange={(val: string) => setData('notes', val)}
-                            placeholder="ملاحظات"
+                            onChange={(val) => setData('notes', val)}
+                            rows={2}
                             error={errors.notes}
                         />
                     </div>
 
-                    <div className="flex items-center justify-end space-x-2">
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
                         <Link
-                            href={route('procedures.index')}
-                            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-200"
+                            href={route('teeth.index')}
+                            className="rounded-xl border border-slate-200 bg-white px-6 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
                         >
                             إنهاء
                         </Link>
 
                         <FormButton
                             processing={processing}
-                            label="حفظ"
-                            loadingLabel="جارِ الحفظ ..."
+                            label="حفظ السن"
+                            loadingLabel="جارِ الحفظ..."
                         />
                     </div>
                 </form>

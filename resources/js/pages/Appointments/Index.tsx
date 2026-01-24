@@ -11,7 +11,6 @@ import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
-
 export default function Index({
     appointments,
     auth,
@@ -25,7 +24,7 @@ export default function Index({
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [perPage] = useState(10);
-      const { success, error } = useAppToast();
+    const { success, error } = useAppToast();
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -89,7 +88,7 @@ export default function Index({
     ];
 
     const handleDelete = (id: number) => {
-        router.delete(route('appointments.destroy', id),{
+        router.delete(route('appointments.destroy', id), {
             onSuccess: () => {
                 success('تم حذف الموعد بنجاح');
             },
@@ -112,7 +111,8 @@ export default function Index({
             <Head title="المواعيد" />
             <div className="flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <h1 className="mb-4 text-2xl font-bold">المواعيد</h1>
-
+            </div>
+            <section className="p-4">
                 <SearchBar
                     value={search}
                     onChange={handleSearch}
@@ -121,8 +121,6 @@ export default function Index({
                     buttonLabel="إضافة موعد"
                     buttonRoute="appointments.create"
                 />
-            </div>
-            <section className="p-4">
 
                 <DynamicTable data={[...appointments.data]} columns={columns} />
             </section>

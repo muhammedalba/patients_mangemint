@@ -139,8 +139,8 @@ export default function Create({
                                     onChange={setSelectedPatientName}
                                     options={patients}
                                     onSelect={handlePatientSelect}
-                                    placeholder=""
                                     error={errors.patient_id}
+                                   
                                 />
 
                                 <FormSelect
@@ -158,6 +158,7 @@ export default function Create({
                                         value: doctor.id.toString(),
                                         label: doctor.name,
                                     }))}
+
                                     error={errors.user_id}
                                 />
                             </div>

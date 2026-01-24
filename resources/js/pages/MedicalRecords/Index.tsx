@@ -4,7 +4,13 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, MedicalRecord, PageProps, PaginatedData } from '@/types';
+import {
+    type BreadcrumbItem,
+    MedicalRecord,
+    PageProps,
+    PaginatedData,
+} from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
@@ -17,10 +23,10 @@ export default function Index({
     medicalRecords: PaginatedData<MedicalRecord>;
     filters: { search?: string };
 }>) {
-
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(true);
     const [perPage] = useState(10);
+      const { success, error } = useAppToast();
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -32,7 +38,14 @@ export default function Index({
     };
 
     const handleDelete = (id: number): void => {
-        router.delete(route('medical-records.destroy', id));
+        router.delete(route('medical-records.destroy', id),{
+             onSuccess: () => {
+                success('تم حذف السجل  بنجاح');
+            },
+            onError: () => {
+                error('فشل حذف السجل يرجى المحاولة مرة أخرى لاحقًا');
+            },
+        });
     };
 
     useEffect(() => {
@@ -51,7 +64,6 @@ export default function Index({
 
         return () => clearTimeout(handler);
     }, [search]);
-
 
     const columns: ColumnDef<MedicalRecord>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -106,22 +118,27 @@ export default function Index({
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">السجلات الطبية</h1>
-                    <SearchBar
-                        value={search}
-                        onChange={handleSearch}
-                        showSearch={true}
-                        showButton={true}
-                        buttonLabel="إضافة سجل طبي"
-                        buttonRoute="medical-records.create"
-                    />
-
                     <section className="p-4">
+                        <SearchBar
+                            value={search}
+                            onChange={handleSearch}
+                            showSearch={true}
+                            showButton={true}
+                            buttonLabel="إضافة سجل طبي"
+                            buttonRoute="medical-records.create"
+                        />
+
                         <DynamicTable
                             data={medicalRecords.data}
                             columns={columns}
                         />
                     </section>
-                    <Pagination links={medicalRecords.links} search={search} perPage={perPage} baseRoute='/medical-records'/>
+                    <Pagination
+                        links={medicalRecords.links}
+                        search={search}
+                        perPage={perPage}
+                        baseRoute="/medical-records"
+                    />
                 </div>
             </div>
         </AppLayout>

@@ -33,11 +33,12 @@
 
     // Shared middleware
     $protected = ['auth', 'verified', 'role.redirect:doctor|admin'];
+    $protectedReceptionist = ['auth', 'verified', 'role.redirect:doctor|admin|receptionist'];
 
     Route::middleware($protected)
         ->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::middleware($protected)
+    Route::middleware(['auth', 'verified', 'role.redirect:doctor|admin|receptionist'])
         ->get('/today', [DashboardController::class, 'statistics'])->name('statistics');
 
     /*
@@ -63,12 +64,13 @@
 | Patients
 |--------------------------------------------------------------------------
 */
-    Route::middleware($protected)->group(function () {
-        Route::resource('patients', PatientController::class);
-        // add dicount amount route
+    // add dicount amount route
+
+    Route::middleware($protectedReceptionist)->group(function () {
         Route::post('patients/{patient}/discount', [PatientController::class, 'addDiscount'])->name('patients.addDiscount');
+        Route::resource('patients', PatientController::class);
         // patient details route
-        Route::get('patients/details/{patient}',[PatientController::class, 'details'])->name('patients.details');
+        Route::get('patients/details/{patient}', [PatientController::class, 'details'])->name('patients.details');
         // get Tooth Procedures
         Route::get('/patients/{patient}/tooth/{tooth}/procedures', [PatientController::class, 'getToothProcedures'])->name('patients.tooth.procedures');
         // create invoice for patient
@@ -80,7 +82,7 @@
 | Procedures
 |--------------------------------------------------------------------------
 */
-    Route::middleware($protected)
+    Route::middleware($protectedReceptionist)
         ->name('procedures.')
         ->prefix('procedures')
         ->controller(ProcedureController::class)
@@ -99,7 +101,7 @@
 | Appointments
 |--------------------------------------------------------------------------
 */
-    Route::middleware($protected)->group(function () {
+    Route::middleware($protectedReceptionist)->group(function () {
         Route::resource('appointments', AppointmentController::class);
         Route::get('available-slots', [AppointmentController::class, 'availableSlots'])
             ->name('appointments.availableSlots');
@@ -110,7 +112,7 @@
 | Services
 |--------------------------------------------------------------------------
 */
-    Route::middleware($protected)
+    Route::middleware($protectedReceptionist)
         ->resource('services', ServicesController::class);
 
     /*
@@ -118,7 +120,7 @@
 | Service Categories
 |--------------------------------------------------------------------------
 */
-    Route::middleware($protected)
+    Route::middleware($protectedReceptionist)
         ->resource('service-categories', ServiceCategoriesController::class);
 
     /*
@@ -126,7 +128,7 @@
 | Medical Records
 |--------------------------------------------------------------------------
 */
-    Route::middleware($protected)
+    Route::middleware($protectedReceptionist)
         ->prefix('medical-records')
         ->name('medical-records.')
         ->controller(MedicalRecordController::class)
@@ -145,7 +147,7 @@
 | Payments
 |--------------------------------------------------------------------------
 */
-    Route::middleware($protected)
+    Route::middleware($protectedReceptionist)
         ->prefix('payments')
         ->name('payments.')
         ->controller(PaymentController::class)
@@ -163,7 +165,7 @@
 | Teeth
 |--------------------------------------------------------------------------
 */
-    Route::middleware($protected)
+    Route::middleware($protectedReceptionist)
         ->prefix('teeth')
         ->name('teeth.')
         ->controller(ToothController::class)
@@ -181,7 +183,7 @@
     | Expense Categories
     |--------------------------------------------------------------------------
     */
-    Route::middleware($protected)
+    Route::middleware($protectedReceptionist)
         ->prefix('expense-categories')
         ->name('expense-categories.')
         ->controller(ExpenseCategoryController::class)

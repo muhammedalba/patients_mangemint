@@ -4,6 +4,7 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, PageProps, PaginatedData } from '@/types';
+import { useAppToast } from '@/utils/toast';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
@@ -28,8 +29,8 @@ export default function Index({
     filters: { search?: string };
 }>) {
     const [search, setSearch] = useState(filters.search || '');
-    console.log(teeth.data);
     const [perPage] = useState(10);
+    const { success, error } = useAppToast();
     const handleSearch = (val: string) => {
         const newValue = val;
         setSearch(newValue);
@@ -89,7 +90,14 @@ export default function Index({
     ];
 
     const handleDelete = (id: number): void => {
-        router.delete(route('teeth.destroy', id));
+        router.delete(route('teeth.destroy', id), {
+            onSuccess: () => {
+                success('تم حذف سن بنجاح');
+            },
+            onError: () => {
+                error('فشل حذف سن، يرجى المحاولة مرة أخرى لاحقًا');
+            },
+        });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -105,17 +113,16 @@ export default function Index({
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div>
                     <h1 className="mb-4 text-2xl font-bold">الأسنان</h1>
-
-                    <SearchBar
-                        value={search}
-                        onChange={handleSearch}
-                        showSearch={true}
-                        showButton={true}
-                        buttonLabel="إضافة سن"
-                        buttonRoute="teeth.create"
-                    />
-
                     <section className="p-4">
+                        <SearchBar
+                            value={search}
+                            onChange={handleSearch}
+                            showSearch={true}
+                            showButton={true}
+                            buttonLabel="إضافة سن"
+                            buttonRoute="teeth.create"
+                        />
+
                         <DynamicTable
                             data={[...teeth.data]}
                             columns={columns}

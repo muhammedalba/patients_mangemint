@@ -25,7 +25,7 @@ class PatientStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:patients,name',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|unique:patients,email',
             'address' => 'nullable|string|max:500',

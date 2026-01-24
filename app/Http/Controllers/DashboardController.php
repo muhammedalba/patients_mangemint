@@ -42,8 +42,7 @@ class DashboardController extends Controller
                 ->get();
             // أكثر الإجراءات طلبًا (حسب عدد المرضى الذين لديهم إجراء)
             $topProcedures = Procedure::select('procedures.name', DB::raw('count(procedures.id) as total'))
-                ->join('teeth', 'procedures.tooth_id', '=', 'teeth.id')
-                ->join('patients', 'teeth.patient_id', '=', 'patients.id')
+                ->join('patients', 'procedures.patient_id', '=', 'patients.id')
                 ->groupBy('procedures.name')
                 ->orderByDesc('total')
                 ->limit(5)
@@ -117,7 +116,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    // يمكنك إضافة دالة لمسح الكاش عند إضافة دفعة أو إجراء أو سن جديد
     public static function clearDashboardCache()
     {
         Cache::forget('dashboard.stats');
