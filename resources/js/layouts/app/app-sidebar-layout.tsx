@@ -5,6 +5,8 @@ import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { type BreadcrumbItem } from '@/types';
 import { type PropsWithChildren } from 'react';
 
+import FloatingSupportButton from '@/components/floating-support-button';
+
 export default function AppSidebarLayout({
     children,
     breadcrumbs = [],
@@ -16,6 +18,7 @@ export default function AppSidebarLayout({
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 {children}
             </AppContent>
+            <FloatingSupportButton />
         </AppShell>
     );
 }

@@ -1,5 +1,6 @@
 import bgImage from '../../../images/auth-bg.png';
 import AppLogoIcon from '@/components/app-logo-icon';
+import FloatingSupportButton from '@/components/floating-support-button';
 import { home } from '@/routes';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -84,6 +85,7 @@ export default function AuthSplitLayout({
                     </div>
                 </div>
             </div>
+            <FloatingSupportButton />
         </div>
     );
 }
