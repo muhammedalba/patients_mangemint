@@ -1,38 +1,34 @@
 import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
 import { route } from 'ziggy-js';
 import { FormButton } from './FormButton';
 import { FormInput } from './FormInput';
+import { useAppToast } from '@/utils/toast';
 
 export default function DiscountForm({ patientId }: { patientId: number }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         discount_amount: '',
     });
-    const [submitted, setSubmitted] = useState(false);
+
+    const { success, error } = useAppToast();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (Number(data.discount_amount) < 0) {
-            return alert('قيمة الخصم يجب أن تكون صفر أو أكبر');
+        if (Number(data.discount_amount) < 0 || !Number(data.discount_amount) ) {
+            return error('قيمة الخصم يجب أن تكون صفر أو أكبر');
         }
 
         post(route('patients.addDiscount', patientId), {
             onSuccess: () => {
-                setSubmitted(true);
+                success('تم إضافة الخصم بنجاح');
                 reset();
                 close();
             },
+            onError: () => {
+                error('فشل إضافة الخصم', 'يرجى التحقق من البيانات المدخلة');
+            },
         });
     };
-
-    if (submitted) {
-        return (
-            <div className="rounded-md border border-green-200 bg-green-50 p-6 text-green-700">
-                ✅ تم إضافة الخصم بنجاح
-            </div>
-        );
-    }
 
     return (
         <form
@@ -40,13 +36,12 @@ export default function DiscountForm({ patientId }: { patientId: number }) {
             className="max-w-md rounded-lg bg-white p-6 shadow-md mt-2"
         >
             <FormInput
-                label="قيمة الخصم"
+                label="أدخل قيمة الخصم"
                 name="discount_amount"
                 type="number"
-                min="0"
+                min={0}
                 value={data.discount_amount}
                 onChange={(val) => setData('discount_amount', val)}
-                placeholder="أدخل قيمة الخصم"
                 error={errors.discount_amount}
             />
 

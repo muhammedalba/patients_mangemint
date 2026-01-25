@@ -52,6 +52,9 @@ const { success, error } = useAppToast();
     const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
+    if(Number(data.cost) < 0 || !Number(data.cost)) {
+        return error('قيمة الإجمالي يجب أن تكون أكبر من صفر');
+    }
     const optimisticProcedure : Procedure = {
         id: Date.now(),
         name: data.name,
@@ -142,6 +145,7 @@ const { success, error } = useAppToast();
                         label="الكلفة"
                         type="number"
                         name="cost"
+                        min={0}
                         value={data.cost}
                         onChange={(e) => setData('cost', e)}
                         icon={DollarSign}

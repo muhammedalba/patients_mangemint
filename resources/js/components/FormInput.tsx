@@ -9,8 +9,8 @@ interface FormInputProps {
     type?: string;
     icon?: LucideIcon;
     disabled?: boolean;
-    min?: string;
-    max?: string;
+    min?: number;
+    max?: number;
 }
 
 export function FormInput({
