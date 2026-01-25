@@ -24,8 +24,8 @@ export default function EditUser({ user }: { user: User }) {
     roles: (user.roles ?? []) as unknown as string[],
   });
 
-  const [, setIsLoading] = useState(false);
-  const { success, error } = useAppToast();
+
+  const { success, error, warning } = useAppToast();
 
   const availableRoles = [
     { key: 'admin', label: 'مدير' },
@@ -44,10 +44,14 @@ export default function EditUser({ user }: { user: User }) {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+//  validate data 
+    if (!data.name || !data.email || !data.password || !data.phone || !data.roles.length) {
+      warning('فشل تعديل المستخدم', 'يرجى التحقق من البيانات المدخلة');
+      return;
+    }
     put(route('users.update', user.id), {
       onSuccess: () => {
-        success('تم تعديل المستخدم بنجاح');
+        success('تم تعديل  بنجاح', 'تم تعديل المستخدم بنجاح');
       },
       onError: () => {
         error('فشل تعديل المستخدم', 'يرجى التحقق من البيانات المدخلة');

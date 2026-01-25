@@ -8,7 +8,7 @@ import { BreadcrumbItem, Expense, PaginatedData } from '@/types';
 import { useAppToast } from '@/utils/toast';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 type PageProps = {
@@ -21,10 +21,10 @@ export default function Index() {
     const handleDelete = (id: number) => {
         router.delete(route('expenses.destroy', id), {
             onSuccess: () => {
-                success('تم حذف مصروف بنجاح');
+                success('تم حذف بنجاح','تم حذف مصروف بنجاح');
             },
             onError: () => {
-                error('فشل حذف مصروف، يرجى المحاولة مرة أخرى لاحقًا');
+                error('فشل حذف','فشل حذف مصروف، يرجى المحاولة مرة أخرى لاحقًا');
             },
         });
     };
@@ -66,7 +66,8 @@ export default function Index() {
         },
     ];
     const [search, setSearch] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
@@ -78,6 +79,10 @@ export default function Index() {
         );
     };
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
         const handler = setTimeout(() => {
             setIsLoading(true);
             router.get(

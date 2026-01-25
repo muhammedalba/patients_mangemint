@@ -26,7 +26,7 @@ export default function CreateUser() {
     roles: [],
   });
 
-  const { success, error } = useAppToast();
+  const { success, error, warning } = useAppToast();
 
   const availableRoles = [
     { key: 'admin', label: 'مدير' },
@@ -44,7 +44,13 @@ export default function CreateUser() {
   };
 
   const handleSubmit = (e: FormEvent) => {
+
     e.preventDefault();
+    // valdate date 
+    if (!data.name || !data.email || !data.password  || !data.roles.length) {
+      warning('فشل حفظ المستخدم', 'يرجى التحقق من البيانات المدخلة');
+      return;
+    }
     post(route('users.store'), {
       onSuccess: () => success('تم حفظ المستخدم بنجاح', 'تمت إضافة المستخدم إلى جدول المستخدمين'),
       onError: () => error('فشل حفظ المستخدم', 'يرجى التحقق من البيانات المدخلة'),

@@ -14,16 +14,25 @@ export default function Create() {
         month: '',
     });
 
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        // validate
+        if (!data.year) {
+            warning('يرجى إدخال السنة');
+            return;
+        }
+        if (!data.month) {
+            warning('يرجى إدخال الشهر');
+            return;
+        }
         post(route('month-closures.closeMonth'), {
             onSuccess: () => {
-                success('تم حفظ إغلاق الشهر بنجاح');
-            },
+                success('تم حفظ  بنجاح','تم حفظ إغلاق الشهر بنجاح'); 
+            }, 
             onError: () => {
-                error('فشل حفظ إغلاق الشهر');
+                error('فشل  حفظ  ','فشل حفظ إغلاق الشهر');
             },
         });
     };

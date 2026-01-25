@@ -36,7 +36,7 @@ interface PagePropsPatient extends PageProps {
 }
 
 export default function Show() {
-    const { services_category, patientDetails: initialPatientDetails } =
+    const { services_category, patientDetails: initialPatientDetails,flash } =
         usePage<PagePropsPatient>().props;
 
     const [patient, setPatient] = useState(initialPatientDetails);

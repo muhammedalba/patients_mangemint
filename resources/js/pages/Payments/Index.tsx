@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, PaginatedData, Payment } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
@@ -59,7 +59,8 @@ export default function Index() {
         },
     ];
     const [search, setSearch] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
@@ -72,6 +73,10 @@ export default function Index() {
     };
 
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
         const handler = setTimeout(() => {
             setIsLoading(true);
             router.get(

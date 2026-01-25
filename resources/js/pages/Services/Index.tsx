@@ -52,10 +52,10 @@ export default function Index() {
     const handleDelete = (id: number): void => {
         router.delete(route('services.destroy', id), {
             onSuccess: () => {
-                success('تم حذف خدمة بنجاح');
+                success('تم حذف  بنجاح', 'تم حذف الخدمة بنجاح');
             },
             onError: () => {
-                error('فشل حذف خدمة، يرجى المحاولة مرة أخرى لاحقًا');
+                error('فشل حذف الخدمة', 'فشل حذف الخدمة، يرجى المحاولة مرة أخرى لاحقًا');
             },
         });
     };

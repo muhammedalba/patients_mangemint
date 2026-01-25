@@ -28,10 +28,15 @@ export default function CreatePatient() {
             gender: '',
             marital_status: '',
         });
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        // validate data
+        if (!data.name || !data.birth_date || !data.gender || !data.marital_status) {
+            warning('يرجى إدخال جميع الحقول');
+            return;
+        }
         post(route('patients.store'), {
             onSuccess: () => {
                 success(

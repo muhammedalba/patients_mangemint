@@ -107,7 +107,8 @@ class PatientService
 
     public function addDiscountToPatient(Patient $patient, float $discountAmount)
     {
-        if ($discountAmount < 0) {
+        // check if discount amount is valid
+        if ($discountAmount < 0 || $discountAmount == 0) {
             throw new InvalidDiscountException($discountAmount, 0, __("Discount amount cannot be negative."));
         }
         // check if discount amount is greater than total procedures cost

@@ -32,14 +32,19 @@ const Edit: React.FC<EditProps> = ({ payment, patients }) => {
         patient_id: String(payment.patient_id),
     });
 
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
+        if (!data.patient_id || !data.amount || !data.payment_date) {
+            warning('يرجى إدخال جميع الحقول');
+            return;
+        }
+
         put(route('payments.update', payment.id), {
             onSuccess: () => {
-                success('تم تعديل الدفعة بنجاح');
+                success('تم تعديل  بنجاح', 'تم تعديل الدفعة بنجاح');
             },
             onError: () => {
                 error(

@@ -6,26 +6,28 @@ import { useAppToast } from '@/utils/toast';
 
 export default function DiscountForm({ patientId }: { patientId: number }) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        discount_amount: '',
+        discount_amount:'',
     });
 
-    const { success, error } = useAppToast();
+    const { success, warning } = useAppToast();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (Number(data.discount_amount) < 0 || !Number(data.discount_amount) ) {
-            return error('قيمة الخصم يجب أن تكون صفر أو أكبر');
+            return warning('قيمة الخصم يجب أن تكون صفر أو أكبر');
         }
 
+
         post(route('patients.addDiscount', patientId), {
-            onSuccess: () => {
-                success('تم إضافة الخصم بنجاح');
+            onSuccess: (e) => {
+                success('تم إضافة الخصم بنجاح', 'تم إضافة الخصم بنجاح');
                 reset();
                 close();
+                
             },
-            onError: () => {
-                error('فشل إضافة الخصم', 'يرجى التحقق من البيانات المدخلة');
+            onError: (e) => {
+                warning(e.discount_amount??'فشل إضافة الخصم', 'يرجى التحقق من البيانات المدخلة');
             },
         });
     };

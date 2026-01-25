@@ -28,10 +28,14 @@ export default function EditService({
         price: String(service.price ?? ''),
         category_id: service.category_id || '',
     });
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        if (!data.name || !data.price || !data.category_id) {
+            warning('يرجى إدخال جميع البيانات');
+            return;
+        }
         patch(route('services.update', service.id), {
             onSuccess: () => {
                 success('تم تعديل الخدمة الطبية بنجاح');

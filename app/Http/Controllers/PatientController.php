@@ -10,6 +10,7 @@ use App\Domain\Patients\Services\PatientService;
 use App\Domain\Patients\DTOs\PatientData;
 use App\Models\ServiceCategory;
 use App\Providers\PdfService;
+use Illuminate\Http\Request;
 
 
 class PatientController extends Controller
@@ -95,9 +96,9 @@ class PatientController extends Controller
             ->with('success', __('Patient updated successfully.'));
     }
     // add discount amount to patient
-    public function addDiscount(Patient $patient)
+    public function addDiscount(Request $request, Patient $patient)
     {
-        $discountAmount = request()->input('discount_amount', 0);
+        $discountAmount = (float) $request->input('discount_amount', 0);
 
         $this->service->addDiscountToPatient($patient, $discountAmount);
 

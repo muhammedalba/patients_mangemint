@@ -28,10 +28,10 @@ export default function Index({
     const handleDelete = (id: number) => {
         router.delete(route('month-closures.destroy', id), {
             onSuccess: () => {
-                success('تم حذف الموعد بنجاح');
+                success('تم حذف  بنجاح','تم حذف الموعد بنجاح');
             },
             onError: () => {
-                error('فشل حذف الموعد، يرجى المحاولة مرة أخرى لاحقًا');
+                error('فشل حذف الموعد','فشل حذف الموعد، يرجى المحاولة مرة أخرى لاحقًا');
             },
         });
     };

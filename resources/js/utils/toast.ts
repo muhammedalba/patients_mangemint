@@ -23,5 +23,11 @@ export const useAppToast = () => {
                 title,
                 description,
             }),
+        warning: (title: string, description?: string) =>
+            toast({
+                title,
+                description,
+                variant: 'warning',
+            }),
     };
 };

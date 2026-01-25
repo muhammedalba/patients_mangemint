@@ -35,7 +35,7 @@ export default function CreatePayment() {
     const [selectedPatientName, setSelectedPatientName] = useState('');
     const [, setSelectedPatientId] = useState<number | null>(patientId ?? null);
 
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     useEffect(() => {
         if (patients.length === 1) {
@@ -54,7 +54,11 @@ export default function CreatePayment() {
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-
+// validate
+        if (!data.patient_id || !data.amount || !data.payment_date) {
+            warning('يرجى إدخال جميع الحقول');
+            return;
+        }
         post(route('payments.store'), {
             onSuccess: () => {
                 success(

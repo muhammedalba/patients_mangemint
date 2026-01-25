@@ -26,7 +26,7 @@ import {
 import { useAppToast } from '@/utils/toast';
 import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Edit({
@@ -51,6 +51,7 @@ export default function Edit({
     });
 
     const [isLoading, setIsLoading] = useState(false);
+    const isFirstMount = useRef(true);
     const [availableAppointments, setAvailableAppointments] = useState<
         AppointmentSlot[]
     >([]);
@@ -61,7 +62,12 @@ export default function Edit({
             setAvailableAppointments([]);
             return;
         }
-        setIsLoading(true);
+
+        // Only show loading overlay if it's not the initial mount
+        if (!isFirstMount.current) {
+            setIsLoading(true);
+        }
+
         try {
             const response = await axios.get(
                 route('appointments.availableSlots'),
@@ -78,6 +84,9 @@ export default function Edit({
             setAvailableAppointments([]);
         } finally {
             setIsLoading(false);
+            if (isFirstMount.current) {
+                isFirstMount.current = false;
+            }
         }
     }, [data.date, data.duration_slots]);
 
@@ -89,7 +98,7 @@ export default function Edit({
         e.preventDefault();
         put(route('appointments.update', appointment.id), {
             onSuccess: () => {
-                success('تم تعديل الموعد بنجاح');
+                success('تم تعديل  بنجاح', 'تم تعديل الموعد بنجاح');
             },
             onError: () => {
                 error('فشل تعديل الموعد', 'يرجى التحقق من البيانات المدخلة');

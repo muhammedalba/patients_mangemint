@@ -49,12 +49,16 @@ export default function EditProcedure({
         patient_id: procedure.patient_id?.toString() || '',
     });
 
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        if (!data.patient_id || !data.cost || !data.service_id) {
+            warning('يرجى إدخال جميع الحقول');
+            return;
+        }
         put(route('procedures.update', procedure.id), {
-            onSuccess: () => success('تم تعديل الإجراء بنجاح'),
+            onSuccess: () => success('تم تعديل  بنجاح','تم تعديل الإجراء بنجاح'),
             onError: () =>
                 error('فشل تعديل الإجراء', 'يرجى التحقق من البيانات المدخلة'),
         });

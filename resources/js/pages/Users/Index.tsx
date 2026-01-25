@@ -8,7 +8,7 @@ import { type BreadcrumbItem, PageProps, PaginatedData, User } from '@/types';
 import { useAppToast } from '@/utils/toast';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -27,7 +27,8 @@ export default function Index({
     filters: { search?: string };
 }>) {
     const [search, setSearch] = useState(filters.search || '');
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const isFirstMount = useRef(true);
      const { success, error } = useAppToast();
     const canDeleteRoles = ['doctor', 'admin'];
     const userHasDeletePermission = canDeleteRoles.some((role) =>
@@ -89,7 +90,13 @@ export default function Index({
     ];
 
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
+
         const handler = setTimeout(() => {
+            setIsLoading(true);
             router.get(
                 route('users.index'),
                 { search },
@@ -107,10 +114,10 @@ export default function Index({
     const handleDelete = (id: number): void => {
         router.delete(route('users.destroy', id),{
             onSuccess: () => {
-                success('تم حذف المستخدم بنجاح');
+                success('تم حذف المستخدم بنجاح', 'تم حذف المستخدم بنجاح');
             },
-            onError: () => {
-                error('فشل حذف المستخدم', 'يرجى المحاولة مرة أخرى لاحقًا');
+            onError: (e) => {
+                error('فشل حذف المستخدم',e.message?? 'يرجى التحقق من البيانات المدخلة');
             },
         });
     };

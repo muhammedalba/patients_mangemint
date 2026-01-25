@@ -25,9 +25,26 @@ export default function CreateService() {
         price: '',
         category_id: '',
     });
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        // validate data
+        if (!data.name) {
+            warning('يرجى إدخال اسم الخدمة');
+            errors.name = 'يرجى إدخال اسم الخدمة';
+            return;
+        }
+
+        if (!data.price) {
+            warning('يرجى إدخال سعر الخدمة');
+            errors.price = 'يرجى إدخال سعر الخدمة';
+            return;
+        }
+        if (!data.category_id) {
+            warning('يرجى إدخال فئة الخدمة');
+            errors.category_id = 'يرجى إدخال فئة الخدمة';
+            return;
+        }
         post(route('services.store'), {
             onSuccess: () => {
                 success(

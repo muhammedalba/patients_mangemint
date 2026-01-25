@@ -15,11 +15,16 @@ export default function Create() {
         type: '',
     });
 
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     const handleSubmit = useCallback(
         (e: FormEvent) => {
             e.preventDefault();
+            // validate data
+            if (!data.name || !data.type) {
+                warning('يرجى إدخال جميع الحقول');
+                return;
+            }
 
             post(route('expense-categories.store'), {
                 onSuccess: () => {
@@ -36,7 +41,7 @@ export default function Create() {
                 },
             });
         },
-        [post, success, error],
+        [post, success, error, warning],
     );
 
     const breadcrumbs: BreadcrumbItem[] = [

@@ -67,6 +67,7 @@ function TableActions({
             {/* Delete */}
             {showDelete && routes.delete && onDelete && (
                 <ConfirmDialog
+                
                     title="تأكيد الحذف"
                     description={confirmMessage}
                     onConfirm={() => onDelete(item.id)}

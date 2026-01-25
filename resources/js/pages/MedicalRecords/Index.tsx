@@ -13,7 +13,7 @@ import {
 import { useAppToast } from '@/utils/toast';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index({
@@ -24,7 +24,8 @@ export default function Index({
     filters: { search?: string };
 }>) {
     const [search, setSearch] = useState(filters.search || '');
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
       const { success, error } = useAppToast();
     const handleSearch = (val: string) => {
@@ -40,15 +41,19 @@ export default function Index({
     const handleDelete = (id: number): void => {
         router.delete(route('medical-records.destroy', id),{
              onSuccess: () => {
-                success('تم حذف السجل  بنجاح');
+                success('تم حذف بنجاح','تم حذف السجل بنجاح');
             },
             onError: () => {
-                error('فشل حذف السجل يرجى المحاولة مرة أخرى لاحقًا');
+                error('فشل حذف','فشل حذف السجل يرجى المحاولة مرة أخرى لاحقًا');
             },
         });
     };
 
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
         const handler = setTimeout(() => {
             setIsLoading(true);
             router.get(

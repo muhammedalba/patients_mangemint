@@ -18,11 +18,16 @@ export default function CreateServiceCategory() {
         description: '',
     });
 
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     const handleSubmit = useCallback(
         (e: FormEvent) => {
             e.preventDefault();
+            if (!data.name ) {
+                errors.name = 'يرجى إدخال اسم الفئة';
+                warning('يرجى إدخال اسم الفئة');
+                return;
+            }
             post(route('service-categories.store'), {
                 onSuccess: () => {
                     success(

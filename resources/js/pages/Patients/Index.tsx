@@ -10,7 +10,7 @@ import { useAppToast } from '@/utils/toast';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Info, Mail, MessageCircle, Phone } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
@@ -29,17 +29,23 @@ export default function Index() {
 
     const [search, setSearch] = useState(filters.search || '');
     const [isLoading, setIsLoading] = useState(false);
+    const isFirstMount = useRef(true);
     const perPage = 10;
 
     const handleDelete = (id: number): void => {
         router.delete(route('patients.destroy', id), {
-            onSuccess: () => success('تم حذف المريض بنجاح'),
+            onSuccess: () => success('تم حذف  بنجاح','تم حذف المريض بنجاح'),
             onError: () =>
                 error('فشل حذف المريض', 'يرجى المحاولة مرة أخرى لاحقًا'),
         });
     };
 
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
+
         const timeout = setTimeout(() => {
             setIsLoading(true);
             router.get(

@@ -3,9 +3,10 @@ import { Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 import { FormInput } from './FormInput';
-import { Calendar, DollarSign, Layers, Stethoscope } from 'lucide-react';
+import { Calendar, ClipboardList, Dock, DollarSign, Layers, Stethoscope, Text } from 'lucide-react';
 import { FormSelect } from './FormSelect';
 import { useAppToast } from '@/utils/toast';
+import { FormTextArea } from './FormTextArea';
 
 interface ProcedureFormData {
     name: string;
@@ -37,7 +38,7 @@ export default function FormProcedure({
     onClose,
     onCreated,
 }: FormProcedureProps) {
-   const { data, setData, post, processing } = useForm<ProcedureFormData>({
+   const { data, setData, post, processing, errors } = useForm<ProcedureFormData>({
     name: '',
     description: '',
     processing_date: new Date().toISOString().slice(0, 10),
@@ -48,12 +49,38 @@ export default function FormProcedure({
     patient_id: patient.id,
     tooth_id: toothId,
 });
-const { success, error } = useAppToast();
+const {  warning,} = useAppToast();
     const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-
+// check if cost is number and greater than 0
     if(Number(data.cost) < 0 || !Number(data.cost)) {
-        return error('قيمة الإجمالي يجب أن تكون أكبر من صفر');
+        return warning('قيمة الإجمالي يجب أن تكون أكبر من صفر');
+    }
+    // check if duration is number and greater than 0
+    if(Number(data.duration_minutes) < 0 || !Number(data.duration_minutes)) {
+        return warning('قيمة المدة يجب أن تكون أكبر من صفر');
+    }
+    // check if name is not empty
+    if(!data.name) {
+        return warning('اسم الإجراء مطلوب');
+    }
+
+    // check if processing date is not empty
+    if(!data.processing_date) {
+        return warning('تاريخ الإجراء مطلوب');
+    }
+ 
+    // check if tooth id is not empty
+    if(!data.tooth_id) {
+        return warning('سن الإجراء مطلوب');
+    }
+    // check if patient id is not empty
+    if(!data.patient_id) {
+        return warning('مريض الإجراء مطلوب');
+    }
+    // check if service id is not empty
+    if(!data.service_id) {
+        return warning('خدمة الإجراء مطلوبة');
     }
     const optimisticProcedure : Procedure = {
         id: Date.now(),
@@ -74,12 +101,8 @@ const { success, error } = useAppToast();
     post(route('procedures.store'), {
         preserveScroll: true,
         onSuccess: () => {
-            success('تم إضافة الإجراء بنجاح');
             onClose?.();
 
-        },
-        onError: () => {
-            error('حدث خطأ أثناء إضافة الإجراء');
         },
     });
 };
@@ -137,6 +160,7 @@ const { success, error } = useAppToast();
                         value={data.name}
                         onChange={(e) => setData('name', e)}
                         icon={Stethoscope}
+                        error={errors.name}
                     />
                 </div>
 
@@ -149,6 +173,7 @@ const { success, error } = useAppToast();
                         value={data.cost}
                         onChange={(e) => setData('cost', e)}
                         icon={DollarSign}
+                        error={errors.cost}
                     />
                 </div>
                 <div>
@@ -176,6 +201,17 @@ const { success, error } = useAppToast();
                         icon={Calendar}
                     />
                 </div>
+               
+                     <FormTextArea
+                        label="ملاحظات"
+                        name="description"
+                        value={data.description}
+                        onChange={(e) => setData('description', e)}
+                        icon={ClipboardList}
+                        rows={2}
+                        className='col-span-2'
+                    />
+                
             </div>
 
             <div className="flex justify-end gap-2">

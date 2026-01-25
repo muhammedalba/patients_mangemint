@@ -3,6 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { forwardRef } from 'react';
 
 interface IconTooltipProps {
   label: string
@@ -10,15 +11,19 @@ interface IconTooltipProps {
 className?: string
 }
 
-export function IconTooltip({ label, children, className  }: IconTooltipProps) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        {children}
-      </TooltipTrigger>
-      <TooltipContent  className={`rounded-md bg-gray-500 px-3 py-1.5 text-xs text-white shadow-lg ${className ?? ""}`}>
-        <p className="font-medium">{label}</p>
-      </TooltipContent>
-    </Tooltip>
-  )
-}
+export const IconTooltip = forwardRef<HTMLButtonElement, IconTooltipProps>(
+  ({ label, children, className, ...props }, ref) => {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild ref={ref} {...props}>
+          {children}
+        </TooltipTrigger>
+        <TooltipContent
+          className={`rounded-md bg-gray-500 px-3 py-1.5 text-xs text-white shadow-lg ${className ?? ""}`}
+        >
+          <p className="font-medium">{label}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+);

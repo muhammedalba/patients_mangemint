@@ -22,12 +22,16 @@ export default function Edit() {
         _method: 'PATCH',
     });
 
-    const { success, error } = useAppToast();
+    const { success, error ,warning} = useAppToast();
 
     const handleSubmit = useCallback(
         (e: FormEvent) => {
             e.preventDefault();
-
+            // validate data
+            if (!data.name || !data.type) {
+                warning('يرجى إدخال جميع الحقول');
+                return;
+            }
             post(route('expense-categories.update', category.id), {
                 onSuccess: () => {
                     success('تم تعديل فئة المصروف بنجاح');
@@ -40,7 +44,7 @@ export default function Edit() {
                 },
             });
         },
-        [post, success, error, category.id],
+        [post, success, error, warning, category.id],
     );
 
     const breadcrumbs: BreadcrumbItem[] = [

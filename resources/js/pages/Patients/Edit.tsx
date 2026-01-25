@@ -23,12 +23,17 @@ export default function EditPatient({ patient }: { patient: Patient }) {
     marital_status: patient.marital_status || '',
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const { success, error } = useAppToast();
+
+  const { success, error, warning } = useAppToast();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    // validate data
+    if (!data.name || !data.birth_date || !data.gender || !data.marital_status) {
+      warning('يرجى إدخال جميع الحقول');
+      return;
+    }
+    // setIsLoading(true);
     patch(route('patients.update', patient.id), {
       onSuccess: () => success('تم تعديل بيانات المريض بنجاح'),
       onError: () => error('فشل تعديل بيانات المريض', 'يرجى التحقق من البيانات المدخلة'),
@@ -39,8 +44,6 @@ export default function EditPatient({ patient }: { patient: Patient }) {
     { title: 'المرضى', href: route('patients.index') },
     { title: `تعديل بيانات المريض: ${patient.name}`, href: route('patients.edit', patient.id) },
   ];
-
-  if (isLoading) return <LoadingPage />;
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>

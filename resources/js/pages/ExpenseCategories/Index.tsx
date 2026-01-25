@@ -8,7 +8,7 @@ import { BreadcrumbItem, ExpenseCategory, PaginatedData } from '@/types';
 import { useAppToast } from '@/utils/toast';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 type PageProps = {
@@ -21,10 +21,10 @@ export default function Index() {
     const handleDelete = (id: number) => {
         router.delete(route('expense-categories.destroy', id),{
              onSuccess: () => {
-                success('تم حذف الفئة بنجاح');
+                success('تم  بنجاح','تم حذف الفئة بنجاح');
             },
             onError: () => {
-                error('فشل حذف الفئة، يرجى المحاولة مرة أخرى لاحقًا');
+                error('فشل حذف الفئة','فشل حذف الفئة، يرجى المحاولة مرة أخرى لاحقًا');
             },
         });
     };
@@ -59,7 +59,8 @@ export default function Index() {
         },
     ];
     const [search, setSearch] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
@@ -71,6 +72,10 @@ export default function Index() {
         );
     };
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
         const handler = setTimeout(() => {
             setIsLoading(true);
             router.get(

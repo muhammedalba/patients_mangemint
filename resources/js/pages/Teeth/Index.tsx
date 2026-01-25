@@ -92,10 +92,10 @@ export default function Index({
     const handleDelete = (id: number): void => {
         router.delete(route('teeth.destroy', id), {
             onSuccess: () => {
-                success('تم حذف سن بنجاح');
+                success('تم حذف  بنجاح', 'تم حذف السن بنجاح');
             },
             onError: () => {
-                error('فشل حذف سن، يرجى المحاولة مرة أخرى لاحقًا');
+                error('فشل حذف ', 'فشل حذف السن، يرجى المحاولة مرة أخرى لاحقًا');
             },
         });
     };

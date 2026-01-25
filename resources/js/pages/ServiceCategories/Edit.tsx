@@ -21,11 +21,16 @@ export default function EditServiceCategory({ category }: EditServiceCategoryPro
         description: category.description || '',
     });
 
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     const handleSubmit = useCallback(
         (e: FormEvent) => {
             e.preventDefault();
+            if (!data.name) {
+                errors.name = 'يرجى إدخال اسم الفئة';
+                warning('يرجى إدخال اسم الفئة');
+                return;
+            }
             patch(route('service-categories.update', category.id), {
                 onSuccess: () => {
                     success('تم تعديل فئة الخدمة الطبية بنجاح');

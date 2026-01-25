@@ -23,7 +23,7 @@ type PageProps = {
 
 export default function Create() {
     const { categories } = usePage<PageProps>().props;
-    const { success, error } = useAppToast();
+    const { success, error ,warning } = useAppToast();
 
     const { data, setData, post, processing, errors } = useForm({
         amount: '',
@@ -36,6 +36,11 @@ export default function Create() {
     const handleSubmit = useCallback(
         (e: FormEvent) => {
             e.preventDefault();
+            // validate data
+            if (!data.amount || !data.expense_category_id || !data.payment_method || !data.expense_date) {
+                warning('يرجى إدخال جميع الحقول');
+                return;
+            }
 
             post(route('expenses.store'), {
                 onSuccess: () => {

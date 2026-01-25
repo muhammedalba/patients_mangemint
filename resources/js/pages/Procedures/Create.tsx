@@ -41,7 +41,7 @@ export default function CreateProcedure({
     });
 
     const [selectedPatientName, setSelectedPatientName] = useState('');
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     const handleServiceSelect = useCallback(
         (service: Service, categoryId: string) => {
@@ -69,6 +69,10 @@ export default function CreateProcedure({
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        if (!data.patient_id || !data.cost || !data.service_id) {
+            warning('يرجى إدخال جميع الحقول');
+            return;
+        }
         post(route('procedures.store'), {
             onSuccess: () =>
                 success(

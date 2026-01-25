@@ -8,7 +8,7 @@ import { Appointment, BreadcrumbItem, PageProps, PaginatedData } from '@/types';
 import { useAppToast } from '@/utils/toast';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index({
@@ -23,6 +23,7 @@ export default function Index({
 
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
     const { success, error } = useAppToast();
     const handleSearch = (val: string) => {
@@ -36,6 +37,10 @@ export default function Index({
     };
 
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
         const handler = setTimeout(() => {
             setIsLoading(true);
             router.get(
@@ -90,10 +95,10 @@ export default function Index({
     const handleDelete = (id: number) => {
         router.delete(route('appointments.destroy', id), {
             onSuccess: () => {
-                success('تم حذف الموعد بنجاح');
+                success(" تم حذف  ","تم حذف الموعد بنجاح");
             },
             onError: () => {
-                error('فشل حذف الموعد، يرجى المحاولة مرة أخرى لاحقًا');
+                error("فشل حذف الموعد","فشل حذف الموعد، يرجى المحاولة مرة أخرى لاحقًا");
             },
         });
     };

@@ -39,6 +39,11 @@ export default function Edit() {
     const handleSubmit = useCallback(
         (e: FormEvent) => {
             e.preventDefault();
+            // validate data
+            if (!data.amount || !data.expense_category_id || !data.payment_method || !data.expense_date) {
+                error('يرجى إدخال جميع الحقول');
+                return;
+            }
 
             post(route('expenses.update', expense.id), {
                 onSuccess: () => {

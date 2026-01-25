@@ -8,7 +8,7 @@ import { PaginatedData, Procedure, type BreadcrumbItem } from '@/types';
 import { useAppToast } from '@/utils/toast';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 
 
@@ -24,7 +24,8 @@ export default function Index(filters: { search?: string }) {
     const userHasDeletePermission = canDeleteRoles.some((role) =>
         auth.user.roles.includes(role),
     );
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
     const handleSearch = (val: string) => {
         const newValue = val;
@@ -91,7 +92,7 @@ export default function Index(filters: { search?: string }) {
     const handleDelete = (id: number): void => {
         router.delete(route('procedures.destroy', id),{
             onSuccess: () => {
-                success('تم حذف الإجراء بنجاح');
+                success('تم حذف  بنجاح','تم حذف الإجراء بنجاح');
             },
             onError: () => {
                 error('فشل حذف الإجراء', 'يرجى المحاولة مرة أخرى لاحقًا');
@@ -99,6 +100,11 @@ export default function Index(filters: { search?: string }) {
         });
     };
     useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
+
         const handler = setTimeout(() => {
             setIsLoading(true);
 

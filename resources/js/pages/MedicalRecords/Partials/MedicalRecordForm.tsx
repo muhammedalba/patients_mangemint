@@ -103,10 +103,19 @@ export default function MedicalRecordForm({
         }
     }, [patients, medicalRecord, setData]);
 
-    const { success, error } = useAppToast();
+    const { success, error, warning } = useAppToast();
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        // validate
+        if (!data.patient_id) {
+            warning('يرجى اختيار المريض');
+            return;
+        }
+        if (!data.doctor_id) {
+            warning('يرجى اختيار الطبيب');
+            return;
+        }
 
         const url = medicalRecord
             ? route('medical-records.update', medicalRecord.id)
@@ -115,7 +124,7 @@ export default function MedicalRecordForm({
         post(url, {
             forceFormData: true,
             onSuccess: () => {
-                success(
+                success('تم حفظ بنجاح',
                     medicalRecord
                         ? 'تم تحديث السجل الطبي بنجاح'
                         : 'تم إنشاء السجل الطبي بنجاح',
