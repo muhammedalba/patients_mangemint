@@ -69,8 +69,12 @@ export default function CreateProcedure({
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        if (!data.patient_id || !data.cost || !data.service_id) {
+        if (!data.patient_id || !data.cost) {
             warning('يرجى إدخال جميع الحقول');
+            return;
+        }
+        if (!data.service_id) {
+            warning('يرجى اختيار الخدمة');
             return;
         }
         post(route('procedures.store'), {
@@ -112,7 +116,7 @@ export default function CreateProcedure({
                                 اختر نوع المعالجة
                             </h2>
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-6">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-6  wrap-wrap">
                                 {services_category.map((category) => (
                                     <FormSelect
                                         key={category.id}
@@ -143,7 +147,6 @@ export default function CreateProcedure({
                                             );
                                         }}
                                         options={[
-                                            { value: '', label: 'اختر خدمة' },
                                             ...category.services.map(
                                                 (service) => ({
                                                     value: service.id.toString(),

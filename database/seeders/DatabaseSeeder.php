@@ -51,20 +51,20 @@ class DatabaseSeeder extends Seeder
 
 
         $user = User::firstOrCreate(
-            ['email' => 'codeProps@gmail.com'],
+            ['email' => 'codepropstec@gmail.com'],
             ['name' => 'Super Admin', 'password' => bcrypt('password')]
         );
         $user->assignRole('admin');
 
-        User::factory(10)->create();
+        // User::factory(10)->create();
 
-        $this->call([
-            PatientSeeder::class,
-            // ToothSeeder::class,
-            // ServiceCategorySeeder::class,
-            // ServiceSeeder::class,
-            // ProcedureSeeder::class,
-            // MedicalRecordSeeder::class,
-        ]);
+        // $this->call([
+        //     // PatientSeeder::class,
+        //     // ToothSeeder::class,
+        //     // ServiceCategorySeeder::class,
+        //     // ServiceSeeder::class,
+        //     // ProcedureSeeder::class,
+        //     // MedicalRecordSeeder::class,
+        // ]);
     }
 }

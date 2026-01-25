@@ -89,14 +89,14 @@ export function FilesTab({
                                     className="group relative aspect-square overflow-hidden rounded-lg bg-black/5"
                                 >
                                     <a
-                                        href={`/storage/${img}`}
+                                        href={`/storage/storage/${img}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="block h-full w-full cursor-zoom-in"
                                     >
                                         <img
                                             alt="Medical Attachment"
-                                            src={`/storage/${img}`}
+                                            src={`/storage/storage/${img}`}
                                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                                         />
                                     </a>
@@ -190,7 +190,7 @@ export function FilesTab({
                                     <div className="flex items-center gap-2 truncate">
                                         <FileText className="h-4 w-4 text-slate-400" />
                                         <a
-                                            href={`/storage/${file}`}
+                                            href={`/storage/storage/${file}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="max-w-50 truncate text-blue-600 hover:underline"

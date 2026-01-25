@@ -1,202 +1,312 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
-    <title>فاتورة المريض</title>
+    <title>فاتورة المريض - مركز زيركون</title>
 
     <style>
+        @page {
+            margin: 0;
+        }
+
         body {
-            font-family: dejavusans;
+            font-family: 'Cairo', dejavusans, sans-serif;
             direction: rtl;
             text-align: right;
-            color: #444;
-            background: #f7f7f7;
+            color: #1e293b;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
         }
 
-        .invoice-box {
-            direction: rtl;
-            max-width: 850px;
-            margin: 40px auto;
+        .container {
             padding: 40px;
-            background: #fff;
-            border: 1px solid #eee;
-            box-shadow: 0 0 12px rgba(0, 0, 0, .08);
-            font-size: 14px;
-            line-height: 22px;
         }
 
-        h2,
-        h3 {
-            margin: 0 0 10px;
-            color: #333;
+        /* Branding Header */
+        .header {
+            background-color: #0d9488; /* Teal 600 */
+            color: white;
+            padding: 40px;
+            margin-bottom: 40px;
         }
 
-        table {
+        .header-table {
             width: 100%;
-            border-collapse: collapse;
         }
 
-        td {
-            padding: 6px 0;
+        .brand-name {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .brand-tagline {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .invoice-title {
+            font-size: 40px;
+            font-weight: 300;
+            text-align: left;
+            margin: 0;
+        }
+
+        /* Info Sections */
+        .info-grid {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .info-box {
+            width: 50%;
             vertical-align: top;
         }
 
-        .text-right {
+        .section-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+
+        .info-content {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .info-content strong {
+            font-size: 18px;
+            color: #0f172a;
+        }
+
+        /* Table Styling */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+
+        .data-table th {
+            background-color: #f1f5f9;
+            color: #475569;
             text-align: right;
-        }
-
-        .muted {
-            color: #888;
+            padding: 12px 15px;
             font-size: 13px;
-        }
-
-        .section {
-            margin-top: 30px;
-        }
-
-        .heading td {
-            background: #f0f0f0;
             font-weight: bold;
-            border-bottom: 1px solid #ddd;
-            padding: 8px;
+            border-bottom: 2px solid #e2e8f0;
         }
 
-        .item td {
-            border-bottom: 1px solid #eee;
-            padding: 8px;
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
         }
 
-        .total-row td {
-            border-top: 2px solid #ddd;
+        .text-left {
+            text-align: left !important;
+        }
+
+        .date-text {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* Summary Section */
+        .summary-wrapper {
+            width: 100%;
+        }
+
+        .summary-table {
+            width: 300px;
+            float: left;
+            border-collapse: collapse;
+        }
+
+        .summary-table td {
+            padding: 10px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .summary-label {
+            color: #64748b;
+        }
+
+        .summary-value {
             font-weight: bold;
-            padding-top: 10px;
+            text-align: left;
+        }
+
+        .grand-total-box {
+            background-color: #f0fdfa; /* Teal 50 */
+            border: 1px solid #ccfbf1;
+            padding: 20px;
+            margin-top: 10px;
+            color: #0d9488;
+        }
+
+        .grand-total-label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .grand-total-amount {
+            font-size: 28px;
+            font-weight: 900;
+            text-align: left;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            right: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 20px;
         }
     </style>
 </head>
 
 <body>
 
-    <div className="invoice-box">
-
-        {{-- Header --}}
-        <table>
+    <div class="header">
+        <table class="header-table">
             <tr>
                 <td>
-                    <h2>فاتورة</h2>
-                    <div class="muted">
-                        تاريخ إصدار الفاتورة : {{ now()->format('Y-m-d') }}
+                    <div class="brand-name">مركز زيركون</div>
+                    <div class="brand-tagline">لطب وتجميل الأسنان الحديث</div>
+                </td>
+                <td class="text-left">
+                    <div class="invoice-title">فاتورة</div>
+                    <div style="font-size: 14px; opacity: 0.8; margin-top: 10px;">
+                        رقم الفاتورة: #{{ $patientDetails['id'] }} | {{ now()->format('Y/m/d') }}
                     </div>
                 </td>
-                <td class="text-right">
-                    <strong>رقم #</strong> {{ $patientDetails['id'] }}
+            </tr>
+        </table>
+    </div>
+
+    <div class="container">
+        {{-- Information Grid --}}
+        <table class="info-grid">
+            <tr>
+                <td class="info-box">
+                    <span class="section-label">مقدم الخدمة</span>
+                    <div class="info-content">
+                        <strong>مركز زيركون الطبي</strong><br>
+                        المنطقة الطبية، الشارع الرئيسي<br>
+                        هاتف: 0123456789<br>
+                        البريد: info@zircon.com
+                    </div>
+                </td>
+                <td class="info-box" style="padding-right: 40px;">
+                    <span class="section-label">العميل (المريض)</span>
+                    <div class="info-content">
+                        <strong>{{ $patientDetails['name'] }}</strong><br>
+                        هاتف: {{ $patientDetails['phone'] }}<br>
+                        رقم الملف الداخلي: #{{ $patientDetails['id'] }}
+                    </div>
                 </td>
             </tr>
         </table>
 
-        {{-- Patient Information --}}
-        <div class="section">
-            <h3>بيانات المريض </h3>
-            <table>
+        {{-- Procedures (Disabled but variables kept as requested) --}}
+        {{-- 
+        <div class="section-label">الإجراءات والخدمات</div>
+        <table class="data-table">
+            <thead>
                 <tr>
-                    <td>
-                        <strong>{{ $patientDetails['name'] }}</strong><br>
-                        {{ $patientDetails['phone'] }}
-                    </td>
+                    <th>وصف الخدمة</th>
+                    <th class="text-left">السعر</th>
                 </tr>
-            </table>
-        </div>
-
-        {{-- Procedures --}}
-        {{-- <div class="section">
-            <h3>إجراءات المريض</h3>
-            <table>
-                <tr class="heading">
-                    <td>الوصف</td>
-                    <td class="text-right">التكلفة</td>
-                </tr>
-
+            </thead>
+            <tbody>
                 @forelse($patientDetails['procedures'] as $procedure)
-                    <tr class="item">
+                    <tr>
                         <td>
                             {{ $procedure->name }}<br>
-                            <span class="muted">
-                                {{ optional($procedure->processing_date)->format('Y-m-d') }}
-                            </span>
+                            <span class="date-text">{{ optional($procedure->processing_date)->format('Y-m-d') }}</span>
                         </td>
-                        <td class="text-right">
-                            ${{ number_format($procedure->cost, 2) }}
-                        </td>
+                        <td class="text-left">${{ number_format($procedure->cost, 2) }}</td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="2" class="muted"> لا يوجد إجراءات مسجلة
-                    </tr>
+                    <tr><td colspan="2" style="text-align: center; color: #94a3b8;">لا توجد إجراءات مسجلة</td></tr>
                 @endforelse
-            </table>
-        </div> --}}
+            </tbody>
+        </table> 
+        --}}
 
         {{-- Payments --}}
-        <div class="section">
-            <h3>الدفعات</h3>
-            <table>
-                <tr class="heading">
-                    <td>تاريخ الدفعة</td>
-                    <td class="text-right">المبلغ</td>
+        <div class="section-label" style="margin-top: 30px;">سجل الدفعات المستلمة</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>تاريخ الدفعة</th>
+                    <th class="text-left">المبلغ المدفوع</th>
                 </tr>
-
+            </thead>
+            <tbody>
                 @forelse($patientDetails['payments'] as $payment)
-                    <tr class="item">
+                    <tr>
                         <td>{{ $payment->payment_date }}</td>
-                        <td class="text-right">
-                            ${{ number_format($payment->amount, 2) }}
-                        </td>
+                        <td class="text-left">${{ number_format($payment->amount, 2) }}</td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="2" class="muted">لا يوجد دفعات حتى الإن</td>
-                    </tr>
+                    <tr><td colspan="2" style="text-align: center; color: #94a3b8;">لا توجد دفعات مسجلة حتى الآن</td></tr>
                 @endforelse
-            </table>
-        </div>
+            </tbody>
+        </table>
 
-        {{-- Financial Summary --}}
-        <div class="section">
-            <h3>الخلاصة المالية </h3>
-            <table>
+        {{-- Summary --}}
+        <div class="summary-wrapper" style="margin-top: 40px;">
+            <table class="summary-table">
                 <tr>
-                    <td>إجمالي كلفة الإجراءات</td>
-                    <td class="text-right">
-                        ${{ number_format($patientDetails['financial_summary']['total_procedures_cost'], 2) }}
-                    </td>
+                    <td class="summary-label">إجمالي التكلفة</td>
+                    <td class="summary-value">${{ number_format($patientDetails['financial_summary']['total_procedures_cost'], 2) }}</td>
                 </tr>
                 <tr>
-                    <td>قيمة الخصم</td>
-                    <td class="text-right">
-                        ${{ number_format($patientDetails['financial_summary']['discount_amount'], 2) }}
-                    </td>
+                    <td class="summary-label">الخصم الممنوح</td>
+                    <td class="summary-value" style="color: #059669;">-${{ number_format($patientDetails['financial_summary']['discount_amount'], 2) }}</td>
                 </tr>
                 <tr>
-                    <td>المبلغ بعد الخصم</td>
-                    <td class="text-right">
-                        ${{ number_format($patientDetails['financial_summary']['total_procedures_after_discount'], 2) }}
-                    </td>
+                    <td class="summary-label">الإجمالي بعد الخصم</td>
+                    <td class="summary-value">${{ number_format($patientDetails['financial_summary']['total_procedures_after_discount'], 2) }}</td>
                 </tr>
                 <tr>
-                    <td>إجمالي المبلغ المدفوع</td>
-                    <td class="text-right">
-                        ${{ number_format($patientDetails['financial_summary']['total_payments'], 2) }}
-                    </td>
-                </tr>
-                <tr class="total-row">
-                    <td>المبلغ المتبقي في حساب المريض</td>
-                    <td class="text-right">
-                        ${{ number_format($patientDetails['financial_summary']['remaining_balance'], 2) }}
-                    </td>
+                    <td class="summary-label">إجمالي المدفوعات</td>
+                    <td class="summary-value">${{ number_format($patientDetails['financial_summary']['total_payments'], 2) }}</td>
                 </tr>
             </table>
+            
+            <div style="clear: both;"></div>
+
+            <div class="grand-total-box" style="width: 260px; float: left; margin-top: 20px;">
+                <span class="grand-total-label">الرصيد المتبقي</span>
+                <span class="grand-total-amount">
+                    ${{ number_format($patientDetails['financial_summary']['remaining_balance'], 2) }}
+                </span>
+            </div>
         </div>
 
+    </div>
+
+    <div class="footer">
+        شكرًا لاختياركم مركز زيركون لطب الأسنان. نتمنى لكم دوام الصحة والعافية.
+        <br>
+        هذه الفاتورة تم إصدارها آلياً وتعتبر سارية المفعول دون الحاجة لختم أو توقيع.
     </div>
 
 </body>

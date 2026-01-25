@@ -81,7 +81,7 @@ const mainNavItems: NavItem[] = [
         title: 'الدفعات',
         href: '/payments',
         icon: FaMoneyBill,
-        color: 'yellow',
+        color: 'red',
         roles: ['admin', 'doctor', 'receptionist'],
     },
     {

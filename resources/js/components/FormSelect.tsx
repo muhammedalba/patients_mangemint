@@ -27,7 +27,7 @@ export function FormSelect<T extends string>({
         <div className="group m-2  relative w-full h-fit">
             <label
                 htmlFor={name}
-                className={`pointer-events-none absolute right-2 rounded-2xl p-1 flex items-center gap-x-2 bg-white px-1 text-sm text-gray-400 transition-all duration-300 ${value || name == 'start_time' ? '-top-4 text-xs text-blue-700 w-fit' : 'w-1/2 top-1/5 text-sm text-gray-400'} `}
+                className={`pointer-events-none absolute w-fit right-2 rounded-2xl p-1 flex items-center gap-x-2 bg-white px-1 text-sm text-gray-400 transition-all duration-300 ${value || name == 'start_time' ? '-top-4 text-xs text-blue-700' : ' top-1/5 text-sm text-gray-400'} `}
             >
                 {IconComponent && (
                     <span className="mr-1 inline-block text-blue-400">
