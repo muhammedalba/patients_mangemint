@@ -99,7 +99,15 @@ class PatientRepository
         $loadData = function () use ($patient) {
             return $patient->load([
                 'procedures' => function ($query) {
-                    $query->select('procedures.id', 'procedures.tooth_id', 'procedures.cost');
+                    $query->select(
+                        'procedures.id',
+                        'procedures.name',
+                        'procedures.tooth_id',
+                        'procedures.cost',
+                        'procedures.status',
+                        'procedures.processing_date',
+                        'procedures.patient_id'
+                    );
                 },
                 'payments:id,patient_id,amount,payment_date',
                 'appointments:id,patient_id,status,start_time,end_time,date,notes',
@@ -177,13 +185,10 @@ class PatientRepository
         $store = $this->getCacheStore();
 
         if ($store instanceof TaggableStore) {
-
-            $patientsCache = Cache::tags('patients');
-
-            $patient
-                ? $patientsCache->forget("patient:{$patient->id}:details")
-                : $patientsCache->flush();
+            Cache::tags('patients')->flush();
         } else {
+            // For non-taggable stores (file, database), we must flush the entire cache
+            // to ensure synchronization across all related patient views and charts.
             Cache::flush();
         }
     }

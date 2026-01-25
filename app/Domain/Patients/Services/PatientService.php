@@ -42,21 +42,21 @@ class PatientService
         $PatientDetails = $this->repository->getPatientDetails($patient);
         // calculate financial summary
         return [
-            'id' => $patient->id,
-            'name' => $patient->name,
-            'email' => $patient->email,
-            'phone' => $patient->phone,
-            'address' => $patient->address,
-            'notes' => $patient->notes,
-            'birth_date' => $patient->birth_date,
-            'gender' => $patient->gender,
-            'marital_status' => $patient->marital_status,
+            'id' => $PatientDetails->id,
+            'name' => $PatientDetails->name,
+            'email' => $PatientDetails->email,
+            'phone' => $PatientDetails->phone,
+            'address' => $PatientDetails->address,
+            'notes' => $PatientDetails->notes,
+            'birth_date' => $PatientDetails->birth_date,
+            'gender' => $PatientDetails->gender,
+            'marital_status' => $PatientDetails->marital_status,
             // related data
-            'teeth' => $patient->teeth,
-            'payments' => $patient->payments,
-            'appointments' => $patient->appointments,
-            'procedures' => $patient->procedures,
-            'medical_record' => $patient->medicalRecord,
+            'teeth' => $PatientDetails->teeth,
+            'payments' => $PatientDetails->payments,
+            'appointments' => $PatientDetails->appointments,
+            'procedures' => $PatientDetails->procedures,
+            'medical_record' => $PatientDetails->medicalRecord,
             //  financial summary
             'financial_summary' => $this->calculatePatientFinancialSummary($PatientDetails),
         ];

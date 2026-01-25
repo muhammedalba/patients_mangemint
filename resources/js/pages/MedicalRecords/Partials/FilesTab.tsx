@@ -8,17 +8,17 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface FilesTabProps {
     data: {
-        images: File[];
-        attachments: File[];
+        images: (File | string)[];
+        attachments: (File | string)[];
     };
     setData: <K extends keyof FilesTabProps['data']>(
         key: K,
         value: FilesTabProps['data'][K],
     ) => void;
-    existingImages: File[];
-    existingAttachments: File[];
-    onDeleteImage: (image: File) => void;
-    onDeleteAttachment: (attachment: File) => void;
+    existingImages: (string | File)[];
+    existingAttachments: (string | File)[];
+    onDeleteImage: (image: string | File) => void;
+    onDeleteAttachment: (attachment: string | File) => void;
     imagesErrors: string[];
     attachmentsErrors: string[];
     isEdit?: boolean;
@@ -88,11 +88,18 @@ export function FilesTab({
                                     key={i}
                                     className="group relative aspect-square overflow-hidden rounded-lg bg-black/5"
                                 >
-                                    <img
-                                        alt="update Attachment"
-                                        src={`/storage/${img}`}
-                                        className="h-full w-full object-cover"
-                                    />
+                                    <a
+                                        href={`/storage/${img}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block h-full w-full cursor-zoom-in"
+                                    >
+                                        <img
+                                            alt="Medical Attachment"
+                                            src={`/storage/${img}`}
+                                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                        />
+                                    </a>
                                     {isEdit ? (
                                         <ConfirmDialog
                                             title="تأكيد الحذف"
@@ -102,7 +109,7 @@ export function FilesTab({
                                             <button
                                                 title="Delete Image"
                                                 type="button"
-                                                className="absolute top-2 right-2 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
+                                                className="absolute top-2 right-2 z-10 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
                                             >
                                                 <X className="h-3 w-3" />
                                             </button>
@@ -112,11 +119,38 @@ export function FilesTab({
                                             title="Delete Image"
                                             type="button"
                                             onClick={() => onDeleteImage(img)}
-                                            className="absolute top-2 right-2 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
+                                            className="absolute top-2 right-2 z-10 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
                                         >
                                             <X className="h-3 w-3" />
                                         </button>
                                     )}
+                                </div>
+                            ))}
+
+                            {/* New Images Previews */}
+                            {data.images.filter(f => f instanceof File).map((file, i) => (
+                                <div
+                                    key={`new-${i}`}
+                                    className="group relative aspect-square overflow-hidden rounded-lg bg-black/5"
+                                >
+                                    <img
+                                        alt="New Upload"
+                                        src={URL.createObjectURL(file)}
+                                        className="h-full w-full object-cover"
+                                    />
+                                    <button
+                                        title="Remove Image"
+                                        type="button"
+                                        onClick={() => {
+                                            const newImages = [...data.images];
+                                            const indexInOriginal = data.images.indexOf(file);
+                                            newImages.splice(indexInOriginal, 1);
+                                            setData('images', newImages);
+                                        }}
+                                        className="absolute top-2 right-2 rounded-full bg-slate-800/50 p-1.5 text-white hover:bg-red-500"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
                                 </div>
                             ))}
                         </div>
@@ -158,9 +192,10 @@ export function FilesTab({
                                         <a
                                             href={`/storage/${file}`}
                                             target="_blank"
+                                            rel="noopener noreferrer"
                                             className="max-w-50 truncate text-blue-600 hover:underline"
                                         >
-                                            {file?.name}
+                                            {typeof file === 'string' ? file.split('/').pop() : file?.name}
                                         </a>
                                     </div>
                                     {isEdit ? (
@@ -187,6 +222,34 @@ export function FilesTab({
                                             <X className="h-4 w-4" />
                                         </button>
                                     )}
+                                </div>
+                            ))}
+
+                            {/* New Attachments */}
+                            {data.attachments.filter(f => f instanceof File).map((file, i) => (
+                                <div
+                                    key={`new-att-${i}`}
+                                    className="flex items-center justify-between rounded-md border border-teal-50 bg-teal-50/30 px-3 py-2 text-sm"
+                                >
+                                    <div className="flex items-center gap-2 truncate">
+                                        <Paperclip className="h-4 w-4 text-teal-500" />
+                                        <span className="max-w-50 truncate text-slate-700">
+                                            {file.name}
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        title="Remove Attachment"
+                                        onClick={() => {
+                                            const newAtts = [...data.attachments];
+                                            const indexInOriginal = data.attachments.indexOf(file);
+                                            newAtts.splice(indexInOriginal, 1);
+                                            setData('attachments', newAtts);
+                                        }}
+                                        className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
                                 </div>
                             ))}
                         </div>

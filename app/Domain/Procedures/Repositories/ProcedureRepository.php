@@ -74,8 +74,10 @@ class ProcedureRepository
     {
         $store = $this->getCacheStore();
         if ($store instanceof TaggableStore) {
-            Cache::tags('procedures')->flush();
+            Cache::tags(['procedures', 'patients'])->flush();
         } else {
+            // If the user's cache driver doesn't support tags (like file), 
+            // we must flush everything to ensure synchronization.
             Cache::flush();
         }
     }

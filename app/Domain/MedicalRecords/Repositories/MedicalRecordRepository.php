@@ -68,7 +68,7 @@ class MedicalRecordRepository
     {
         $store = $this->getCacheStore();
         if ($store instanceof TaggableStore) {
-            Cache::tags('medical_records')->flush();
+            Cache::tags(['medical_records', 'patients'])->flush();
         } else {
             Cache::flush();
         }

@@ -39,7 +39,7 @@ export default function DentalChart({
             {/* Upper Jaw */}
             <div className="flex justify-center gap-1 md:gap-2">
                 {/* Quadrant 2 (Upper Left from Dr perspective, Right on screen) - effectively 28->21 */}
-                <div className="flex gap-2 md:gap-4">
+                <div className="flex gap-2 md:gap-7">
                      {upperLeft.map((tooth) => (
                         <MemoizedToothSVG
                             key={tooth.tooth_number}
@@ -56,7 +56,7 @@ export default function DentalChart({
                 <div className="w-px bg-slate-200 mx-2 h-16 self-center" />
 
                 {/* Quadrant 1 (Upper Right from Dr perspective, Left on screen) - effectively 11->18 */}
-                <div className="flex gap-2 md:gap-4">
+                <div className="flex gap-2 md:gap-7">
                     {upperRight.map((tooth) => (
                         <MemoizedToothSVG
                             key={tooth.tooth_number}
@@ -80,7 +80,7 @@ export default function DentalChart({
             {/* Lower Jaw */}
             <div className="flex justify-center gap-1 md:gap-2 lower-jaw mb-10">
                 {/* Quadrant 3 (Lower Left from Dr perspective) - effectively 38->31 */}
-                 <div className="flex gap-2 md:gap-4">
+                 <div className="flex gap-2 md:gap-7">
                     {lowerLeft.map((tooth) => (
                         <MemoizedToothSVG
                             key={tooth.tooth_number}
@@ -97,7 +97,7 @@ export default function DentalChart({
                 <div className="w-px bg-slate-200 mx-2 h-16 self-center" />
 
                 {/* Quadrant 4 (Lower Right from Dr perspective) - effectively 41->48 */}
-                <div className="flex gap-2 md:gap-4 px-1">
+                <div className="flex gap-2 md:gap-7 px-1">
                      {lowerRight.map((tooth) => (
                         <MemoizedToothSVG
                             key={tooth.tooth_number}

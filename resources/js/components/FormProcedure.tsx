@@ -27,7 +27,7 @@ type FormProcedureProps = Readonly <
     services_category: ServiceCategory[];
     toothId: number;
     onClose?: () => void;
-    onCreated: (procedure:Procedure) => void;
+    onCreated?: (procedure:Procedure) => void;
 }>;
 
 
@@ -96,7 +96,7 @@ const {  warning,} = useAppToast();
        follow_up_days: data.follow_up_days,
     };
 
-    onCreated(optimisticProcedure);
+    // onCreated(optimisticProcedure);
 
     post(route('procedures.store'), {
         preserveScroll: true,
@@ -225,7 +225,7 @@ const {  warning,} = useAppToast();
                 <button
                     type="submit"
                     disabled={processing}
-                    className="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+                    className={`rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 ${processing ? 'opacity-50' : ''}`}
                 >
                     حفظ
                 </button>

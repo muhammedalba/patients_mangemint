@@ -132,10 +132,10 @@ export type MedicalRecord = {
     patient_id: number;
     doctor_id: number;
     created_at: Date;
-    attachments?: File[];
-    images?: File[];
-    deleted_attachments?: File[];
-    deleted_images?: File[];
+    attachments?: (string | File)[];
+    images?: (string | File)[];
+    deleted_attachments?: (string | File)[];
+    deleted_images?: (string | File)[];
     chief_complaint?: string;
     present_illness_history?: string;
     past_dental_history?: string;

@@ -34,10 +34,10 @@ export default function MedicalRecordForm({
         _method: medicalRecord ? 'PUT' : 'POST',
         patient_id: medicalRecord?.patient_id || '',
         doctor_id: medicalRecord?.doctor_id || '',
-        attachments: medicalRecord?.attachments || [],
-        images: medicalRecord?.images || [],
-        deleted_attachments: medicalRecord?.deleted_attachments || [],
-        deleted_images: medicalRecord?.deleted_images || [],
+        attachments: [] as File[],
+        images: [] as File[],
+        deleted_attachments: [] as string[],
+        deleted_images: [] as string[],
         chief_complaint: medicalRecord?.chief_complaint || [],
         present_illness_history: medicalRecord?.present_illness_history || '',
         past_dental_history: medicalRecord?.past_dental_history || '',
@@ -144,7 +144,12 @@ export default function MedicalRecordForm({
                 onSuccess: () => {
                     setExistingAttachments((prev) =>
                         prev.filter((att) => att !== attachment),
+
                     );
+                    success('تم حذف المرفق بنجاح');
+                },
+                onError: () => {
+                    error('فشل حذف المرفق', 'يرجى التحقق من البيانات المدخلة');
                 },
             });
         } else {
@@ -167,6 +172,10 @@ export default function MedicalRecordForm({
                     setExistingImages((prev) =>
                         prev.filter((img) => img !== image),
                     );
+                    success('تم حذف الصورة بنجاح');
+                },
+                onError: () => {
+                    error('فشل حذف الصورة', 'يرجى التحقق من البيانات المدخلة');
                 },
             });
         } else {
@@ -200,7 +209,7 @@ export default function MedicalRecordForm({
                             error={errors.patient_id}
                         />
                         <FormSelect
-                            label="اسم الطبيب"
+                            label="اختر الطبيب"
                             name="doctor_id"
                             icon={Stethoscope}
                             value={String(data.doctor_id ?? '')}

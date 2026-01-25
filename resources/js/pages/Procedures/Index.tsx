@@ -1,3 +1,4 @@
+import { ToothIcon } from '@/components/dashboard';
 import { DynamicTable } from '@/components/DynamicTable';
 import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
@@ -61,9 +62,12 @@ export default function Index(filters: { search?: string }) {
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <span className="border px-2 py-1">
+                   p?.tooth?.tooth_number ? <span className=" relative">
+                        <ToothIcon  className="h-8 w-20 text-blue-100 z-0 m-auto"  />
+                        <span className="absolute top-1/2 -translate-y-1/2 right-1/2 z-10 font-bold text-center">
                         {p?.tooth?.tooth_number}
-                    </span>
+                        </span>
+                    </span> : <span className="text-gray-500 ">غير محدد</span>
                 );
             },
         },

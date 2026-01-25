@@ -21,7 +21,7 @@ import {
 import { useAppToast } from '@/utils/toast';
 import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
 
 import DentalChartCard from './Partials/DentalChartCard';
@@ -35,12 +35,7 @@ interface PagePropsPatient extends PageProps {
     patientDetails: patientDetails;
 }
 
-export default function Show() {
-    const { services_category, patientDetails: initialPatientDetails,flash } =
-        usePage<PagePropsPatient>().props;
-
-    const [patient, setPatient] = useState(initialPatientDetails);
-
+export default function Show({ services_category, patientDetails: patient, flash }: PagePropsPatient) {
     // UI States
     const [selectedTooth, setSelectedTooth] = useState<number>(1);
     const [showProcedureForm, setShowProcedureForm] = useState(false);
@@ -153,20 +148,7 @@ export default function Show() {
         return (Number(tooth?.id)) ?? 0;
     }, [patient.teeth]);
 
-    const addProcedureOptimistic = useCallback((procedure: Procedure) => {
-        setPatient((prev) => ({
-            ...prev,
-            procedures: [
-                ...prev.procedures,
-                { ...procedure, tooth_id: Number(procedure.tooth_id) },
-            ],
-        }));
-
-        success(
-            'تم إضافة الإجراء بنجاح',
-            `تم تسجيل ${procedure.name} للسن رقم ${teethMap.get(Number(procedure.tooth_id))}`,
-        );
-    }, [success, teethMap]);
+    // We rely on the automatic prop synchronization from the server response.
 
     const handleToothSelect = useCallback((toothNumber: number) => {
         setSelectedTooth(toothNumber);
@@ -226,7 +208,6 @@ export default function Show() {
                     services_category={services_category}
                     patient={patient}
                     onClose={handleCloseProcedureForm}
-                    onCreated={addProcedureOptimistic}
                 />
             </div>
         </AppLayout>

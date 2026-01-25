@@ -45,7 +45,7 @@ export default function EditUser({ user }: { user: User }) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 //  validate data 
-    if (!data.name || !data.email || !data.password || !data.phone || !data.roles.length) {
+    if (!data.name || !data.email  ) {
       warning('فشل تعديل المستخدم', 'يرجى التحقق من البيانات المدخلة');
       return;
     }
@@ -163,9 +163,9 @@ export default function EditUser({ user }: { user: User }) {
 
             <FormButton
               processing={processing}
-              label="حفظ"
+              label="تعديل"
               loadingLabel="جارِ التعديل ..."
-              className="w-full md:w-auto bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200"
+              className="w-full md:w-auto "
             />
           </div>
         </form>

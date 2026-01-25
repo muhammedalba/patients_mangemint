@@ -4,7 +4,7 @@ import { DynamicTable } from '@/components/DynamicTable';
 import FinancialSummaryForm from '@/components/FinancialSummary';
 import { cn } from '@/lib/utils';
 import { patientDetails, Procedure } from '@/types';
-import { Tab } from '@headlessui/react';
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Activity, Percent, Receipt, Wallet } from 'lucide-react';
 import React, { Fragment } from 'react';
@@ -20,9 +20,9 @@ const PatientDataTabs: React.FC<PatientDataTabsProps> = ({
 }) => {
     return (
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-            <Tab.Group>
+            <TabGroup>
                 <div className="border-b border-slate-100 bg-slate-50/50 px-4">
-                    <Tab.List className="flex gap-4">
+                    <TabList className="flex gap-4">
                         {[
                             {
                                 name: 'الإجراءات العلاجية',
@@ -51,12 +51,12 @@ const PatientDataTabs: React.FC<PatientDataTabsProps> = ({
                                 )}
                             </Tab>
                         ))}
-                    </Tab.List>
+                    </TabList>
                 </div>
 
-                <Tab.Panels className="p-6">
+                <TabPanels className="p-6">
                     {/* Procedures Panel */}
-                    <Tab.Panel className="focus:outline-none">
+                    <TabPanel className="focus:outline-none">
                         {patient?.procedures ? (
                             <DynamicTable
                                 data={patient.procedures}
@@ -67,17 +67,17 @@ const PatientDataTabs: React.FC<PatientDataTabsProps> = ({
                                 جاري تحميل البيانات...
                             </p>
                         )}
-                    </Tab.Panel>
+                    </TabPanel>
 
                     {/* Financial Panel */}
-                    <Tab.Panel className="focus:outline-none">
+                    <TabPanel className="focus:outline-none">
                         <FinancialSummaryForm
                             summary={patient.financial_summary}
                         />
-                    </Tab.Panel>
+                    </TabPanel>
 
                     {/* Discounts Panel */}
-                    <Tab.Panel className="focus:outline-none">
+                    <TabPanel className="focus:outline-none">
                         <div className="max-w-xl">
                             <h3 className="mb-4 text-lg font-semibold">
                                 إضافة خصم جديد
@@ -86,10 +86,10 @@ const PatientDataTabs: React.FC<PatientDataTabsProps> = ({
                                 patientId={patient.id}
                             />
                         </div>
-                    </Tab.Panel>
+                    </TabPanel>
 
                     {/* Invoices Panel */}
-                    <Tab.Panel className="focus:outline-none">
+                    <TabPanel className="focus:outline-none">
                         <div className="flex items-center justify-between rounded-lg border p-4">
                             <div>
                                 <h3 className="font-semibold text-slate-800">
@@ -104,11 +104,11 @@ const PatientDataTabs: React.FC<PatientDataTabsProps> = ({
                                 patientId={patient.id}
                             />
                         </div>
-                    </Tab.Panel>
-                </Tab.Panels>
-            </Tab.Group>
+                    </TabPanel>
+                </TabPanels>
+            </TabGroup>
         </div>
     );
 };
 
-export default React.memo(PatientDataTabs);
+export default PatientDataTabs;

@@ -10,7 +10,7 @@ interface ProcedureModalProps {
     services_category: ServiceCategory[];
     patient: patientDetails;
     onClose: () => void;
-    onCreated: (procedure: Procedure) => void;
+    onCreated?: (procedure: Procedure) => void;
 }
 
 const ProcedureModal: React.FC<ProcedureModalProps> = ({

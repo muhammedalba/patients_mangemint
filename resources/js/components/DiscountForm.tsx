@@ -20,11 +20,9 @@ export default function DiscountForm({ patientId }: { patientId: number }) {
 
 
         post(route('patients.addDiscount', patientId), {
-            onSuccess: (e) => {
+            onSuccess: () => {
                 success('تم إضافة الخصم بنجاح', 'تم إضافة الخصم بنجاح');
                 reset();
-                close();
-                
             },
             onError: (e) => {
                 warning(e.discount_amount??'فشل إضافة الخصم', 'يرجى التحقق من البيانات المدخلة');

@@ -52,7 +52,7 @@ class PaymentRepository
 
         $store = Cache::getStore();
         if ($store instanceof TaggableStore) {
-            Cache::tags('payments')->flush();
+            Cache::tags(['payments', 'patients'])->flush();
         } else {
             Cache::flush();
         }
@@ -66,7 +66,7 @@ class PaymentRepository
 
         $store = Cache::getStore();
         if ($store instanceof TaggableStore) {
-            Cache::tags('payments')->flush();
+            Cache::tags(['payments', 'patients'])->flush();
         } else {
             Cache::flush();
         }
@@ -80,7 +80,7 @@ class PaymentRepository
 
         $store = Cache::getStore();
         if ($store instanceof TaggableStore) {
-            Cache::tags('payments')->flush();
+            Cache::tags(['payments', 'patients'])->flush();
         } else {
             Cache::flush();
         }
