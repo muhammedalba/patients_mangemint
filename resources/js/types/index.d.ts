@@ -95,6 +95,10 @@ export type PageProps<
     };
 };
 
+export type SharedData = PageProps & {
+    sidebarOpen: boolean;
+};
+
 export type PaginationLink = {
     url: string | null;
     label: string;
@@ -232,8 +236,8 @@ export type FinancialSummary = {
 };
 export type NavItem = {
     title: string;
-    href: string | ReturnType<typeof dashboard>;
+    href: string | any;
     icon?: import('react').ComponentType<import('lucide-react').LucideProps>;
     color?: string;
-    roles?: Role[];
+    roles?: string[];
 };

@@ -2,6 +2,10 @@ import {  patientDetails, Procedure, ServiceCategory } from '@/types';
 import { Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import { FormInput } from './FormInput';
+import { Calendar, DollarSign, Layers, Stethoscope } from 'lucide-react';
+import { FormSelect } from './FormSelect';
+import { useAppToast } from '@/utils/toast';
 
 interface ProcedureFormData {
     name: string;
@@ -44,7 +48,7 @@ export default function FormProcedure({
     patient_id: patient.id,
     tooth_id: toothId,
 });
-
+const { success, error } = useAppToast();
     const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
@@ -67,9 +71,12 @@ export default function FormProcedure({
     post(route('procedures.store'), {
         preserveScroll: true,
         onSuccess: () => {
+            success('تم إضافة الإجراء بنجاح');
             onClose?.();
+
         },
         onError: () => {
+            error('حدث خطأ أثناء إضافة الإجراء');
         },
     });
 };
@@ -80,21 +87,27 @@ export default function FormProcedure({
             onSubmit={handleSubmit}
             className="space-y-6 rounded bg-white p-6 shadow"
         >
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-                {services_category.map((category) => (
-                    <div key={category.id}>
-                        <label className="mb-1 block font-semibold">
-                            {category.name}
-                        </label>
-                        <select
-                            className="w-full rounded border p-2"
-                            onChange={(e) => {
-                                const serviceId = Number(e.target.value);
-
+            <div className="grid grid-cols-1 gap-4 items-center md:grid-cols-2">
+                {Array.isArray(services_category) &&
+                    services_category.map((category) => (
+                        <FormSelect
+                            key={category.id}
+                            label={`اختر خدمة من ${category.name}`}
+                            name={`service_${category.id}`}
+                            value={
+                                category.services?.some(
+                                    (s) =>
+                                        s.id.toString() ===
+                                        data.service_id?.toString(),
+                                )
+                                    ? data.service_id?.toString() || ''
+                                    : ''
+                            }
+                            onChange={(val) => {
+                                const serviceId = Number(val);
                                 const selectedService = category.services?.find(
                                     (s) => s.id === serviceId,
                                 );
-
                                 if (selectedService) {
                                     setData('service_id', selectedService.id);
                                     setData('name', selectedService.name);
@@ -104,69 +117,59 @@ export default function FormProcedure({
                                     );
                                 }
                             }}
-                        >
-                            <option value="">اختر {category.name}</option>
-
-                            {(category.services ?? []).map((service) => (
-                                <option key={service.id} value={service.id}>
-                                    {service.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                ))}
+                            options={category.services.map((service) => ({
+                                value: service.id.toString(),
+                                label: service.name,
+                            }))}
+                            icon={Layers}
+                        />
+                    ))}
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4 items-center">
                 <div>
-                    <label className="mb-1 block text-sm text-gray-600">
-                        اسم الإجراء
-                    </label>
-                    <input
-                        type="text"
-                        className="w-full rounded border p-2"
+                    <FormInput
+                        label="اسم الإجراء"
+                        name="name"
                         value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
+                        onChange={(e) => setData('name', e)}
+                        icon={Stethoscope}
                     />
                 </div>
 
                 <div>
-                    <label className="mb-1 block text-sm text-gray-600">
-                        الكلفة
-                    </label>
-                    <input
+                     <FormInput
+                        label="الكلفة"
                         type="number"
-                        className="w-full rounded border p-2"
+                        name="cost"
                         value={data.cost}
-                        onChange={(e) => setData('cost', e.target.value)}
+                        onChange={(e) => setData('cost', e)}
+                        icon={DollarSign}
                     />
                 </div>
                 <div>
-                    <label className="mb-1 block text-sm text-gray-600">
-                        حالة الإجراء
-                    </label>
-                    <select
-                        className="w-full rounded border p-2"
+                    <FormSelect
+                        label="حالة الإجراء"
+                        name="status"
                         value={data.status}
-                        onChange={(e) => setData('status', e.target.value)}
-                    >
-                        <option value="planned">مخطط</option>
-                        <option value="in_progress">قيد التنفيذ</option>
-                        <option value="completed">مكتمل</option>
-                        <option value="cancelled">ملغي</option>
-                    </select>
+                        onChange={(e) => setData('status', e.toString())}
+                        options={[
+                            { value: 'planned', label: 'مخطط' },
+                            { value: 'in_progress', label: 'قيد التنفيذ' },
+                            { value: 'completed', label: 'مكتمل' },
+                            { value: 'cancelled', label: 'ملغي' },
+                        ]}
+                        icon={Layers}
+                    />
                 </div>
                 <div>
-                    <label className="mb-1 block text-sm text-gray-600">
-                        تاريخ الإجراء
-                    </label>
-                    <input
+                     <FormInput
+                        label="تاريخ الإجراء"
                         type="date"
-                        className="w-full rounded border p-2"
+                        name="processing_date"
                         value={data.processing_date}
-                        onChange={(e) =>
-                            setData('processing_date', e.target.value)
-                        }
+                        onChange={(e) => setData('processing_date', e)}
+                        icon={Calendar}
                     />
                 </div>
             </div>

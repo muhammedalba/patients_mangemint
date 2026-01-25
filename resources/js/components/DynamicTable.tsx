@@ -28,14 +28,14 @@ export function DynamicTable({ data, columns }: DynamicTableProps) {
       id: key,
       accessorKey: key,
       header: key.charAt(0).toUpperCase() + key.slice(1),
-      cell: ({ row }) => (
+      cell: ({ row }: { row: any }) => (
         <span className="truncate block">{row.getValue(key)}</span>
       ),
     })),
     {
       id: "actions",
       header: "Action",
-      cell: ({ row }) => (
+      cell: ({ row }: { row: any }) => (
         <Button
           variant="outline"
           size="sm"

@@ -68,7 +68,7 @@ const ToothSVG = memo(function ToothSVG({
                     stroke={strokeColor}
                     strokeWidth={strokeWidth}
                     fill={fillColor}
-                    transition="fill 0.3s ease"
+                    style={{ transition: 'fill 0.3s ease' }}
                 >
                     {/* Crown & Root Paths merged or separate for better coloring logic later if needed */}
                     {type === 'incisor' && (

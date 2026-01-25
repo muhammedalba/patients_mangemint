@@ -96,7 +96,7 @@ export default function EditPatient({ patient }: { patient: Patient }) {
               label="الجنس"
               name="gender"
               value={data.gender}
-              onChange={(val) => setData('gender', val)}
+              onChange={(val) => setData('gender', val as 'male' | 'female' | 'other')}
               options={[
                 { value: 'male', label: 'ذكر' },
                 { value: 'female', label: 'أنثى' },
@@ -110,7 +110,7 @@ export default function EditPatient({ patient }: { patient: Patient }) {
               label="الحالة الاجتماعية"
               name="marital_status"
               value={data.marital_status}
-              onChange={(val) => setData('marital_status', val)}
+              onChange={(val) => setData('marital_status', val as 'single' | 'married' | 'divorced' | 'widowed')}
               options={[
                 { value: 'single', label: 'عازب' },
                 { value: 'married', label: 'متزوج' },

@@ -9,6 +9,8 @@ interface FormInputProps {
     type?: string;
     icon?: LucideIcon;
     disabled?: boolean;
+    min?: string;
+    max?: string;
 }
 
 export function FormInput({
@@ -21,6 +23,8 @@ export function FormInput({
     type = 'text',
     icon,
     disabled = false,
+    min,
+    max,
 }: FormInputProps) {
     const IconComponent = icon;
     return (
@@ -33,6 +37,8 @@ export function FormInput({
                 placeholder={placeholder}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
+                min={min}
+                max={max}
                 className={`peer w-full rounded-xl border border-gray-300 bg-white px-10 py-3 text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none`}
             />
             <label
