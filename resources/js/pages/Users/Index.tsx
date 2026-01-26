@@ -4,11 +4,12 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
 import { type BreadcrumbItem, PageProps, PaginatedData, User } from '@/types';
-import { useAppToast } from '@/utils/toast';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -17,34 +18,28 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: route('users.index'),
     },
 ];
+
 export default function Index({
     users,
-    auth,
-    filters,
 }: PageProps<{
     users: PaginatedData<User>;
-    auth: { user: { roles: string[] } };
-    filters: { search?: string };
 }>) {
-    const [search, setSearch] = useState(filters.search || '');
-    const [isLoading, setIsLoading] = useState(false);
-    const isFirstMount = useRef(true);
-     const { success, error } = useAppToast();
-    const canDeleteRoles = ['doctor', 'admin'];
-    const userHasDeletePermission = canDeleteRoles.some((role) =>
-        auth.user.roles.includes(role),
-    );
-    const [perPage] = useState(10);
 
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/users',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
+    
+    const [perPage] = useState(10);
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'users.index',
+        initialSearch: '',
+        dataKey: 'users',
+    });
+
+    const { handleDelete,isDeleting } = useDeleteAction({
+        routeName: 'users.destroy',
+        successMessage: 'تم حذف المستخدم بنجاح',
+        successTitle: 'تم حذف المستخدم بنجاح',
+        errorMessage: 'يرجى التحقق من البيانات المدخلة',
+        errorTitle: 'فشل حذف المستخدم',
+    });
 
     const columns: ColumnDef<User>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -80,49 +75,14 @@ export default function Index({
                         }}
                         showEdit={true}
                         showView={false}
-                        showDelete={userHasDeletePermission}
                         confirmMessage="هل أنت متأكد من حذف هذا المستخدم؟"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
-
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
-        }
-
-        const handler = setTimeout(() => {
-            setIsLoading(true);
-            router.get(
-                route('users.index'),
-                { search },
-                {
-                    preserveState: true,
-                    replace: true,
-                    onFinish: () => setIsLoading(false),
-                },
-            );
-        }, 300);
-
-        return () => clearTimeout(handler);
-    }, [search]);
-
-    const handleDelete = (id: number): void => {
-        router.delete(route('users.destroy', id),{
-            onSuccess: () => {
-                success('تم حذف المستخدم بنجاح', 'تم حذف المستخدم بنجاح');
-            },
-            onError: (e) => {
-                error('فشل حذف المستخدم',e.message?? 'يرجى التحقق من البيانات المدخلة');
-            },
-        });
-    };
-
-    if (isLoading) return <LoadingPage />;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -145,6 +105,7 @@ export default function Index({
                         <DynamicTable
                             data={[...users.data]}
                             columns={columns}
+                            isLoading={isLoading}
                         />
                     </section>
 

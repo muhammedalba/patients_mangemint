@@ -7,61 +7,37 @@ import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem, type Patient } from '@/types';
 import { useAppToast } from '@/utils/toast';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Info, Mail, MessageCircle, Phone } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { patients, auth, filters } = usePage<{
+    const { patients } = usePage<{
         patients: PaginatedData<Patient>;
-        auth: { user: { roles: string[] } };
-        filters: { search?: string };
     }>().props;
 
-    const { success, error } = useAppToast();
+    const [perPage] = useState(10);
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'المرضى', href: route('patients.index') },
+    ];
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'patients.index',
+        initialSearch:'',
+        dataKey: 'patients',
+    });
 
-    const canDeleteRoles = ['doctor', 'admin'];
-    const userHasDeletePermission = canDeleteRoles.some(role =>
-        auth.user.roles.includes(role)
-    );
+    const { handleDelete, isDeleting } = useDeleteAction({
+        routeName: 'patients.destroy',
+        successMessage: 'تم حذف المريض بنجاح',
+        errorMessage: 'يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف المريض',
+    });
 
-    const [search, setSearch] = useState(filters.search || '');
-    const [isLoading, setIsLoading] = useState(false);
-    const isFirstMount = useRef(true);
-    const perPage = 10;
 
-    const handleDelete = (id: number): void => {
-        router.delete(route('patients.destroy', id), {
-            onSuccess: () => success('تم حذف  بنجاح','تم حذف المريض بنجاح'),
-            onError: () =>
-                error('فشل حذف المريض', 'يرجى المحاولة مرة أخرى لاحقًا'),
-        });
-    };
-
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
-        }
-
-        const timeout = setTimeout(() => {
-            setIsLoading(true);
-            router.get(
-                route('patients.index'),
-                { search, perPage },
-                {
-                    preserveState: true,
-                    preserveScroll: true,
-                    replace: true,
-                    onFinish: () => setIsLoading(false),
-                }
-            );
-        }, 400);
-
-        return () => clearTimeout(timeout);
-    }, [search, perPage]);
 
 const columns: ColumnDef<Patient>[] = useMemo(() => [
         { accessorKey: 'id', header: 'ID' },
@@ -144,19 +120,15 @@ const columns: ColumnDef<Patient>[] = useMemo(() => [
                         view: 'patients.details',
                         delete: 'patients.destroy',
                     }}
-                    showDelete={userHasDeletePermission}
                     confirmMessage="هل أنت متأكد من حذف هذا المريض؟"
                     onDelete={handleDelete}
+                    isDeleting={isDeleting}
                 />
             ),
         },
-    ], [userHasDeletePermission]);
+    ], []);
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'المرضى', href: route('patients.index') },
-    ];
 
-    if (isLoading) return <LoadingPage />;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -166,7 +138,7 @@ const columns: ColumnDef<Patient>[] = useMemo(() => [
 
                 <SearchBar
                     value={search}
-                    onChange={setSearch}
+                    onChange={handleSearch}
                     showSearch
                     showButton
                     buttonLabel="إضافة مريض"
@@ -177,6 +149,7 @@ const columns: ColumnDef<Patient>[] = useMemo(() => [
                 <DynamicTable
                     data={patients.data}
                     columns={columns}
+                    isLoading={isLoading}
                 />
 
                 <Pagination

@@ -1,0 +1,11 @@
+
+zircon dental_clinic
+
+db
+password
+6lMO4Qf6V$Zc 
+username
+u932314977_zircon
+
+MySQL database name
+u932314977_zirconLogo

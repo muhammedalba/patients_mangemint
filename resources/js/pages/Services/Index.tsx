@@ -4,28 +4,50 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, type BreadcrumbItem, type Service } from '@/types';
-import { useAppToast } from '@/utils/toast';
-import { Head, router, usePage } from '@inertiajs/react';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
+
+import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
+import { formatCurrency } from '@/utils/currency';
 
 export default function Index() {
-    const { services, auth, filters } = usePage<{
+    const { services, auth } = usePage<{
         services: PaginatedData<Service>;
         auth: { user: { roles: string[] } };
-        filters: { search?: string };
+      
     }>().props;
-    const { success, error } = useAppToast();
-    const canDeleteRoles = ['admin'];
-    const userHasDeletePermission = canDeleteRoles.some((role) =>
-        auth.user.roles.includes(role),
-    );
+
+
+    const [perPage] = useState(10);
+
+    
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'الخدمات الطبية',
+            href: route('services.index'),
+        },
+    ];
+
+    const { handleDelete, isDeleting } = useDeleteAction({
+        routeName: 'services.destroy',
+        successMessage: 'تم حذف الخدمة بنجاح',
+        errorMessage: 'فشل حذف الخدمة، يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف الخدمة',
+    });
+
     const columns: ColumnDef<Service>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
         { id: 'category', accessorKey: 'category', header: '  الفئة' },
         { id: 'name', accessorKey: 'name', header: ' اسم الخدمة' },
-        { id: 'price', accessorKey: 'price', header: 'التكلفة' },
+        {
+            id: 'price',
+            accessorKey: 'price',
+            header: 'التكلفة',
+            cell: ({ row }) => formatCurrency(row.original.price),
+        },
         {
             id: 'actions',
             header: 'الإجراءات',
@@ -40,55 +62,22 @@ export default function Index() {
                         }}
                         showEdit={true}
                         showView={false}
-                        showDelete={userHasDeletePermission}
                         confirmMessage="هل أنت متأكد من حذف هذه الخدمة"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
 
-    const handleDelete = (id: number): void => {
-        router.delete(route('services.destroy', id), {
-            onSuccess: () => {
-                success('تم حذف  بنجاح', 'تم حذف الخدمة بنجاح');
-            },
-            onError: () => {
-                error('فشل حذف الخدمة', 'فشل حذف الخدمة، يرجى المحاولة مرة أخرى لاحقًا');
-            },
-        });
-    };
-    const [search, setSearch] = useState(filters.search || '');
-    const [perPage] = useState(10);
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/services',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'services.index',
+        initialSearch: '',
+        dataKey: 'services',
+    });
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            router.get(
-                route('services.index'),
-                { search },
-                { preserveState: true, replace: true },
-            );
-        }, 300);
 
-        return () => clearTimeout(handler);
-    }, [search]);
-
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'الخدمات الطبية',
-            href: route('services.index'),
-        },
-    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -109,6 +98,7 @@ export default function Index() {
                         <DynamicTable
                             data={[...services.data]}
                             columns={columns}
+                            isLoading={isLoading}
                         />
                     </section>
                 </div>

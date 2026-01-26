@@ -4,11 +4,12 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
 import { BreadcrumbItem, ExpenseCategory, PaginatedData } from '@/types';
-import { useAppToast } from '@/utils/toast';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 type PageProps = {
@@ -17,17 +18,27 @@ type PageProps = {
 
 export default function Index() {
     const { categories } = usePage<PageProps>().props;
-    const { success, error } = useAppToast();
-    const handleDelete = (id: number) => {
-        router.delete(route('expense-categories.destroy', id),{
-             onSuccess: () => {
-                success('تم  بنجاح','تم حذف الفئة بنجاح');
-            },
-            onError: () => {
-                error('فشل حذف الفئة','فشل حذف الفئة، يرجى المحاولة مرة أخرى لاحقًا');
-            },
-        });
-    };
+    const [perPage] = useState(10);
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'فئات المصروفات',
+            href: route('expense-categories.index'),
+        },
+    ];
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'expense-categories.index',
+        initialSearch: '',
+        dataKey: 'categories',
+    });
+
+    const { handleDelete, isDeleting } = useDeleteAction({
+        routeName: 'expense-categories.destroy',
+        successMessage: 'تم حذف الفئة بنجاح',
+        errorMessage: 'فشل حذف الفئة، يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف الفئة',
+    });
+
     const columns: ColumnDef<ExpenseCategory>[] = [
         { accessorKey: 'id', header: 'المعرف' },
         { accessorKey: 'name', header: 'اسم الفئة' },
@@ -53,52 +64,14 @@ export default function Index() {
                         showDelete={true}
                         confirmMessage="هل أنت متأكد من حذف هذه الفئة"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
-    const [search, setSearch] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const isFirstMount = useRef(true);
-    const [perPage] = useState(10);
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/expense-categories',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
-        }
-        const handler = setTimeout(() => {
-            setIsLoading(true);
-            router.get(
-                route('expense-categories.index'),
-                { search },
-                {
-                    preserveState: true,
-                    replace: true,
-                    onFinish: () => setIsLoading(false),
-                },
-            );
-        }, 300);
+  
 
-        return () => clearTimeout(handler);
-    }, [search]);
-
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'فئات المصروفات',
-            href: route('expense-categories.index'),
-        },
-    ];
-    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="فئات المصروفات" />
@@ -120,6 +93,7 @@ export default function Index() {
                         <DynamicTable
                             data={categories?.data}
                             columns={columns}
+                            isLoading={isLoading}
                         />
                     </section>
                 </div>

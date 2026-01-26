@@ -5,22 +5,45 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem, PaginatedData, Payment } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
+import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import React, { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { formatCurrency } from '@/utils/currency';
+import { formatDate } from '@/utils/date';
 import { route } from 'ziggy-js';
 
+
+
+
+
+
 export default function Index() {
-    const { payments, filters } = usePage<{
+    const { payments, } = usePage<{
         payments: PaginatedData<Payment>;
-        auth: { user: { roles: string[] } };
-        filters: { search?: string };
     }>().props;
-    console.log(payments, 'payments');
-    console.log(filters, 'filters');
-    const handleDelete = (id: number) => {
-        router.delete(route('payments.destroy', id));
-    };
+      const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'الدفعات',
+            href: route('payments.index'),
+        },
+    ];
+  const [perPage] = useState(10);
+
+    const { handleDelete,isDeleting } = useDeleteAction({
+        routeName: 'payments.destroy',
+        successMessage: 'تم حذف الدفعة بنجاح',
+        successTitle: 'نجاح',
+        errorMessage: 'حدث خطأ أثناء حذف الدفعة',
+        errorTitle: 'خطأ',
+    } );
+
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'payments.index',
+        initialSearch: '',
+        dataKey: 'payments',
+    });
 
     const columns: ColumnDef<Payment>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -31,10 +54,12 @@ export default function Index() {
         {
             accessorKey: 'amount',
             header: 'قيمة الدفعة',
+            cell: ({ row }) => formatCurrency(row.original.amount),
         },
         {
             accessorKey: 'payment_date',
             header: 'تاريخ الدفعة',
+            cell: ({ row }) => formatDate(row.original.payment_date),
         },
         {
             id: 'actions',
@@ -53,54 +78,13 @@ export default function Index() {
                         showDelete={true}
                         confirmMessage="هل أنت متأكد من حذف هذه الدفعة؟"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
-    const [search, setSearch] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const isFirstMount = useRef(true);
-    const [perPage] = useState(10);
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/payments',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
 
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
-        }
-        const handler = setTimeout(() => {
-            setIsLoading(true);
-            router.get(
-                route('payments.index'),
-                { search },
-                {
-                    preserveState: true,
-                    replace: true,
-                    onFinish: () => setIsLoading(false),
-                },
-            );
-        }, 300);
-
-        return () => clearTimeout(handler);
-    }, [search]);
-
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'الدفعات',
-            href: route('payments.index'),
-        },
-    ];
-
-    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="الدفعات" />
@@ -117,7 +101,7 @@ export default function Index() {
                         buttonRoute="payments.create"
                     />
 
-                        <DynamicTable data={payments?.data} columns={columns} />
+                        <DynamicTable data={payments?.data} columns={columns} isLoading={isLoading} />
                     </section>
                 </div>
                 <Pagination

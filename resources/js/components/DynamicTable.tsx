@@ -15,13 +15,15 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { FileText, Info } from "lucide-react";
+import TableSkeleton from "./TableSkeleton";
 
 interface DynamicTableProps {
   data: any[];
   columns?: ColumnDef<any>[];
+  isLoading?: boolean;
 }
 
-export function DynamicTable({ data, columns }: DynamicTableProps) {
+export function DynamicTable({ data, columns, isLoading=false }: DynamicTableProps) {
   // إنشاء الأعمدة تلقائيًا إذا لم يتم تمريرها
   const generatedColumns: ColumnDef<any>[] = columns ?? [
     ...Object.keys(data[0] || {}).map((key) => ({
@@ -55,6 +57,9 @@ export function DynamicTable({ data, columns }: DynamicTableProps) {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  if(isLoading) {
+    return <TableSkeleton columnCount={columns?.length || Object.keys(data[0] || {}).length || 5} />;
+  }
   if (!data || data.length === 0)
     return (
       <div className="flex flex-col items-center justify-center p-8 border rounded-lg shadow-sm bg-gray-50">
@@ -67,7 +72,6 @@ export function DynamicTable({ data, columns }: DynamicTableProps) {
         </p>
       </div>
     );
-
   return (
     <div className="overflow-x-auto rounded-lg border shadow-sm">
       <Table className="min-w-full divide-y divide-gray-200">

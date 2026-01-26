@@ -2,6 +2,8 @@ import { DynamicTable } from '@/components/DynamicTable';
 import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
 import AppLayout from '@/layouts/app-layout';
 import {
     BreadcrumbItem,
@@ -9,41 +11,39 @@ import {
     PageProps,
     PaginatedData,
 } from '@/types';
-import { useAppToast } from '@/utils/toast';
-import { Head, router } from '@inertiajs/react';
+
+import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index({
     closures,
-    filters,
 }: PageProps<{
     closures: PaginatedData<MonthClosures>;
-    filters: { search?: string };
 }>) {
-    const [search, setSearch] = useState(filters.search || '');
+
     const [perPage] = useState(10);
-    const { success, error } = useAppToast();
-    const handleDelete = (id: number) => {
-        router.delete(route('month-closures.destroy', id), {
-            onSuccess: () => {
-                success('تم حذف  بنجاح','تم حذف الموعد بنجاح');
-            },
-            onError: () => {
-                error('فشل حذف الموعد','فشل حذف الموعد، يرجى المحاولة مرة أخرى لاحقًا');
-            },
-        });
-    };
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/month-closures',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: ' إغلاق الشهر',
+            href: route('month-closures.index'),
+        },
+    ];
+
+    const { handleDelete, isDeleting } = useDeleteAction({
+        routeName: 'month-closures.destroy',
+        successMessage: 'تم حذف الشهر بنجاح',
+        successTitle: 'تم حذف بنجاح',
+        errorMessage: 'فشل حذف الشهر يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف',
+    });
+
+    const { handleSearch, search, isLoading } = useSearchFilter({
+        routeName: 'month-closures.index',
+        initialSearch:'',
+        dataKey: 'closures',
+    });
     const columns: ColumnDef<MonthClosures>[] = [
         { accessorKey: 'id', header: 'المعرف' },
         { accessorKey: 'year', header: 'السنة' },
@@ -71,17 +71,13 @@ export default function Index({
                         showDelete={true}
                         confirmMessage="هل أنت متأكد من حذف هذا العنصر؟"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: ' إغلاق الشهر',
-            href: route('month-closures.index'),
-        },
-    ];
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -99,7 +95,7 @@ export default function Index({
                             buttonRoute="month-closures.close"
                         />
 
-                        <DynamicTable data={closures?.data} columns={columns} />
+                        <DynamicTable data={closures?.data} columns={columns} isLoading={isLoading} />
                     </section>
                 </div>
 

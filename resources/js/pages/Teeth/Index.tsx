@@ -3,11 +3,12 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
 import { type BreadcrumbItem, PageProps, PaginatedData } from '@/types';
-import { useAppToast } from '@/utils/toast';
 import { Head, router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export interface Teeth {
@@ -21,42 +22,30 @@ export interface Teeth {
 
 export default function Index({
     teeth,
-    auth,
-    filters,
 }: PageProps<{
     teeth: PaginatedData<Teeth>;
-    auth: { user: { roles: string[] } };
-    filters: { search?: string };
 }>) {
-    const [search, setSearch] = useState(filters.search || '');
     const [perPage] = useState(10);
-    const { success, error } = useAppToast();
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/teeth',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            router.get(
-                route('teeth.index'),
-                { search },
-                { preserveState: true, replace: true },
-            );
-        }, 300);
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'الأسنان',
+            href: route('teeth.index'),
+        },
+    ];
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'teeth.index',
+        initialSearch:'',
+        dataKey: 'teeth',
+    });
 
-        return () => clearTimeout(handler);
-    }, [search]);
-
-    const canDeleteRoles = ['doctor', 'admin'];
-    const userHasDeletePermission = canDeleteRoles.some((role) =>
-        auth.user.roles.includes(role),
-    );
+    const { handleDelete, isDeleting } = useDeleteAction({
+        routeName: 'teeth.destroy',
+        successMessage: 'تم حذف السن بنجاح',
+        successTitle: 'تم حذف بنجاح',
+        errorMessage: 'فشل حذف السن، يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف',
+    });
 
     const columns: ColumnDef<Teeth>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -80,32 +69,17 @@ export default function Index({
                         }}
                         showEdit={false}
                         showView={false}
-                        showDelete={userHasDeletePermission}
                         confirmMessage="هل أنت متأكد من حذف هذا السن؟"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
 
-    const handleDelete = (id: number): void => {
-        router.delete(route('teeth.destroy', id), {
-            onSuccess: () => {
-                success('تم حذف  بنجاح', 'تم حذف السن بنجاح');
-            },
-            onError: () => {
-                error('فشل حذف ', 'فشل حذف السن، يرجى المحاولة مرة أخرى لاحقًا');
-            },
-        });
-    };
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'الأسنان',
-            href: route('teeth.index'),
-        },
-    ];
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -126,6 +100,7 @@ export default function Index({
                         <DynamicTable
                             data={[...teeth.data]}
                             columns={columns}
+                            isLoading={isLoading}
                         />
                     </section>
                     <Pagination

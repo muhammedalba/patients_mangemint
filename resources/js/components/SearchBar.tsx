@@ -1,6 +1,7 @@
 import { Link as InertiaLink } from '@inertiajs/react';
 import { Plus, Search } from 'lucide-react';
 import { route } from 'ziggy-js';
+import { FormInput } from './FormInput';
 
 interface SearchBarProps {
     value: string;
@@ -37,12 +38,14 @@ export function SearchBar({
 
             {showSearch && (
                 <div className="relative w-full max-w-md">
-                    <input
+                    
+                    <FormInput
+                        name="search"
                         type="text"
                         value={value}
-                        onChange={(e) => onChange(e.target.value)}
-                        placeholder="بحث..."
-                        className="w-full rounded-lg border border-gray-300 bg-white py-2 pr-4 pl-10 shadow-sm transition duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                        onChange={(e) => onChange(e)}
+                        label="بحث..."
+                        className="w-full focus:outline-none"
                     />
                     <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-gray-400">
                         <Search size={18} />

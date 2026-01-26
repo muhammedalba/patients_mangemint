@@ -1,4 +1,5 @@
 import { LucideIcon } from 'lucide-react';
+import InputError from './input-error';
 interface FormInputProps {
     label: string;
     name: string;
@@ -11,6 +12,7 @@ interface FormInputProps {
     disabled?: boolean;
     min?: number;
     max?: number;
+    className?: string;
 }
 
 export function FormInput({
@@ -25,6 +27,7 @@ export function FormInput({
     disabled = false,
     min,
     max,
+    className = '',
 }: FormInputProps) {
     const IconComponent = icon;
     return (
@@ -39,7 +42,7 @@ export function FormInput({
                 onChange={(e) => onChange(e.target.value)}
                 min={min}
                 max={max}
-                className={`peer w-full rounded-xl border border-gray-300 bg-white px-10 py-3 text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none`}
+                className={`peer w-full rounded-xl border border-gray-300 bg-white px-10 py-3 text-gray-700 transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none ${className}`}
             />
             <label
                 htmlFor={name}
@@ -52,8 +55,8 @@ export function FormInput({
                 )}
                 {label}
             </label>
-
-            {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+                
+            <InputError message={error} className="mt-1" />
         </div>
     );
 }

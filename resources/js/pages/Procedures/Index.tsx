@@ -6,37 +6,40 @@ import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
 import { PaginatedData, Procedure, type BreadcrumbItem } from '@/types';
-import { useAppToast } from '@/utils/toast';
-import { Head, router, usePage } from '@inertiajs/react';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
+import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
+import { formatCurrency } from '@/utils/currency';
+import { formatDate } from '@/utils/date';
 
 
 export default function Index(filters: { search?: string }) {
-    const { procedures, auth } = usePage<{
+    const { procedures } = usePage<{
         procedures: PaginatedData<Procedure>;
-        auth: { user: { roles: string[] } };
         filters: { search?: string };
     }>().props;
-    const [search, setSearch] = useState(filters.search || '');
-    const canDeleteRoles = ['doctor', 'admin'];
-     const { success, error } = useAppToast();
-    const userHasDeletePermission = canDeleteRoles.some((role) =>
-        auth.user.roles.includes(role),
-    );
-    const [isLoading, setIsLoading] = useState(false);
-    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/procedures',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
+ const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'الإجراءات',
+            href: route('procedures.index'),
+        },
+    ];
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'procedures.index',
+        initialSearch: filters.search || '',
+        dataKey: 'procedures',
+    });
+
+    const { handleDelete, isDeleting } = useDeleteAction({
+        routeName: 'procedures.destroy',
+        successMessage: 'تم حذف الإجراء بنجاح',
+        errorMessage: 'يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف الإجراء',
+    });
 
     const columns: ColumnDef<Procedure>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -50,12 +53,14 @@ export default function Index(filters: { search?: string }) {
             id: 'processing_date',
             accessorKey: 'processing_date',
             header: 'تاريخ المعالجة',
-            cell: ({ row }) =>
-                new Date(row.original.processing_date).toLocaleDateString(
-                    'en-SY',
-                ),
+            cell: ({ row }) => formatDate(row.original.processing_date),
         },
-        { id: 'cost', accessorKey: 'cost', header: 'التكلفة' },
+        {
+            id: 'cost',
+            accessorKey: 'cost',
+            header: 'التكلفة',
+            cell: ({ row }) => formatCurrency(row.original.cost),
+        },
         {
             id: 'tooth_id',
             header: 'رقم السن',
@@ -85,55 +90,16 @@ export default function Index(filters: { search?: string }) {
                         }}
                         showEdit={true}
                         showView={false}
-                        showDelete={userHasDeletePermission}
                         confirmMessage="هل أنت متأكد من حذف هذا الإجراء؟"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
-    const handleDelete = (id: number): void => {
-        router.delete(route('procedures.destroy', id),{
-            onSuccess: () => {
-                success('تم حذف  بنجاح','تم حذف الإجراء بنجاح');
-            },
-            onError: () => {
-                error('فشل حذف الإجراء', 'يرجى المحاولة مرة أخرى لاحقًا');
-            },
-        });
-    };
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
-        }
 
-        const handler = setTimeout(() => {
-            setIsLoading(true);
 
-            router.get(
-                route('procedures.index'),
-                { search },
-                {
-                    preserveState: true,
-                    replace: true,
-                    onFinish: () => setIsLoading(false),
-                },
-            );
-        }, 300);
-
-        return () => clearTimeout(handler);
-    }, [search]);
-
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'الإجراءات',
-            href: route('procedures.index'),
-        },
-    ];
-
-    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="الإجراءات" />
@@ -152,10 +118,10 @@ export default function Index(filters: { search?: string }) {
                         className='mb-7'
                     />
 
-
                         <DynamicTable
                             data={[...procedures.data]}
                             columns={columns}
+                            isLoading={isLoading}
                         />
                     </section>
                 </div>

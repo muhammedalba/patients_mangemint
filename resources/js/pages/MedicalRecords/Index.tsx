@@ -1,19 +1,19 @@
 import { DynamicTable } from '@/components/DynamicTable';
-import LoadingPage from '@/components/LoadingPage';
 import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
 import {
     type BreadcrumbItem,
     MedicalRecord,
     PageProps,
     PaginatedData,
 } from '@/types';
-import { useAppToast } from '@/utils/toast';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index({
@@ -23,52 +23,28 @@ export default function Index({
     medicalRecords: PaginatedData<MedicalRecord>;
     filters: { search?: string };
 }>) {
-    const [search, setSearch] = useState(filters.search || '');
-    const [isLoading, setIsLoading] = useState(false);
-    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
-      const { success, error } = useAppToast();
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/medical-records',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
+    
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'السجلات الطبية',
+            href: route('medical-records.index'),
+        },
+    ];
 
-    const handleDelete = (id: number): void => {
-        router.delete(route('medical-records.destroy', id),{
-             onSuccess: () => {
-                success('تم حذف بنجاح','تم حذف السجل بنجاح');
-            },
-            onError: () => {
-                error('فشل حذف','فشل حذف السجل يرجى المحاولة مرة أخرى لاحقًا');
-            },
-        });
-    };
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'medical-records.index',
+        initialSearch: filters.search || '',
+        dataKey: 'medicalRecords',
+    });
 
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
-        }
-        const handler = setTimeout(() => {
-            setIsLoading(true);
-            router.get(
-                route('medical-records.index'),
-                { search },
-                {
-                    preserveState: true,
-                    replace: true,
-                    onFinish: () => setIsLoading(false),
-                },
-            );
-        }, 300);
-
-        return () => clearTimeout(handler);
-    }, [search]);
+    const { handleDelete, isDeleting } = useDeleteAction({
+        routeName: 'medical-records.destroy',
+        successMessage: 'تم حذف السجل بنجاح',
+        successTitle: 'تم حذف بنجاح',
+        errorMessage: 'فشل حذف السجل يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف',
+    });
 
     const columns: ColumnDef<MedicalRecord>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -104,19 +80,14 @@ export default function Index({
                         showDelete={true}
                         confirmMessage="هل أنت متأكد من حذف هذا السجل الطبي؟"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'السجلات الطبية',
-            href: route('medical-records.index'),
-        },
-    ];
-    if (isLoading) return <LoadingPage />;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="السجلات الطبية" />
@@ -136,6 +107,7 @@ export default function Index({
                         <DynamicTable
                             data={medicalRecords.data}
                             columns={columns}
+                            isLoading={isLoading}
                         />
                     </section>
                     <Pagination

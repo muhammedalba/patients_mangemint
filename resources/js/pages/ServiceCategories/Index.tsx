@@ -4,70 +4,39 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
 import { PaginatedData, ServiceCategory, type BreadcrumbItem } from '@/types';
-import { useAppToast } from '@/utils/toast';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { serviceCategories, auth, filters } = usePage<{
+    const { serviceCategories, auth } = usePage<{
         serviceCategories: PaginatedData<ServiceCategory>;
         auth: { user: { roles: string[] } };
-        filters: { search?: string };
+      
     }>().props;
-    const { success, error } = useAppToast();
-    const canDeleteRoles = ['doctor', 'admin'];
-    const userHasDeletePermission = canDeleteRoles.some((role) =>
-        auth.user.roles.includes(role),
-    );
-    console.log(serviceCategories, 'serviceCategories');
-
-    const handleDelete = (id: number): void => {
-        router.delete(route('service-categories.destroy', id), {
-            onSuccess: () => {
-                success('تم حذف  بنجاح','تم حذف الفئة بنجاح');
-            },
-            onError: () => {
-                error('فشل حذف الفئة','فشل حذف الفئة، يرجى المحاولة مرة أخرى لاحقًا');
-            },
-        });
-    };
-    const [search, setSearch] = useState(filters.search || '');
-    const [isLoading, setIsLoading] = useState(false);
-    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/service-categories',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
+        const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'فئات الخدمات الطبية ',
+            href: route('service-categories.index'),
+        },
+    ];
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'service-categories.index',
+        initialSearch: '',
+        dataKey: 'serviceCategories',
+    });
 
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
-        }
-        const handler = setTimeout(() => {
-            setIsLoading(true);
-            router.get(
-                route('service-categories.index'),
-                { search },
-                {
-                    preserveState: true,
-                    replace: true,
-                    onFinish: () => setIsLoading(false),
-                },
-            );
-        }, 300);
-
-        return () => clearTimeout(handler);
-    }, [search]);
+    const { handleDelete, isDeleting } = useDeleteAction({
+        routeName: 'service-categories.destroy',
+        successMessage: 'تم حذف الفئة بنجاح',
+        errorMessage: 'فشل حذف الفئة، يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف الفئة',
+    });
 
     const columns: ColumnDef<ServiceCategory>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -86,23 +55,17 @@ export default function Index() {
                         }}
                         showEdit={true}
                         showView={false}
-                        showDelete={userHasDeletePermission}
                         confirmMessage="هل أنت متأكد من حذف هذه الفئة؟"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
 
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'فئات الخدمات الطبية ',
-            href: route('service-categories.index'),
-        },
-    ];
 
-    if (isLoading) return <LoadingPage />;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="فئات الخدمات الطبية" />
@@ -124,6 +87,7 @@ export default function Index() {
                         <DynamicTable
                             data={[...serviceCategories.data]}
                             columns={columns}
+                            isLoading={isLoading}
                         />
                     </section>
 

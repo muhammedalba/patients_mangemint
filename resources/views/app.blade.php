@@ -32,7 +32,24 @@
         }
     </style>
 
-    <title inertia>{{ config('app.name', 'Zircon') }}</title>
+    <meta name="description" content="عيادة دكتور لطب وتجميل الأسنان - نقدم أفضل الخدمات الطبية بأحدث التقنيات لضمان ابتسامة مثالية وصحة فموية ممتازة.">
+    <meta name="keywords" content="عيادة أسنان, تجميل الأسنان, زراعة الأسنان, تبييض الأسنان, دكتور أسنان">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="{{ config('app.name', 'عيادة الزركون لطب الأسنان') }}">
+    <meta property="og:description" content="عيادة دكتور لطب وتجميل الأسنان - نقدم أفضل الخدمات الطبية بأحدث التقنيات لضمان ابتسامة مثالية وصحة فموية ممتازة.">
+    <meta property="og:image" content="{{ asset('zirconLogo.png') }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ url()->current() }}">
+    <meta property="twitter:title" content="{{ config('app.name', 'عيادة الزركون لطب الأسنان') }}">
+    <meta property="twitter:description" content="عيادة دكتور لطب وتجميل الأسنان - نقدم أفضل الخدمات الطبية بأحدث التقنيات لضمان ابتسامة مثالية وصحة فموية ممتازة.">
+    <meta property="twitter:image" content="{{ asset('zirconLogo.png') }}">
+
+    <title inertia>{{ config('app.name', 'عيادة الزركون لطب الأسنان') }}</title>
 
     <link rel="icon" type="image/png" href="/zirconLogo.png" sizes="64x64">
     <link rel="icon" href="/zirconLogo.png" type="image/svg+xml">
@@ -40,8 +57,7 @@
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600|cairo:400,500,600,700" rel="stylesheet" />
-    <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" /> -->
+
 
     @viteReactRefresh
     @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])

@@ -4,58 +4,46 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
 import { Appointment, BreadcrumbItem, PageProps, PaginatedData } from '@/types';
-import { useAppToast } from '@/utils/toast';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
+import { formatDate } from '@/utils/date';
+
+
+
 
 export default function Index({
     appointments,
-    auth,
 }: PageProps<{
     appointments: PaginatedData<Appointment>;
     auth: { user: { roles: string[] } };
 }>) {
-    console.log(appointments, 'appointments.data');
-    console.log(auth, 'auth');
 
-    const [search, setSearch] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const isFirstMount = useRef(true);
     const [perPage] = useState(10);
-    const { success, error } = useAppToast();
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/appointments',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'المواعيد',
+            href: route('appointments.index'),
+        },
+    ];
 
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
-        }
-        const handler = setTimeout(() => {
-            setIsLoading(true);
-            router.get(
-                route('appointments.index'),
-                { search },
-                {
-                    preserveState: true,
-                    replace: true,
-                    onFinish: () => setIsLoading(false),
-                },
-            );
-        }, 300);
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'appointments.index',
+        initialSearch: '',
+        dataKey: 'appointments',
+    });
 
-        return () => clearTimeout(handler);
-    }, [search]);
+    const { handleDelete ,isDeleting} = useDeleteAction({
+        routeName: 'appointments.destroy',
+        successTitle: 'تم الحذف بنجاح',
+        successMessage: 'تم حذف الموعد بنجاح',
+        errorMessage: 'فشل حذف الموعد، يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف الموعد',
+    });
 
     const columns: ColumnDef<Appointment>[] = [
         { id: 'id', accessorKey: 'id', header: 'ID' },
@@ -65,6 +53,7 @@ export default function Index({
             id: 'date',
             accessorKey: 'date',
             header: 'تاريخ الموعد',
+            cell: ({ row }) => formatDate(row.original.date),
         },
         { id: 'start_time', accessorKey: 'start_time', header: 'بداية الموعد' },
         { id: 'end_time', accessorKey: 'end_time', header: 'نهاية الموعد' },
@@ -86,31 +75,13 @@ export default function Index({
                         showDelete={true}
                         confirmMessage="هل انت متأكد من حذف هذا الموعد؟"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
 
-    const handleDelete = (id: number) => {
-        router.delete(route('appointments.destroy', id), {
-            onSuccess: () => {
-                success(" تم حذف  ","تم حذف الموعد بنجاح");
-            },
-            onError: () => {
-                error("فشل حذف الموعد","فشل حذف الموعد، يرجى المحاولة مرة أخرى لاحقًا");
-            },
-        });
-    };
-
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'المواعيد',
-            href: route('appointments.index'),
-        },
-    ];
-
-    if (isLoading) return <LoadingPage />;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="المواعيد" />
@@ -127,7 +98,7 @@ export default function Index({
                     buttonRoute="appointments.create"
                 />
 
-                <DynamicTable data={[...appointments.data]} columns={columns} />
+                <DynamicTable data={[...appointments.data]} columns={columns} isLoading={isLoading} />
             </section>
 
             <Pagination

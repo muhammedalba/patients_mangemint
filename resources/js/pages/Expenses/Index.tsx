@@ -4,12 +4,15 @@ import Pagination from '@/components/Pagination';
 import { SearchBar } from '@/components/SearchBar';
 import TableActions from '@/components/TableActionsProps';
 import AppLayout from '@/layouts/app-layout';
+import { useDeleteAction } from '@/hooks/use-delete-action';
+import { useSearchFilter } from '@/hooks/use-search-filter';
 import { BreadcrumbItem, Expense, PaginatedData } from '@/types';
-import { useAppToast } from '@/utils/toast';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
+import { formatCurrency } from '@/utils/currency';
+import { formatDate } from '@/utils/date';
 
 type PageProps = {
     expenses: PaginatedData<Expense>;
@@ -17,20 +20,33 @@ type PageProps = {
 
 export default function Index() {
     const { expenses } = usePage<PageProps>().props;
-    const { success, error } = useAppToast();
-    const handleDelete = (id: number) => {
-        router.delete(route('expenses.destroy', id), {
-            onSuccess: () => {
-                success('تم حذف بنجاح','تم حذف مصروف بنجاح');
-            },
-            onError: () => {
-                error('فشل حذف','فشل حذف مصروف، يرجى المحاولة مرة أخرى لاحقًا');
-            },
-        });
-    };
+    const [perPage] = useState(10);
+   const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'المصروفات',
+            href: route('expenses.index'),
+        },
+    ];
+
+    const { search, handleSearch, isLoading } = useSearchFilter({
+        routeName: 'expenses.index',
+        initialSearch: '',
+        dataKey: 'expenses',
+    });
+
+    const { handleDelete, isDeleting } = useDeleteAction({
+        routeName: 'expenses.destroy',
+        successMessage: 'تم حذف مصروف بنجاح',
+        errorMessage: 'فشل حذف مصروف، يرجى المحاولة مرة أخرى لاحقًا',
+        errorTitle: 'فشل حذف',
+    });
     const columns: ColumnDef<Expense>[] = [
         { accessorKey: 'id', header: 'ID' },
-        { accessorKey: 'amount', header: 'المبلغ' },
+        {
+            accessorKey: 'amount',
+            header: 'المبلغ',
+            cell: ({ row }) => formatCurrency(row.original.amount),
+        },
         {
             accessorKey: 'category.name',
             header: 'الفئة',
@@ -41,7 +57,7 @@ export default function Index() {
             accessorKey: 'expense_date',
             header: 'تاريخ المصروف',
             cell: ({ row }) =>
-                row.original.expense_date ?? row.original.created_at,
+                formatDate(row.original.expense_date ?? row.original.created_at),
         },
         {
             id: 'actions',
@@ -60,51 +76,12 @@ export default function Index() {
                         showDelete={true}
                         confirmMessage="هل أنت متأكد من حذف هذه الدفعة؟"
                         onDelete={handleDelete}
+                        isDeleting={isDeleting}
                     />
                 );
             },
         },
     ];
-    const [search, setSearch] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const isFirstMount = useRef(true);
-    const [perPage] = useState(10);
-    const handleSearch = (val: string) => {
-        const newValue = val;
-        setSearch(newValue);
-        router.get(
-            '/expenses',
-            { search: val, perPage },
-            { preserveState: true, preserveScroll: true },
-        );
-    };
-    useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            return;
-        }
-        const handler = setTimeout(() => {
-            setIsLoading(true);
-            router.get(
-                route('expenses.index'),
-                { search },
-                {
-                    preserveState: true,
-                    replace: true,
-                    onFinish: () => setIsLoading(false),
-                },
-            );
-        }, 300);
-
-        return () => clearTimeout(handler);
-    }, [search]);
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'المصروفات',
-            href: route('expenses.index'),
-        },
-    ];
-    if (isLoading) return <LoadingPage />;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -122,7 +99,7 @@ export default function Index() {
                             buttonRoute="expenses.create"
                         />
 
-                        <DynamicTable data={expenses?.data} columns={columns} />
+                        <DynamicTable data={expenses?.data} columns={columns} isLoading={isLoading} />
                     </section>
                 </div>
                 <Pagination

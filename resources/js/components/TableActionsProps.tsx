@@ -3,6 +3,7 @@ import { Link as InertiaLink } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { Pencil, Eye, Trash2 } from 'lucide-react';
 
+import { usePermission } from '@/hooks/use-permission';
 import ConfirmDialog from './ConfirmDialog';
 import { IconTooltip } from './IconToolTip';
 
@@ -20,6 +21,7 @@ interface TableActionsProps {
     showDelete?: boolean;
     confirmMessage?: string;
     onDelete?: (id: number) => void;
+    isDeleting?: boolean;
 }
 
 function TableActions({
@@ -30,7 +32,10 @@ function TableActions({
     showDelete = true,
     confirmMessage = 'Are you sure you want to delete this item?',
     onDelete,
+    isDeleting=false,
 }: TableActionsProps) {
+    const { canDelete } = usePermission();
+
     return (
         <div className="flex items-start gap-2 px-2 py-1">
             
@@ -38,7 +43,7 @@ function TableActions({
             {showEdit && routes.edit && (
                 <IconTooltip label="تعديل">
                     <InertiaLink
-                        href={route(routes.edit, item.id)}
+                        href={isDeleting ? '#' : route(routes.edit, item.id)}
                         className="rounded-md p-1.5 text-slate-600 transition
                                    hover:bg-indigo-50 hover:text-indigo-600
                                    focus:outline-none focus:ring-2 focus:ring-indigo-300"
@@ -53,7 +58,7 @@ function TableActions({
             {showView && routes.view && (
                 <IconTooltip label="عرض">
                     <InertiaLink
-                        href={route(routes.view, item.id)}
+                        href={isDeleting ? '#' : route(routes.view, item.id)}
                         className="rounded-md p-1.5 text-slate-600 transition
                                    hover:bg-sky-50 hover:text-sky-600
                                    focus:outline-none focus:ring-2 focus:ring-sky-300"
@@ -65,7 +70,7 @@ function TableActions({
             )}
 
             {/* Delete */}
-            {showDelete && routes.delete && onDelete && (
+            {showDelete && canDelete && routes.delete && onDelete && (
                 <ConfirmDialog
                 
                     title="تأكيد الحذف"
@@ -74,6 +79,7 @@ function TableActions({
                 >
                     <IconTooltip label="حذف">
                         <button
+                        disabled={isDeleting}
                             type="button"
                             className="rounded-md p-1.5 text-rose-600 transition
                                        hover:bg-rose-50 hover:text-rose-700
