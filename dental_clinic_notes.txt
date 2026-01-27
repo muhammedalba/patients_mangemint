@@ -2,10 +2,6 @@
 zircon dental_clinic
 
 db
-password
-6lMO4Qf6V$Zc 
-username
-u932314977_zircon
-
-MySQL database name
-u932314977_zirconLogo
+DB_DATABASE=u932314977_clinic_zircon
+DB_USERNAME=u932314977_clinic_zircon
+DB_PASSWORD=r0I>sDc/HlE9

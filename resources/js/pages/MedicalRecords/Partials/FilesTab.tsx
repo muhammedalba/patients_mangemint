@@ -22,6 +22,7 @@ interface FilesTabProps {
     imagesErrors: string[];
     attachmentsErrors: string[];
     isEdit?: boolean;
+    processing?: boolean;
 }
 
 export function FilesTab({
@@ -34,6 +35,7 @@ export function FilesTab({
     imagesErrors,
     attachmentsErrors,
     isEdit = false,
+    processing = false,
 }: FilesTabProps) {
     return (
         <Card className="border-slate-200 shadow-sm">
@@ -89,14 +91,14 @@ export function FilesTab({
                                     className="group relative aspect-square overflow-hidden rounded-lg bg-black/5"
                                 >
                                     <a
-                                        href={`/storage/storage/${img}`}
+                                        href={`/storage/${img}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="block h-full w-full cursor-zoom-in"
                                     >
                                         <img
                                             alt="Medical Attachment"
-                                            src={`/storage/storage/${img}`}
+                                            src={`/storage/${img}`}
                                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                                         />
                                     </a>
@@ -105,11 +107,13 @@ export function FilesTab({
                                             title="تأكيد الحذف"
                                             description="هل أنت متأكد من حذف هذه الصورة نهائياً؟"
                                             onConfirm={() => onDeleteImage(img)}
+                                            disabled={processing}
                                         >
                                             <button
                                                 title="Delete Image"
                                                 type="button"
-                                                className="absolute top-2 right-2 z-10 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
+                                                disabled={processing}
+                                                className="absolute top-2 right-2 z-10 rounded-full bg-red-500 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 <X className="h-3 w-3" />
                                             </button>
@@ -141,6 +145,7 @@ export function FilesTab({
                                     <button
                                         title="Remove Image"
                                         type="button"
+                                        disabled={processing}
                                         onClick={() => {
                                             const newImages = [...data.images];
                                             const indexInOriginal = data.images.indexOf(file);
@@ -168,6 +173,7 @@ export function FilesTab({
                     <Input
                         type="file"
                         multiple
+                        disabled={processing}
                         onChange={(e) =>
                             setData(
                                 'attachments',
@@ -190,7 +196,7 @@ export function FilesTab({
                                     <div className="flex items-center gap-2 truncate">
                                         <FileText className="h-4 w-4 text-slate-400" />
                                         <a
-                                            href={`/storage/storage/${file}`}
+                                            href={`/storage/${file}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="max-w-50 truncate text-blue-600 hover:underline"
@@ -203,6 +209,7 @@ export function FilesTab({
                                             title="تأكيد الحذف"
                                             description="هل أنت متأكد من حذف هذا الملف نهائياً؟"
                                             onConfirm={() => onDeleteAttachment(file)}
+                                            disabled={processing}
                                         >
                                             <button
                                                 type="button"
@@ -215,9 +222,10 @@ export function FilesTab({
                                     ) : (
                                         <button
                                             type="button"
+                                            disabled={processing}
                                             title="Delete Attachment"
                                             onClick={() => onDeleteAttachment(file)}
-                                            className="rounded p-1 text-red-500 hover:bg-red-50"
+                                            className="rounded p-1 text-red-500 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <X className="h-4 w-4" />
                                         </button>
@@ -239,6 +247,7 @@ export function FilesTab({
                                     </div>
                                     <button
                                         type="button"
+                                        disabled={processing}
                                         title="Remove Attachment"
                                         onClick={() => {
                                             const newAtts = [...data.attachments];

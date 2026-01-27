@@ -297,6 +297,7 @@ export default function MedicalRecordForm({
                                 imagesErrors={imagesErrors}
                                 attachmentsErrors={attachmentsErrors}
                                 isEdit={!!medicalRecord}
+                                processing={processing}
                             />
                         </TabPanel>
                     </TabPanels>

@@ -7,8 +7,6 @@ export default function AppointmentsTodayTable({
 }) {
 
     const { stats } = usePage().props as any;
-        console.log(stats);
-
     return (
         <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             

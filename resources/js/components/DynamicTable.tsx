@@ -41,9 +41,7 @@ export function DynamicTable({ data, columns, isLoading=false }: DynamicTablePro
         <Button
           variant="outline"
           size="sm"
-          className="flex items-center gap-1"
-          onClick={() => console.log("Details for", row.original)}
-        >
+          className="flex items-center gap-1"        >
           <Info size={16} />
           Details
         </Button>

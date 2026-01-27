@@ -64,9 +64,7 @@ export default function EditProcedure({
         });
     };
 
-    const handleServiceSelect = (service: Service, categoryId: string) => {
-        console.log(service);
-        
+    const handleServiceSelect = (service: Service, categoryId: string) => {        
         setData('name', service.name);
         setData('cost', service.price.toString());
         setData('service_id', service.id.toString());

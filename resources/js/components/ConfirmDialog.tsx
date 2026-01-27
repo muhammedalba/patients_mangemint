@@ -18,10 +18,11 @@ interface ConfirmDialogProps {
     description: string;
     onConfirm: () => void;
     variant?: 'danger' | 'warning' | 'info';
+    disabled?: boolean;
 }
 
 const ConfirmDialog = forwardRef<HTMLButtonElement, ConfirmDialogProps>(
-    ({ children, title, description, onConfirm, variant = 'danger', ...props }, ref) => {
+    ({ children, title, description, onConfirm, variant = 'danger', disabled = false, ...props }, ref) => {
         return (
             <Dialog >
                 <DialogTrigger asChild ref={ref} {...props}>
@@ -61,6 +62,7 @@ const ConfirmDialog = forwardRef<HTMLButtonElement, ConfirmDialogProps>(
                             <Button 
                                 onClick={onConfirm} 
                                 variant={variant === 'danger' ? 'destructive' : 'default'}
+                                disabled={disabled}
                                 className={`h-10 px-8 font-bold shadow-lg shadow-rose-200/50 transition-all active:scale-95 ${
                                     variant === 'danger' ? 'bg-rose-600 hover:bg-rose-700' : ''
                                 }`}
